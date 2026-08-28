@@ -1,0 +1,236 @@
+@import "tailwindcss";
+
+:root {
+  --background: #06111d;
+  --foreground: #f8fafc;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom cyber HUD animations */
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(1000%);
+  }
+}
+
+/* ----------------------------------------------------
+   Electromagnetic Wave & Orbital Energy Animations
+   ---------------------------------------------------- */
+@keyframes orbital-flow-1 {
+  0% {
+    stroke-dashoffset: 2400;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes orbital-flow-2 {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 2600;
+  }
+}
+
+@keyframes orbital-flow-3 {
+  0% {
+    stroke-dashoffset: 2000;
+  }
+  100% {
+    stroke-dashoffset: -400;
+  }
+}
+
+@keyframes orbital-flow-4 {
+  0% {
+    stroke-dashoffset: -200;
+  }
+  100% {
+    stroke-dashoffset: 2200;
+  }
+}
+
+@keyframes orbital-flow-5 {
+  0% {
+    stroke-dashoffset: 2800;
+  }
+  100% {
+    stroke-dashoffset: 200;
+  }
+}
+
+@keyframes particle-orbit-1 {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes particle-orbit-2 {
+  0% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+}
+
+@keyframes ambient-drift {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(35px, -30px) scale(1.1);
+    opacity: 0.65;
+  }
+}
+
+@keyframes pulse-energy-node {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.2);
+  }
+}
+
+.animate-radar {
+  animation: radar-sweep 8s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-scan {
+  animation: scan-line 4.5s linear infinite;
+}
+
+.animate-orbital-1 {
+  animation: orbital-flow-1 14s linear infinite;
+}
+
+.animate-orbital-2 {
+  animation: orbital-flow-2 19s linear infinite;
+}
+
+.animate-orbital-3 {
+  animation: orbital-flow-3 23s linear infinite;
+}
+
+.animate-orbital-4 {
+  animation: orbital-flow-4 16s linear infinite;
+}
+
+.animate-orbital-5 {
+  animation: orbital-flow-5 21s linear infinite;
+}
+
+.animate-ambient-drift {
+  animation: ambient-drift 16s ease-in-out infinite;
+}
+
+.animate-pulse-energy-node {
+  animation: pulse-energy-node 7s ease-in-out infinite;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-radar,
+  .animate-pulse-glow,
+  .animate-scan,
+  .animate-orbital-1,
+  .animate-orbital-2,
+  .animate-orbital-3,
+  .animate-orbital-4,
+  .animate-orbital-5,
+  .animate-ambient-drift,
+  .animate-pulse-energy-node {
+    animation: none !important;
+    opacity: 0.25 !important;
+  }
+}
+
+/* Custom dark scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #06111d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.35);
+}
+
+/* Accessible focus visible ring */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.5);
+}
