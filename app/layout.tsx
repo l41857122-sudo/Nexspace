@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: "Next-generation AI-powered natural language satellite imagery intelligence and automated anomaly detection.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"

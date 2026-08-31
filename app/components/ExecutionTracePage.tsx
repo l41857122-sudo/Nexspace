@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Satellite,
   LayoutGrid,
@@ -22,19 +23,19 @@ import Sidebar from "./Sidebar";
 // ---------------------------------------------
 // Page header
 // ---------------------------------------------
-function Header() {
+function Header({ data }: { data?: any }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-4 border-b border-slate-800/80 bg-[#0d1826]/40 backdrop-blur-md">
       <div>
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium mb-1 font-mono">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          ACTIVE OPERATION
+          {data?.status ? `STATUS: ${data.status}` : "ACTIVE OPERATION"}
         </div>
         <p className="text-base font-semibold text-white tracking-tight">
-          Geospatial Feature Extraction
+          {data?.operationName || "Geospatial Feature Extraction"}
         </p>
         <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
-          Target Region: Quadrant 7A, Sector North
+          Target Region: {data?.targetRegion || "Quadrant 7A, Sector North"}
         </p>
       </div>
       <button className="self-start sm:self-auto text-xs text-red-300 border border-red-400/30 bg-red-500/10 hover:bg-red-500/20 transition-all rounded-lg px-3 py-1.5 font-mono active:scale-95 cursor-pointer">
@@ -90,7 +91,24 @@ function Stage({
   );
 }
 
-function PipelineTopology() {
+function PipelineTopology({ stages }: { stages?: any[] }) {
+  const defaultStages: Array<{ label: string; state: StageState; icon: any; sublabel?: string }> = [
+    { label: "Data Ingestion", state: "done", icon: CircleDot },
+    { label: "Radiometric Correction", state: "done", icon: CircleDot },
+    { label: "Neural Extraction", state: "active", sublabel: "74%", icon: Scan },
+    { label: "Spatial Clustering", state: "pending", icon: Boxes },
+    { label: "Confidence Scoring", state: "pending", icon: Gauge }
+  ];
+
+  const list: Array<{ label: string; state: StageState; icon: any; sublabel?: string }> = stages && stages.length > 0
+    ? stages.map((s, idx) => ({
+        label: s.name,
+        state: (s.state === "done" || s.state === "active" || s.state === "pending" ? s.state : "pending") as StageState,
+        sublabel: s.progressPct ? `${s.progressPct}%` : undefined,
+        icon: idx === 2 ? Scan : idx === 3 ? Boxes : idx === 4 ? Gauge : CircleDot
+      }))
+    : defaultStages;
+
   return (
     <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
       <p className="text-xs font-semibold text-slate-200 mb-5 flex items-center gap-1.5 font-mono uppercase tracking-wider">
@@ -100,20 +118,12 @@ function PipelineTopology() {
 
       <div className="overflow-x-auto w-full pb-2">
         <div className="flex items-center min-w-[550px]">
-          <Stage icon={CircleDot} label="Data Ingestion" state="done" />
-          <div className="h-px flex-1 bg-slate-800 -mx-2 mb-6" />
-          <Stage icon={CircleDot} label="Radiometric Correction" state="done" />
-          <div className="h-px flex-1 bg-slate-800 -mx-2 mb-6" />
-          <Stage
-            icon={Scan}
-            label="Neural Extraction"
-            state="active"
-            sublabel="74%"
-          />
-          <div className="h-px flex-1 bg-slate-800 -mx-2 mb-6" />
-          <Stage icon={Boxes} label="Spatial Clustering" state="pending" />
-          <div className="h-px flex-1 bg-slate-800 -mx-2 mb-6" />
-          <Stage icon={Gauge} label="Confidence Scoring" state="pending" />
+          {list.map((st, i) => (
+            <div key={i} className="contents">
+              <Stage icon={st.icon} label={st.label} state={st.state} sublabel={st.sublabel} />
+              {i < list.length - 1 && <div className="h-px flex-1 bg-slate-800 -mx-2 mb-6" />}
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -123,36 +133,59 @@ function PipelineTopology() {
 // ---------------------------------------------
 // Live kernel output (terminal log)
 // ---------------------------------------------
-const logLines = [
-  { time: "14:02:11", tag: "INFO", text: "Initializing pipeline...", color: "text-slate-400" },
-  { time: "14:02:12", tag: null, text: "Loading source array TRQ_64A0_RAW (34.2 GB)", color: "text-slate-500" },
-  { time: "14:02:18", tag: "SUCCESS", text: "Data ingestion complete. Checksum matched.", color: "text-emerald-400" },
-  { time: "14:02:19", tag: null, text: "Applying radiometric calibration profile...", color: "text-slate-500" },
-  { time: "14:02:35", tag: "WARN", text: "Cloud cover detected in sector 9 (coverage ~12%)", color: "text-amber-400" },
-  { time: "14:02:40", tag: "SUCCESS", text: "Radiometric correction applied. Tensor shape: [1024, 1024, 6]", color: "text-emerald-400" },
-  { time: "14:02:41", tag: "INFO", text: "Booting Neural Extraction Engine (GPU:0, GPU:1)...", color: "text-slate-400" },
-  { time: "14:02:43", tag: null, text: "Allocating VRAM... 16000MB reserved", color: "text-slate-500" },
-  { time: "14:02:45", tag: null, text: "Commencing deep feature extraction using model RESNET_SAT_v4", color: "text-slate-500" },
-  { time: "14:02:50", tag: null, text: "Processing batch 1/64 ...", color: "text-slate-500" },
-  { time: "14:02:55", tag: null, text: "Processing batch 18/64 ...", color: "text-slate-500" },
-  { time: "14:03:02", tag: null, text: "Processing batch 42/64 ...", color: "text-slate-500" },
-  { time: "14:03:09", tag: null, text: "Processing batch 49/64 ...", color: "text-slate-500" },
-];
+function LiveKernelOutput({ logData }: { logData?: any }) {
+  const initialLogs = logData?.logLines || [
+    { time: "14:02:11", tag: "INFO", text: "Initializing pipeline...", color: "text-slate-400" },
+    { time: "14:02:12", tag: null, text: "Loading source array TRQ_64A0_RAW (34.2 GB)", color: "text-slate-500" },
+    { time: "14:02:18", tag: "SUCCESS", text: "Data ingestion complete. Checksum matched.", color: "text-emerald-400" },
+    { time: "14:02:19", tag: null, text: "Applying radiometric calibration profile...", color: "text-slate-500" },
+    { time: "14:02:35", tag: "WARN", text: "Cloud cover detected in sector 9 (coverage ~12%)", color: "text-amber-400" },
+    { time: "14:02:40", tag: "SUCCESS", text: "Radiometric correction applied. Tensor shape: [1024, 1024, 6]", color: "text-emerald-400" },
+    { time: "14:02:41", tag: "INFO", text: "Booting Neural Extraction Engine (GPU:0, GPU:1)...", color: "text-slate-400" },
+    { time: "14:02:43", tag: null, text: "Allocating VRAM... 16000MB reserved", color: "text-slate-500" },
+    { time: "14:02:45", tag: null, text: "Commencing deep feature extraction using model RESNET_SAT_v4", color: "text-slate-500" },
+    { time: "14:02:50", tag: null, text: "Processing batch 1/64 ...", color: "text-slate-500" },
+    { time: "14:02:55", tag: null, text: "Processing batch 18/64 ...", color: "text-slate-500" },
+    { time: "14:03:02", tag: null, text: "Processing batch 42/64 ...", color: "text-slate-500" },
+    { time: "14:03:09", tag: null, text: "Processing batch 49/64 ...", color: "text-slate-500" },
+  ];
 
-function LiveKernelOutput() {
+  const [logs, setLogs] = useState<any[]>(initialLogs);
+
+  useEffect(() => {
+    const extraBatches = [
+      { time: "14:03:15", tag: null, text: "Processing batch 54/64 ...", color: "text-slate-500" },
+      { time: "14:03:22", tag: null, text: "Processing batch 61/64 ...", color: "text-slate-500" },
+      { time: "14:03:28", tag: "SUCCESS", text: "Feature extraction tensor generated. Mean precision: 94.2%", color: "text-emerald-400" },
+      { time: "14:03:30", tag: "INFO", text: "Commencing spatial clustering & vector embedding indexing...", color: "text-cyan-400" }
+    ];
+
+    let index = 0;
+    const timer = setInterval(() => {
+      if (index < extraBatches.length) {
+        setLogs((prev) => [...prev, extraBatches[index]]);
+        index++;
+      } else {
+        clearInterval(timer);
+      }
+    }, 1800);
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="w-full border border-slate-800/90 bg-[#08121e] rounded-xl p-4 font-mono text-[11px] overflow-auto min-h-[280px] shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800/80">
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
           <Terminal size={13} className="text-cyan-400" />
-          <span>Live Kernel Stream</span>
+          <span>Live Kernel Stream (Active Stream)</span>
         </div>
         <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-          PID: 9021-CUDA
+          PID: {logData?.pid || "9021-CUDA"}
         </span>
       </div>
       <div className="space-y-1">
-        {logLines.map((line, i) => (
+        {logs.map((line: any, i: number) => (
           <div key={i} className="flex gap-2">
             <span className="text-slate-600 shrink-0">{line.time}</span>
             {line.tag && (
@@ -160,7 +193,7 @@ function LiveKernelOutput() {
             )}
             <span className={line.tag ? "text-slate-400" : line.color}>
               {line.text}
-              {i === logLines.length - 1 && (
+              {i === logs.length - 1 && (
                 <span className="inline-block w-1.5 h-3 bg-cyan-400 ml-1 animate-pulse align-middle" />
               )}
             </span>
@@ -174,8 +207,8 @@ function LiveKernelOutput() {
 // ---------------------------------------------
 // Total progress ring
 // ---------------------------------------------
-function TotalProgress() {
-  const percent = 75;
+function TotalProgress({ traceData }: { traceData?: any }) {
+  const percent = traceData?.totalProgressPct ?? 75;
   const radius = 46;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
@@ -226,18 +259,18 @@ function TotalProgress() {
           fontSize="9"
           fontFamily="monospace"
         >
-          ETA: 02m 34s
+          ETA: {traceData?.eta || "02m 34s"}
         </text>
       </svg>
 
       <div className="flex w-full justify-around mt-3 text-center border-t border-slate-800/80 pt-3">
         <div>
           <p className="text-[10px] text-slate-400 uppercase font-mono tracking-widest">Throughput</p>
-          <p className="text-xs text-cyan-400 mt-0.5 font-mono font-semibold">4.2 GB/s</p>
+          <p className="text-xs text-cyan-400 mt-0.5 font-mono font-semibold">{traceData?.throughput || "4.2 GB/s"}</p>
         </div>
         <div>
           <p className="text-[10px] text-slate-400 uppercase font-mono tracking-widest">Active Nodes</p>
-          <p className="text-xs text-slate-200 mt-0.5 font-mono">2 Compute</p>
+          <p className="text-xs text-slate-200 mt-0.5 font-mono">{traceData?.activeNodes || "2 Compute"}</p>
         </div>
       </div>
     </div>
@@ -260,22 +293,37 @@ function StatusBar() {
 // Execution Trace Page
 // ---------------------------------------------
 export default function ExecutionTracePage() {
+  const [traceData, setTraceData] = useState<any>(null);
+  const [logData, setLogData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/query/q_9482_a/trace")
+      .then((res) => res.json())
+      .then((d) => setTraceData(d))
+      .catch((err) => console.error(err));
+
+    fetch("/api/query/q_9482_a/log")
+      .then((res) => res.json())
+      .then((d) => setLogData(d))
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-[#0a1420] text-white font-sans overflow-x-hidden">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Header />
+        <Header data={traceData} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-5 overflow-y-auto">
-          <PipelineTopology />
+          <PipelineTopology stages={traceData?.stages} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2">
-              <LiveKernelOutput />
+              <LiveKernelOutput logData={logData} />
             </div>
             <div className="lg:col-span-1">
-              <TotalProgress />
+              <TotalProgress traceData={traceData} />
             </div>
           </div>
 

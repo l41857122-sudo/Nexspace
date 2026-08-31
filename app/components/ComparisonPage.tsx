@@ -158,23 +158,24 @@ function ImageViewer({
 
         {/* Scalable Container */}
         <div
-          className="w-full h-full grid grid-cols-1 sm:grid-cols-2 min-h-[360px] sm:min-h-[440px] transition-transform duration-200 origin-center"
+          className="w-full h-full grid grid-cols-1 sm:grid-cols-2 min-h-[360px] sm:min-h-[440px] transition-transform duration-300 origin-center"
           style={{ transform: `scale(${zoom})` }}
         >
           {/* Historical Baseline (Left Panel) */}
-          <div className="relative border-b sm:border-b-0 sm:border-r border-slate-800/80 bg-gradient-to-br from-[#0e1d2e] via-[#0a1523] to-[#070e17] flex flex-col justify-between p-4 overflow-hidden group">
-            {/* Satellite Imagery Texture Background */}
+          <div className="relative border-b sm:border-b-0 sm:border-r border-slate-800/80 bg-[#091522] flex flex-col justify-between p-4 overflow-hidden group">
+            {/* Real Satellite Imagery Background */}
             <div
-              className="absolute inset-0 opacity-[0.15] mix-blend-screen pointer-events-none"
+              className="absolute inset-0 bg-cover bg-center opacity-70 mix-blend-luminosity contrast-125 brightness-90 transition-all duration-300"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle at 30% 40%, rgba(14, 116, 144, 0.4) 0%, transparent 60%), radial-gradient(circle at 70% 80%, rgba(30, 41, 59, 0.6) 0%, transparent 70%)",
+                  "url('https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?q=80&w=1200&auto=format&fit=crop')",
               }}
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#091522] via-transparent to-[#091522]/80 pointer-events-none" />
 
             {/* Corner Bracket Marks */}
-            <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-slate-600/60" />
-            <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-slate-600/60" />
+            <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-slate-400/60 z-20" />
+            <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-slate-400/60 z-20" />
 
             {/* Timestamp Badge */}
             <div className="relative z-20 flex items-center justify-between">
@@ -182,53 +183,99 @@ function ImageViewer({
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                 <span>T0: Oct 12, 2023 · 02:11Z</span>
               </div>
-              <span className="text-[9px] font-mono text-slate-400 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">
+              <span className="text-[9px] font-mono text-slate-300 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">
                 S2B_MSI_L2A
               </span>
             </div>
 
-            {/* Center Label & Reticle */}
+            {/* Center Reticle */}
             <div className="relative z-20 flex flex-col items-center justify-center my-auto py-8">
-              <div className="w-16 h-16 rounded-full border border-dashed border-slate-700/50 flex items-center justify-center mb-2">
-                <Crosshair size={24} className="text-slate-600" />
+              <div className="w-16 h-16 rounded-full border border-dashed border-slate-300/40 backdrop-blur-xs flex items-center justify-center mb-2 shadow-lg">
+                <Crosshair size={24} className="text-slate-200" />
               </div>
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-widest bg-[#09111c]/80 px-3 py-1 rounded-full border border-slate-800">
+              <span className="text-[11px] font-mono text-slate-200 uppercase tracking-widest bg-[#09111c]/90 px-3 py-1 rounded-full border border-slate-700 shadow">
                 Historical Baseline
               </span>
-              <span className="text-[9px] font-mono text-slate-400 mt-1">
+              <span className="text-[9px] font-mono text-slate-300 mt-1 bg-slate-900/80 px-2 py-0.5 rounded">
                 Ref: EO-LANDSAT-8921
               </span>
             </div>
 
             {/* Bottom Telemetry */}
-            <div className="relative z-20 flex items-center justify-between text-[9px] font-mono text-slate-400">
+            <div className="relative z-20 flex items-center justify-between text-[9px] font-mono text-slate-300 bg-slate-900/80 px-2 py-1 rounded border border-slate-800">
               <span>CLOUD: 1.2%</span>
               <span>AZ: 142.8°</span>
             </div>
           </div>
 
           {/* Current Recon Telemetry (Right Panel) */}
-          <div className="relative bg-gradient-to-br from-[#121f2d] via-[#0c1826] to-[#070e17] flex flex-col justify-between p-4 overflow-hidden group">
-            {/* Satellite Imagery Texture Background */}
+          <div className="relative bg-[#081726] flex flex-col justify-between p-4 overflow-hidden group">
+            {/* Real Satellite Imagery Background */}
             <div
-              className="absolute inset-0 opacity-[0.25] mix-blend-screen pointer-events-none"
+              className="absolute inset-0 bg-cover bg-center opacity-85 contrast-125 brightness-95 transition-all duration-300"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle at 60% 30%, rgba(6, 182, 212, 0.25) 0%, transparent 60%), radial-gradient(circle at 40% 70%, rgba(245, 158, 11, 0.15) 0%, transparent 60%)",
+                  "url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop')",
               }}
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#081726] via-transparent to-[#081726]/80 pointer-events-none" />
 
             {/* Corner Bracket Marks */}
-            <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-cyan-500/60" />
-            <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-cyan-500/60" />
+            <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-cyan-400/80 z-20" />
+            <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-cyan-400/80 z-20" />
+
+            {/* Dynamic Delta Heatmap Overlay */}
+            {deltaHeatmap && (
+              <div
+                className="absolute inset-0 bg-gradient-to-tr from-amber-500/30 via-red-500/25 to-cyan-500/20 mix-blend-color-dodge pointer-events-none transition-opacity duration-300 z-10"
+                style={{ opacity: opacity / 100 }}
+              />
+            )}
 
             {/* Dynamic NDVI color wash */}
             {ndviOverlay && (
               <div
-                className="absolute inset-0 bg-emerald-500/15 mix-blend-color-dodge pointer-events-none transition-opacity duration-300"
+                className="absolute inset-0 bg-emerald-500/30 mix-blend-color-dodge pointer-events-none transition-opacity duration-300 z-10"
                 style={{ opacity: opacity / 100 }}
               />
             )}
+
+            {/* Anomaly Bounding Boxes */}
+            <div className="absolute inset-0 pointer-events-none z-15">
+              {/* Anomaly #01 Vegetation Loss */}
+              <div
+                onClick={() => setActiveAnomaly("veg")}
+                className={`absolute top-[25%] left-[30%] w-32 h-24 border-2 ${
+                  activeAnomaly === "veg" || hoveredAnomaly === "veg"
+                    ? "border-amber-400 bg-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.6)]"
+                    : "border-amber-400/70 bg-amber-500/10"
+                } rounded-lg pointer-events-auto cursor-pointer transition-all duration-200 flex flex-col justify-between p-1.5`}
+              >
+                <span className="text-[9px] font-mono font-bold text-amber-300 bg-slate-900/90 px-1.5 py-0.5 rounded self-start">
+                  ANOMALY #01 (VEG)
+                </span>
+                <span className="text-[8px] font-mono text-emerald-300 bg-slate-900/90 px-1 py-0.5 rounded self-end">
+                  Δ 4.2 km²
+                </span>
+              </div>
+
+              {/* Anomaly #02 New Structure */}
+              <div
+                onClick={() => setActiveAnomaly("struct")}
+                className={`absolute top-[55%] left-[55%] w-28 h-20 border-2 ${
+                  activeAnomaly === "struct" || hoveredAnomaly === "struct"
+                    ? "border-red-400 bg-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.6)]"
+                    : "border-red-400/70 bg-red-500/10"
+                } rounded-lg pointer-events-auto cursor-pointer transition-all duration-200 flex flex-col justify-between p-1.5`}
+              >
+                <span className="text-[9px] font-mono font-bold text-red-300 bg-slate-900/90 px-1.5 py-0.5 rounded self-start">
+                  ANOMALY #02 (STR)
+                </span>
+                <span className="text-[8px] font-mono text-cyan-300 bg-slate-900/90 px-1 py-0.5 rounded self-end">
+                  0.8 km²
+                </span>
+              </div>
+            </div>
 
             {/* Timestamp Badge */}
             <div className="relative z-20 flex items-center justify-between">
@@ -243,10 +290,10 @@ function ImageViewer({
 
             {/* Center Label & Reticle */}
             <div className="relative z-20 flex flex-col items-center justify-center my-auto py-8">
-              <div className="w-16 h-16 rounded-full border border-dashed border-cyan-500/30 flex items-center justify-center mb-2">
-                <Crosshair size={24} className="text-cyan-500/60 animate-pulse" />
+              <div className="w-16 h-16 rounded-full border border-dashed border-cyan-400/60 backdrop-blur-xs flex items-center justify-center mb-2 shadow-lg">
+                <Crosshair size={24} className="text-cyan-300 animate-pulse" />
               </div>
-              <span className="text-[11px] font-mono text-cyan-300 uppercase tracking-widest bg-[#09111c]/80 px-3 py-1 rounded-full border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+              <span className="text-[11px] font-mono text-cyan-200 uppercase tracking-widest bg-[#09111c]/90 px-3 py-1 rounded-full border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.3)]">
                 Current Recon Telemetry
               </span>
               <span className="text-[9px] font-mono text-cyan-400/60 mt-1">
@@ -373,14 +420,18 @@ function AnalysisPanel({
 
   const tabs: ("Analysis" | "Controls" | "Metadata")[] = ["Analysis", "Controls", "Metadata"];
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (exporting) return;
     setExporting(true);
-    setTimeout(() => {
-      setExporting(false);
+    try {
+      window.open("/api/comparisons/comp_b492_xt_p/export?format=pdf", "_blank");
       setExported(true);
       setTimeout(() => setExported(false), 3000);
-    }, 2200);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (

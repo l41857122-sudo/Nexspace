@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   KeyRound,
   FileText,
@@ -13,20 +13,55 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-
 import Sidebar from "./Sidebar";
 
 export default function SettingsPage() {
   const [twoFactor, setTwoFactor] = useState(true);
   const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [apiKey, setApiKey] = useState("sq_live_8f92a4b928104719x921k");
 
-  const apiKey = "sq_live_8f92a4b928104719x921k";
+  useEffect(() => {
+    fetch("/api/settings/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.apiKey) setApiKey(data.apiKey);
+        if (typeof data.twoFactorOn === "boolean") setTwoFactor(data.twoFactorOn);
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(apiKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRotateKey = async () => {
+    try {
+      const res = await fetch("/api/settings/api-key/rotate", { method: "POST" });
+      const data = await res.json();
+      if (data.apiKey) {
+        setApiKey(data.apiKey);
+        setShowKey(true);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggle2FA = async () => {
+    const nextVal = !twoFactor;
+    setTwoFactor(nextVal);
+    try {
+      await fetch("/api/settings/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ twoFactorOn: nextVal })
+      });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -75,6 +110,12 @@ export default function SettingsPage() {
                       className="text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
                     >
                       {showKey ? "Hide" : "Reveal Key"}
+                    </button>
+                    <button
+                      onClick={handleRotateKey}
+                      className="text-xs font-medium text-amber-400 hover:text-amber-300 transition-colors cursor-pointer border border-amber-500/30 px-2 py-0.5 rounded bg-amber-500/10"
+                    >
+                      Rotate Key
                     </button>
                   </div>
                 </div>
@@ -157,7 +198,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => setTwoFactor((v) => !v)}
+                    onClick={handleToggle2FA}
                     aria-pressed={twoFactor}
                     aria-label="Toggle two-factor authentication"
                     className={`relative w-10 h-6 rounded-full transition-colors cursor-pointer ${

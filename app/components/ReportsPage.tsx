@@ -31,7 +31,10 @@ export default function ReportsPage() {
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-cyan-300 border border-slate-800 hover:border-cyan-500/40 rounded-lg px-3.5 py-2 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-180 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm">
+            <button
+              onClick={() => window.open("/api/reports/SQ-REP-2023-11A/pdf", "_blank")}
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-cyan-300 border border-slate-800 hover:border-cyan-500/40 rounded-lg px-3.5 py-2 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-180 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm"
+            >
               <Download size={13} />
               <span>Export PDF</span>
             </button>

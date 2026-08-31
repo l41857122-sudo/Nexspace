@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Satellite,
   LayoutGrid,
@@ -257,44 +257,26 @@ const statusStyles: Record<AnalysisStatus, string> = {
   Error: "bg-red-500/15 text-red-300 border-red-500/30",
 };
 
-const analyses: {
+interface AnalysisItem {
   name: string;
   type: string;
   status: AnalysisStatus;
   detail: string;
   metadata: string;
-}[] = [
-  {
-    name: "Synthetic Aperture Radar (SAR) Analysis - Suez Canal",
-    type: "Vessel Wake Detection",
-    status: "Processing",
-    detail: "82%",
-    metadata: "GSD: 8.5m | Cloud: 0%",
-  },
-  {
-    name: "Sentinel-2 Multispectral Ingestion",
-    type: "Vegetation Index (NDVI)",
-    status: "Completed",
-    detail: "",
-    metadata: "GSD: 10m | Cloud: 12%",
-  },
-  {
-    name: "Urban Sprawl Mapping - Lagos",
-    type: "Change Detection",
-    status: "Awaiting QA",
-    detail: "",
-    metadata: "GSD: 3m | Cloud: 5%",
-  },
-  {
-    name: "Thermal Anomaly Scan - Eastern Europe",
-    type: "Infrared Analysis",
-    status: "Error",
-    detail: "Corrupt Metadata",
-    metadata: "N/A",
-  },
-];
+}
 
 function RecentAnalyses() {
+  const [analyses, setAnalyses] = useState<AnalysisItem[]>([]);
+
+  useEffect(() => {
+    fetch("/api/analyses")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setAnalyses(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
     <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
       <div className="flex items-center justify-between mb-4">
@@ -337,7 +319,7 @@ function RecentAnalyses() {
                 </td>
                 <td className="py-3 pr-3">
                   <span
-                    className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[10px] font-mono border font-semibold ${statusStyles[row.status]}`}
+                    className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[10px] font-mono border font-semibold ${statusStyles[row.status] || statusStyles.Processing}`}
                   >
                     {row.status}
                     {row.detail && row.status === "Processing"
@@ -367,25 +349,24 @@ function RecentAnalyses() {
   );
 }
 
-const queries = [
-  {
-    text: "Detect new construction activities near coordinates 25.276987, 55.296249 in the last 36 days.",
-    time: "1.2s",
-    status: "Completed",
-  },
-  {
-    text: "Identify maritime vessels over 50m length in the Malacca Strait using SAR imagery.",
-    time: "4.5s",
-    status: "Completed",
-  },
-  {
-    text: "Show me NDVI changes in the Amazon basin during Q3 stream analysis...",
-    time: null,
-    status: "Running",
-  },
-];
+interface QueryItem {
+  text: string;
+  time: string | null;
+  status: string;
+}
 
 function RecentQueries() {
+  const [queriesList, setQueriesList] = useState<QueryItem[]>([]);
+
+  useEffect(() => {
+    fetch("/api/queries/recent")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setQueriesList(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
     <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
       <div className="mb-4">
@@ -398,7 +379,7 @@ function RecentQueries() {
       </div>
 
       <div className="space-y-2.5">
-        {queries.map((q, i) => (
+        {queriesList.map((q, i) => (
           <div
             key={i}
             className="p-3 rounded-lg bg-slate-900/50 border border-slate-800/80 hover:border-cyan-500/30 hover:bg-cyan-500/[0.03] transition-all duration-180 group cursor-pointer"
