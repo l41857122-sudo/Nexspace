@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import {
   Search,
   Play,
@@ -21,8 +21,10 @@ import {
   CalendarDays,
   Gauge,
   Cloud,
-  CheckCircle2,
-  Sparkles,
+  Cpu,
+  AlertTriangle,
+  FileCode,
+  CheckCircle2
 } from "lucide-react";
 import Sidebar from "./Sidebar";
 
@@ -39,18 +41,18 @@ function PageHeader() {
             NLP Query Terminal
           </h1>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-            AI Active
+            AI Controller Active
           </span>
         </div>
         <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-          Natural language geospatial analysis · SatQuery AI Engine
+          Natural language geospatial analysis · SatQuery AI Controller
         </p>
       </div>
 
       <div className="flex items-center gap-2 self-end sm:self-auto">
         <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Model: Spatial-GPT4v</span>
+          <span>Model: PaliGemma-3B + BLIP</span>
         </div>
         <div className="flex items-center gap-1.5 text-[11px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-lg">
           <Radio size={11} className="animate-pulse" />
@@ -65,12 +67,12 @@ function PageHeader() {
 // Suggestion chips
 // ----------------------------------------------------------------
 const suggestions = [
-  { label: "Port activity changes", icon: Ship },
-  { label: "Detect new infrastructure", icon: Building2 },
-  { label: "Vegetation health (NDVI)", icon: Leaf },
-  { label: "Active wildfires", icon: Flame },
-  { label: "Coastal erosion", icon: Waves },
-  { label: "Deforestation patterns", icon: TreePine },
+  { label: "Is there a river or water body present?", icon: Waves },
+  { label: "How many residential buildings are in this area?", icon: Building2 },
+  { label: "Describe the land-cover and major objects visible", icon: Ship },
+  { label: "What changed between these two dates?", icon: Flame },
+  { label: "Are there industrial structures and roads present?", icon: TreePine },
+  { label: "Describe this scene using both Optical and SAR sensors", icon: Leaf },
 ];
 
 function SuggestionChips({
@@ -127,7 +129,6 @@ function QueryBar({
       <div
         className={`flex items-center gap-3 border rounded-xl px-4 py-3 sm:py-3.5 transition-all duration-180 ease-out ${containerClass}`}
       >
-        {/* Terminal AI icon */}
         <div className="shrink-0 flex items-center gap-1.5">
           <div
             className={`p-1.5 rounded-lg border transition-colors duration-180 ${
@@ -148,7 +149,7 @@ function QueryBar({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onKeyDown={(e) => e.key === "Enter" && !loading && onExecute()}
-          placeholder="Ask a natural language geospatial query — e.g. Detect vessel wake patterns in the Suez Canal over 48h..."
+          placeholder="Ask a natural language geospatial query — e.g. How many residential buildings are in this area?..."
           className="flex-1 bg-transparent text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none min-w-0 font-sans"
         />
 
@@ -160,7 +161,7 @@ function QueryBar({
           {loading ? (
             <>
               <Loader2 size={13} className="animate-spin text-[#071320]" />
-              <span>Analyzing</span>
+              <span>Routing...</span>
             </>
           ) : (
             <>
@@ -171,7 +172,6 @@ function QueryBar({
         </button>
       </div>
 
-      {/* Progressive loading state banner */}
       {loading && (
         <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/25 px-3 py-1.5 rounded-lg shadow-sm">
           <div className="flex items-center gap-2">
@@ -204,7 +204,6 @@ function AdvancedFilters() {
       </div>
 
       <div className="space-y-4">
-        {/* Date Range */}
         <div>
           <label className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono mb-1.5">
             <CalendarDays size={11} className="text-cyan-400" />
@@ -215,11 +214,9 @@ function AdvancedFilters() {
             <option value="7d">Last 7 Days</option>
             <option value="30d">Last 30 Days</option>
             <option value="90d">Last 90 Days</option>
-            <option value="custom">Custom Range</option>
           </select>
         </div>
 
-        {/* Spatial Resolution */}
         <div>
           <label className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono mb-1.5">
             <Gauge size={11} className="text-cyan-400" />
@@ -232,7 +229,6 @@ function AdvancedFilters() {
           </select>
         </div>
 
-        {/* Cloud Cover Slider */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono">
@@ -261,7 +257,6 @@ function AdvancedFilters() {
           </div>
         </div>
 
-        {/* Sensor Source */}
         <div>
           <label className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono mb-1.5">
             <ScanLine size={11} className="text-cyan-400" />
@@ -294,7 +289,6 @@ function AdvancedFilters() {
 function LivePreview() {
   return (
     <div className="w-full border border-cyan-500/25 bg-[#0c1624]/75 backdrop-blur-md rounded-xl p-4 sm:p-5 relative overflow-hidden min-h-[340px] flex flex-col shadow-[0_0_30px_rgba(6,182,212,0.06)]">
-      {/* Subtle HUD grid background */}
       <div
         className="absolute inset-0 opacity-[0.08] pointer-events-none"
         style={{
@@ -319,9 +313,7 @@ function LivePreview() {
         </span>
       </div>
 
-      {/* Viewport */}
       <div className="relative flex-1 rounded-xl bg-[#08121e] border border-cyan-500/15 flex items-center justify-center overflow-hidden min-h-[220px]">
-        {/* Corner labels */}
         <div className="absolute top-3 left-3 text-[10px] font-mono text-cyan-400/70 z-10">
           BBOX: [−62.5, −4.2, −58.1, −1.0]
         </div>
@@ -329,7 +321,6 @@ function LivePreview() {
           ZOOM: 16.4× · GSD: 0.5M
         </div>
 
-        {/* Scan-line sweep */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
           <div
             className="w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-scan"
@@ -337,7 +328,6 @@ function LivePreview() {
           />
         </div>
 
-        {/* Selection bounding box */}
         <div className="absolute inset-8 border border-cyan-500/20 rounded-md pointer-events-none z-10">
           {[
             "top-0 left-0 border-t-2 border-l-2",
@@ -352,7 +342,6 @@ function LivePreview() {
           ))}
         </div>
 
-        {/* Central target */}
         <div className="relative flex items-center justify-center z-20">
           <span
             className="absolute w-20 h-20 rounded-full border border-cyan-400/15 animate-ping"
@@ -363,14 +352,12 @@ function LivePreview() {
             style={{ animationDuration: "2s", animationDelay: "0.5s" }}
           />
 
-          {/* Crosshair */}
           <div className="relative w-10 h-10 flex items-center justify-center">
             <Crosshair size={36} className="text-cyan-400/80" />
             <span className="absolute w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(252,211,77,0.9)]" />
           </div>
         </div>
 
-        {/* Bottom telemetry */}
         <div className="absolute bottom-3 left-3 text-[10px] font-mono text-slate-300 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800 z-10">
           −1.9° S, −58.1° E
         </div>
@@ -383,133 +370,124 @@ function LivePreview() {
 }
 
 // ----------------------------------------------------------------
-// Query History
+// ML Controller Output Panel
 // ----------------------------------------------------------------
-const history = [
-  {
-    text: "Show me all active wildfires in the Amazon over the last 48 hours",
-    time: "2 mins ago",
-    icon: Flame,
-    status: "Completed",
-  },
-  {
-    text: "Detect new infrastructure in Eastern Europe",
-    time: "1 hr ago",
-    icon: Building2,
-    status: "Completed",
-  },
-  {
-    text: "Calculate NDVI for California Central Valley",
-    time: "Yesterday",
-    icon: Leaf,
-    status: "Completed",
-  },
-];
+function ControllerResultPanel({ result }: { result: any }) {
+  if (!result) return null;
 
-function QueryHistory({
-  onRunAgain,
-}: {
-  onRunAgain: (text: string) => void;
-}) {
+  const decision = result.routing_decision || {};
+  const vqaResults = result.vqa_results || [];
+  const requiresWarning = decision.requires_count_warning;
+
   return (
-    <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-white tracking-tight">
-          Query History
-        </h3>
-        <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-          {history.length} recent queries
+    <div className="w-full border border-cyan-500/30 bg-[#091524] rounded-xl p-5 shadow-[0_0_24px_rgba(6,182,212,0.12)] space-y-4">
+      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center gap-2">
+          <Cpu className="text-cyan-400" size={18} />
+          <h3 className="text-sm font-semibold text-white font-mono">
+            Agentic Controller Execution Output
+          </h3>
+        </div>
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+          Status: 200 OK
+        </span>
+      </div>
+
+      {/* Target Tools Badges */}
+      <div>
+        <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
+          <FileCode size={12} className="text-cyan-400" />
+          <span>Target Tools Selected</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {decision.target_tools?.map((tool: string) => (
+            <span
+              key={tool}
+              className="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
+            >
+              {tool}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Execution Reasoning */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-lg p-3">
+        <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider mb-1">
+          Execution Reasoning
+        </div>
+        <p className="text-xs text-slate-300 leading-relaxed font-sans">
+          {decision.execution_reasoning}
         </p>
       </div>
 
-      <div className="space-y-2">
-        {history.map((q, i) => (
-          <div
-            key={i}
-            className="group p-3 rounded-lg bg-slate-900/50 border border-slate-800/80 hover:border-cyan-500/30 hover:bg-cyan-500/[0.03] transition-all duration-180 cursor-default"
-          >
-            <div className="flex items-start gap-2.5">
-              <div className="mt-0.5 p-1.5 rounded-md bg-slate-800/80 border border-slate-700/60 shrink-0">
-                <q.icon size={12} className="text-cyan-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-300 leading-relaxed group-hover:text-slate-100 transition-colors line-clamp-2">
-                  {q.text}
-                </p>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
-                    <Clock size={10} />
-                    <span>{q.time}</span>
-                  </div>
-                  <button
-                    onClick={() => onRunAgain(q.text)}
-                    className="flex items-center gap-1 text-[10px] font-mono text-slate-400 hover:text-cyan-400 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-                  >
-                    <RotateCcw size={10} />
-                    <span>Run again</span>
-                  </button>
+      {/* Counting Warning Banner */}
+      {requiresWarning && (
+        <div className="flex items-start gap-2.5 bg-amber-500/15 border border-amber-500/30 p-3 rounded-lg text-amber-300 text-xs font-mono">
+          <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-400" />
+          <div>
+            <div className="font-bold">Low Confidence Counting Warning</div>
+            <div>Exact numeric counts are derived with low model confidence (~0.25-0.40). Treat this count as an estimate.</div>
+          </div>
+        </div>
+      )}
+
+      {/* Restructured Queries / VQA findings */}
+      {vqaResults.length > 0 && (
+        <div className="space-y-2">
+          <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">
+            Structured RSVQA Sub-Queries & Findings
+          </div>
+          <div className="space-y-1.5">
+            {vqaResults.map((r: any, idx: number) => (
+              <div key={idx} className="flex items-center justify-between bg-slate-900/60 border border-slate-800/80 px-3 py-2 rounded text-xs">
+                <span className="font-mono text-slate-300">{r.question}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-cyan-300">{r.answer}</span>
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${r.low_confidence ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "bg-emerald-500/20 text-emerald-300"}`}>
+                    conf: {r.confidence}
+                  </span>
                 </div>
               </div>
-              <ChevronRight
-                size={14}
-                className="text-slate-600 group-hover:text-cyan-500 shrink-0 mt-0.5 transition-colors"
-              />
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------
-// Status bar
-// ----------------------------------------------------------------
-function StatusBar({ loading }: { loading: boolean }) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-3 mt-3 border-t border-slate-800/80 text-[10px] font-mono text-slate-400">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5 text-emerald-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>AI Engine: Active</span>
         </div>
-        {loading && (
-          <div className="flex items-center gap-1.5 text-cyan-400">
-            <Loader2 size={11} className="animate-spin" />
-            <span>Processing query pipeline...</span>
-          </div>
-        )}
-      </div>
-      <div className="flex items-center gap-3 text-slate-400">
-        <span>LAT: −3.4653</span>
-        <span className="text-slate-700">·</span>
-        <span>LON: −68.2144</span>
-        <span className="text-slate-700">·</span>
-        <span>ALT: 450 KM</span>
+      )}
+
+      {/* Synthesized Response */}
+      <div className="bg-cyan-950/30 border border-cyan-500/20 p-3.5 rounded-lg space-y-1">
+        <div className="text-[10px] font-mono text-cyan-300 uppercase tracking-wider font-semibold">
+          Synthesized User Response
+        </div>
+        <div className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
+          {result.response_text}
+        </div>
       </div>
     </div>
   );
 }
 
 // ----------------------------------------------------------------
-// Query Page
+// Query Page Main Component
 // ----------------------------------------------------------------
 export default function QueryPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadingPhase, setLoadingPhase] = useState("INITIALIZING ORBITAL LINK...");
+  const [loadingPhase, setLoadingPhase] = useState("ROUTING QUERY VIA AGENT...");
+  const [apiResult, setApiResult] = useState<any>(null);
 
   const phases = [
-    "INITIALIZING ORBITAL LINK...",
-    "ACQUIRING SENSOR DATA...",
-    "PROCESSING GEO-REFERENCE...",
-    "RUNNING NEURAL ANALYSIS...",
-    "GENERATING INTELLIGENCE...",
+    "CLASSIFYING INTENT...",
+    "RESTRUCTURING QUERY FOR RSVQA...",
+    "SELECTING TARGET TOOLS...",
+    "EXECUTING VQA & CAPTIONING PIPELINE...",
+    "SYNTHESIZING AGENT RESPONSE...",
   ];
 
-  const handleExecute = () => {
+  const handleExecute = async () => {
     if (!query.trim() || loading) return;
     setLoading(true);
+    setApiResult(null);
 
     let phaseIndex = 0;
     setLoadingPhase(phases[0]);
@@ -517,26 +495,30 @@ export default function QueryPage() {
       phaseIndex += 1;
       if (phaseIndex < phases.length) {
         setLoadingPhase(phases[phaseIndex]);
-      } else {
-        clearInterval(interval);
       }
-    }, 550);
+    }, 400);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: query,
+          optical_image: "dummy_data",
+        })
+      });
+      const data = await res.json();
+      setApiResult(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
       clearInterval(interval);
       setLoading(false);
-    }, 2800);
+    }
   };
 
   const handleSuggestion = (label: string) => {
     setQuery(label);
-  };
-
-  const handleRunAgain = (text: string) => {
-    setQuery(text);
-    setTimeout(() => {
-      handleExecute();
-    }, 50);
   };
 
   return (
@@ -546,9 +528,9 @@ export default function QueryPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <PageHeader />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6">
           {/* Query input + chips */}
-          <div className="mb-6">
+          <div>
             <QueryBar
               value={query}
               onChange={setQuery}
@@ -559,26 +541,19 @@ export default function QueryPage() {
             <SuggestionChips onSelect={handleSuggestion} />
           </div>
 
+          {/* Controller execution output panel */}
+          {apiResult && <ControllerResultPanel result={apiResult} />}
+
           {/* Main panels grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-5">
-            {/* Filters — col 1 */}
-            <div className="md:col-span-1 xl:col-span-1 order-2 md:order-1">
+            <div className="md:col-span-1 xl:col-span-1">
               <AdvancedFilters />
             </div>
 
-            {/* Live Preview — col 2-3 (primary focus) */}
-            <div className="md:col-span-2 xl:col-span-2 order-1 md:order-2">
+            <div className="md:col-span-2 xl:col-span-3">
               <LivePreview />
             </div>
-
-            {/* Query History — col 4 */}
-            <div className="md:col-span-3 xl:col-span-1 order-3">
-              <QueryHistory onRunAgain={handleRunAgain} />
-            </div>
           </div>
-
-          {/* Status bar */}
-          <StatusBar loading={loading} />
         </main>
       </div>
     </div>
