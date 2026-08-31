@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Satellite,
   LayoutGrid,
@@ -189,7 +190,7 @@ function PipelineSteps() {
 // ---------------------------------------------
 // Node Inspector panel
 // ---------------------------------------------
-function NodeInspector() {
+function NodeInspector({ tensorMetadata }: { tensorMetadata?: any }) {
   return (
     <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl overflow-hidden flex flex-col shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
       <div className="flex items-center gap-1.5 px-4 py-3 border-b border-slate-800/80 font-mono">
@@ -240,23 +241,23 @@ function NodeInspector() {
         <div className="space-y-2 text-[11px] font-mono bg-slate-900/60 p-3 rounded-lg border border-slate-800/80">
           <div className="flex justify-between">
             <span className="text-slate-400">Shape</span>
-            <span className="text-cyan-300 font-semibold">(1, 3, 1024, 1024)</span>
+            <span className="text-cyan-300 font-semibold">{tensorMetadata?.shape || "(1, 3, 1024, 1024)"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">DType</span>
-            <span className="text-slate-200">float32</span>
+            <span className="text-slate-200">{tensorMetadata?.dtype || "float32"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Min / Max Val</span>
-            <span className="text-slate-200">-0.984 / 1.000</span>
+            <span className="text-slate-200">{tensorMetadata?.minMaxVal || "-0.984 / 1.000"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Mean Act.</span>
-            <span className="text-slate-200">0.1425</span>
+            <span className="text-slate-200">{tensorMetadata?.meanAct || "0.1425"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Mem Usage</span>
-            <span className="text-emerald-400 font-semibold">12.0 MB</span>
+            <span className="text-emerald-400 font-semibold">{tensorMetadata?.memUsage || "12.0 MB"}</span>
           </div>
         </div>
 
@@ -287,6 +288,15 @@ function StatusBar() {
 // Execution Log Page
 // ---------------------------------------------
 export default function ExecutionLogPage() {
+  const [logData, setLogData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/query/q_9482_a/log")
+      .then((res) => res.json())
+      .then((d) => setLogData(d))
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-[#0a1420] text-white font-sans overflow-x-hidden">
       <Sidebar />
@@ -299,7 +309,7 @@ export default function ExecutionLogPage() {
             <PipelineSteps />
           </div>
           <div className="lg:col-span-1">
-            <NodeInspector />
+            <NodeInspector tensorMetadata={logData?.tensorMetadata} />
           </div>
         </main>
 

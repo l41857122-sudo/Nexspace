@@ -1,0 +1,116 @@
+// Prisma Schema for SatQuery AI (Nexspace)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  apiKey       String   @unique
+  twoFactorOn  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  queries      Query[]
+}
+
+model Scene {
+  id            String          @id @default(cuid())
+  source        String          // "sentinel-2", "sar", "user-upload", etc.
+  capturedAt    DateTime        @default(now())
+  gsdMeters     Float           @default(10.0)
+  cloudCoverPct Float           @default(0.0)
+  bands         Json            // e.g. ["RGB", "NIR", "SWIR"]
+  rawUrl        String
+  cogUrl        String?
+  thumbnailUrl  String?
+  ndviMeanValue Float?
+  status        String          @default("indexed") // "uploading" | "processing" | "indexed" | "error"
+  createdAt     DateTime        @default(now())
+  entities      DetectedEntity[]
+}
+
+model Query {
+  id            String           @id @default(cuid())
+  userId        String?
+  user          User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  rawText       String
+  parsedFilters Json             // { location, dateRange, sensor, entityType, cloudCoverMax }
+  status        String           @default("completed") // "running" | "completed" | "error"
+  execTimeMs    Int?
+  responseText  String?
+  createdAt     DateTime         @default(now())
+  stages        ExecutionStage[]
+  entities      DetectedEntity[]
+}
+
+model ExecutionStage {
+  id          String   @id @default(cuid())
+  queryId     String
+  query       Query    @relation(fields: [queryId], references: [id], onDelete: Cascade)
+  name        String   // "Data Ingestion", "Radiometric Correction", "Neural Extraction", etc.
+  state       String   @default("pending") // "pending" | "active" | "done" | "error"
+  order       Int
+  logs        String[]
+  progressPct Int?     @default(0)
+}
+
+model Comparison {
+  id             String   @id @default(cuid())
+  sceneBeforeId  String
+  sceneAfterId   String
+  deltaPct       Float?   @default(18.4)
+  coregRmsPx     Float?   @default(0.08)
+  diffHeatmapUrl String?
+  anomalies      Json     // Array of { id, label, type, bbox, confidence, location, area }
+  status         String   @default("completed") // "pending" | "processing" | "completed" | "error"
+  createdAt      DateTime @default(now())
+  reports        Report[]
+}
+
+model DetectedEntity {
+  id         String   @id @default(cuid())
+  sceneId    String?
+  scene      Scene?   @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+  queryId    String?
+  query      Query?   @relation(fields: [queryId], references: [id], onDelete: Cascade)
+  name       String
+  type       String   // "Cargo/Container", "Storage/Liquid", "Cargo/Breakbulk"
+  confidence Float    @default(0.9)
+  bboxX      Float    // percentage x (0-100)
+  bboxY      Float    // percentage y (0-100)
+  bboxWidth  Float    // pixel or percentage width
+  bboxHeight Float    // pixel or percentage height
+  metadata   Json?    // e.g. { size: "294 x 32m", statusColor: "bg-emerald-400" }
+  createdAt  DateTime @default(now())
+}
+
+model Analysis {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // "Vessel Wake Detection", "Vegetation Index (NDVI)", "Change Detection", "Infrared Analysis"
+  status      String   @default("Completed") // "Processing" | "Completed" | "Awaiting QA" | "Error"
+  progressPct Int?     @default(100)
+  detail      String?  // e.g. "82%", "Corrupt Metadata"
+  metadata    Json     // e.g. { gsd: "10m", cloud: "12%" }
+  createdAt   DateTime @default(now())
+  reports     Report[]
+}
+
+model Report {
+  id           String      @id @default(cuid())
+  comparisonId String?
+  comparison   Comparison? @relation(fields: [comparisonId], references: [id], onDelete: SetNull)
+  analysisId   String?
+  analysis     Analysis?   @relation(fields: [analysisId], references: [id], onDelete: SetNull)
+  title        String
+  sections     Json        // { executiveSummary, spatialAnalysis, temporalTrends, technicalAppendix }
+  pdfUrl       String?
+  createdAt    DateTime    @default(now())
+}

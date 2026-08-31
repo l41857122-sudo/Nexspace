@@ -33,32 +33,40 @@ export default function UploadPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const startUploadSimulation = (name: string, size: string) => {
+  const startUploadSimulation = async (name: string, size: string) => {
     setFileName(name);
     setFileSize(size);
     setDatasetId(name.replace(/\.[^/.]+$/, ""));
-    setProgress(0);
+    setProgress(10);
     setUploadStatus("uploading");
     setStatusMessage("Reading geospatial raster header...");
 
-    let current = 0;
-    const interval = setInterval(() => {
-      current += 10;
-      if (current === 30) {
-        setStatusMessage("Extracting multi-spectral raster layers...");
-      } else if (current === 60) {
-        setStatusMessage("Calculating NDVI & Cloud Occlusion matrix...");
-      } else if (current === 90) {
-        setStatusMessage("Building spatial tile pyramid (COG format)...");
-      } else if (current >= 100) {
-        current = 100;
-        setProgress(100);
-        setUploadStatus("completed");
-        setStatusMessage("Dataset successfully indexed into Vector Database");
-        clearInterval(interval);
-      }
-      setProgress(current);
-    }, 380);
+    try {
+      const res = await fetch("/api/scenes/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: name, fileSize: size })
+      });
+      const job = await res.json();
+      const jobId = job.id;
+
+      const interval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`/api/scenes/${jobId}/status`);
+          const statusData = await statusRes.json();
+          setProgress(statusData.progress);
+          setStatusMessage(statusData.statusMessage);
+          if (statusData.status === "completed" || statusData.progress >= 100) {
+            setUploadStatus("completed");
+            clearInterval(interval);
+          }
+        } catch (e) {
+          clearInterval(interval);
+        }
+      }, 500);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleFileSelect = (files: FileList | null) => {

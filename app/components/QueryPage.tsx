@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Link from "next/link";
 import {
   Search,
   Play,
@@ -314,17 +315,27 @@ function LivePreview() {
       </div>
 
       <div className="relative flex-1 rounded-xl bg-[#08121e] border border-cyan-500/15 flex items-center justify-center overflow-hidden min-h-[220px]">
-        <div className="absolute top-3 left-3 text-[10px] font-mono text-cyan-400/70 z-10">
+        {/* Real High-Resolution Satellite Raster Imagery Background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-85 contrast-125 brightness-95 transition-all duration-300 pointer-events-none"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?q=80&w=1600&auto=format&fit=crop')",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#08121e]/90 via-[#08121e]/40 to-[#08121e]/80 pointer-events-none" />
+
+        <div className="absolute top-3 left-3 text-[10px] font-mono text-cyan-300 font-semibold z-20 bg-slate-900/80 px-2 py-0.5 rounded border border-cyan-500/30">
           BBOX: [−62.5, −4.2, −58.1, −1.0]
         </div>
-        <div className="absolute top-3 right-3 text-[10px] font-mono text-slate-400 z-10">
+        <div className="absolute top-3 right-3 text-[10px] font-mono text-slate-200 z-20 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">
           ZOOM: 16.4× · GSD: 0.5M
         </div>
 
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-15">
           <div
-            className="w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-scan"
-            style={{ animationDuration: "4s" }}
+            className="w-full h-10 bg-gradient-to-b from-cyan-400/30 via-cyan-500/10 to-transparent border-b-2 border-cyan-400 animate-scan shadow-[0_0_15px_rgba(6,182,212,0.6)]"
+            style={{ animationDuration: "3.5s" }}
           />
         </div>
 
@@ -462,6 +473,24 @@ function ControllerResultPanel({ result }: { result: any }) {
         <div className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
           {result.response_text}
         </div>
+      </div>
+
+      {/* Action Navigation Buttons */}
+      <div className="flex flex-wrap gap-3 pt-2 border-t border-slate-800">
+        <Link
+          href="/execution"
+          className="flex items-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 rounded-lg px-3 py-2 text-xs font-mono font-semibold transition-all cursor-pointer"
+        >
+          <Activity size={13} />
+          <span>View Execution Trace Stage Topology →</span>
+        </Link>
+        <Link
+          href="/results"
+          className="flex items-center gap-1.5 bg-[#091522] hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-cyan-300 rounded-lg px-3 py-2 text-xs font-mono font-semibold transition-all cursor-pointer"
+        >
+          <ScanLine size={13} className="text-cyan-400" />
+          <span>View Scan Results Target Bounding Boxes →</span>
+        </Link>
       </div>
     </div>
   );

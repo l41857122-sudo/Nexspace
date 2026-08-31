@@ -216,9 +216,19 @@ function MapArea({
           transformOrigin: transformOrigin,
         }}
       >
-        {/* Synthetic Nautical Bathymetry / Coastal Contours */}
+        {/* Real High-Resolution Satellite Raster Imagery Background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-85 contrast-125 brightness-95 transition-all duration-300 pointer-events-none"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?q=80&w=1600&auto=format&fit=crop')",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#07111c]/90 via-[#07111c]/30 to-[#07111c]/80 pointer-events-none" />
+
+        {/* Synthetic Nautical Bathymetry / Coastal Contours Overlay */}
         <svg
-          className="absolute inset-0 w-full h-full pointer-events-none opacity-45"
+          className="absolute inset-0 w-full h-full pointer-events-none opacity-55"
           preserveAspectRatio="none"
           viewBox="0 0 1000 600"
         >
@@ -277,11 +287,11 @@ function MapArea({
           />
         </svg>
 
-        {/* Slow Scan-Line Radar Sweep Animation */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+        {/* Active Scan-Line Radar Sweep Beam Animation */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-15">
           <div
-            className="w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent animate-scan"
-            style={{ animationDuration: "4.5s" }}
+            className="w-full h-12 bg-gradient-to-b from-cyan-400/30 via-cyan-500/10 to-transparent border-b-2 border-cyan-400 animate-scan shadow-[0_0_15px_rgba(6,182,212,0.6)]"
+            style={{ animationDuration: "3.5s" }}
           />
         </div>
 
@@ -477,14 +487,18 @@ function ScanResultsPanel({
   const [downloading, setDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
-  const handleGeneratePDF = () => {
+  const handleGeneratePDF = async () => {
     if (downloading) return;
     setDownloading(true);
-    setTimeout(() => {
-      setDownloading(false);
+    try {
+      window.open("/api/reports/SQ-REP-2023-11A/pdf", "_blank");
       setDownloadSuccess(true);
       setTimeout(() => setDownloadSuccess(false), 3000);
-    }, 1800);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
