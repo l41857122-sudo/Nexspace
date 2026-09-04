@@ -15,6 +15,7 @@
  */
 
 const { spawn, execSync, exec } = require("child_process");
+const fs = require("fs");
 const http = require("http");
 const os = require("os");
 const path = require("path");
@@ -119,9 +120,12 @@ async function main() {
     process.exit(1);
   }
 
+  const venvPy = path.resolve(__dirname, "..", ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
+  const pyExecutable = fs.existsSync(venvPy) ? venvPy : "python";
+
   try {
-    const pyVer = execSync("python --version", { encoding: "utf8" }).trim();
-    log(`  ✓ Python environment: ${pyVer}`);
+    const pyVer = execSync(`"${pyExecutable}" --version`, { encoding: "utf8" }).trim();
+    log(`  ✓ Python environment: ${pyVer} (${fs.existsSync(venvPy) ? "isolated .venv" : "system PATH"})`);
   } catch (_) {
     console.error("  ❌ Python is required but not found.");
     process.exit(1);
@@ -133,8 +137,8 @@ async function main() {
   if (backendCheck.ok) {
     log("  ✓ Reusing existing FastAPI backend on http://localhost:8000");
   } else {
-    log("  → Launching FastAPI backend (python ml_backend/server.py)...");
-    const backendProc = spawn("python", ["ml_backend/server.py"], {
+    log(`  → Launching FastAPI backend (${fs.existsSync(venvPy) ? ".venv python" : "python"} ml_backend/server.py)...`);
+    const backendProc = spawn(pyExecutable, ["ml_backend/server.py"], {
       cwd: path.resolve(__dirname, ".."),
       stdio: "pipe",
       shell: process.platform === "win32",

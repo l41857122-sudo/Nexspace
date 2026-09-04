@@ -1,5 +1,5 @@
 # ==============================================================================
-# NexSpace ML Backend Dependencies
+# NexSpace ML Backend & Geospatial Processing Dependencies
 # Python Target: 3.11.x
 # ==============================================================================
 

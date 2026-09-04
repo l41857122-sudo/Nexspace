@@ -4,21 +4,89 @@ NexSpace is a production-grade Agentic Multi-Modal Remote Sensing Intelligence P
 
 ---
 
-## ⚡ Quick Start: One-Click Live Demo
+## 🚀 Fresh Developer Machine Setup
 
-To launch the full live stack with both FastAPI backend and Next.js frontend and automatically open the investigation terminal in your browser:
+### Prerequisites
+- **Node.js**: `v18.x` or `v20.x+` ([Download Node.js](https://nodejs.org/))
+- **Python**: `3.11.x` ([Download Python 3.11](https://www.python.org/downloads/)) — *Ensure "Add Python to PATH" is checked during installation.*
+- **Git**: ([Download Git](https://git-scm.com/))
 
+---
+
+### Option A: Automated Setup on Windows (Recommended)
+
+Run the safe, idempotent batch script from the repository root:
+
+```cmd
+setup.bat
+```
+
+The `setup.bat` script automatically:
+1. Validates Node.js and Python 3.11.x availability in your system PATH.
+2. Creates an isolated local Python virtual environment (`.venv`) if one does not already exist.
+3. Upgrades `pip` and installs all backend machine learning dependencies from `requirements.txt`.
+4. Installs all Node.js and Next.js frontend dependencies via `npm install`.
+5. Initializes `.env.local` from `.env.example` if not already present (strictly preserving existing `.env.local`).
+6. Verifies system integrity, required file trees, and Python backend module imports.
+
+---
+
+### Option B: Manual Cross-Platform Setup (Windows / macOS / Linux)
+
+If you prefer manual configuration or are on Linux/macOS:
+
+```bash
+# 1. Clone repository and navigate to root
+cd Nexspace
+
+# 2. Configure Python 3.11 Virtual Environment
+python -m venv .venv
+
+# Windows activation:
+.venv\Scripts\activate
+# Linux/macOS activation:
+# source .venv/bin/activate
+
+# 3. Upgrade pip and install Python dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# 4. Install Node.js frontend dependencies
+npm install
+
+# 5. Initialize environment variables (only if .env.local does not exist)
+cp .env.example .env.local
+```
+
+---
+
+## ⚡ Running the Application
+
+### 1. One-Click Live Demo Launcher (FastAPI + Next.js)
 ```bash
 npm run demo
 ```
-
 The demo runner automatically:
-1. Validates Python 3.11+ and Node.js environments.
+1. Validates Python 3.11+ and Node.js runtimes.
 2. Checks port 8000 (FastAPI) and port 3000 (Next.js), safely reusing active services without duplicate spawns.
-3. Polls `/api/health` until backend inference runtimes are ready.
+3. Polls `/api/health` until ML inference runtimes are loaded.
 4. Verifies the Next.js API proxy to FastAPI.
-5. Displays the active Remote-Sensing ML Capabilities table.
-6. Opens `http://localhost:3000/query` in your default browser.
+5. Displays the active Remote-Sensing ML Capabilities matrix.
+6. Automatically opens `http://localhost:3000/query` in your default browser.
+
+### 2. Standard Concurrent Development
+```bash
+npm run dev
+```
+
+### 3. Dedicated Microservice Dev Commands
+```bash
+# Frontend only (Port 3000)
+npm run dev:next
+
+# FastAPI ML Backend only (Port 8000)
+npm run dev:ml
+```
 
 ---
 
@@ -38,31 +106,20 @@ Inside the NexSpace NLP Terminal (`/query`), click any scenario button for real-
 
 ---
 
-## 🛠️ Developer Scripts
+## 🧪 Testing & Verification Suites
 
 ```bash
-# Start Next.js and FastAPI concurrently
-npm run dev
-
-# Launch one-click demo launcher
-npm run demo
-
-# Build production Next.js bundle
-npm run build
-
-# Run TypeScript type check
+# TypeScript compiler type check
 npx tsc --noEmit
 
-# Run Next.js and ESLint checks
-npm run lint
-
-# Run Backend Python test suites
+# Core ML Controller & Hardening unit tests
 python ml_backend/test_step10_hardening.py
-python ml_backend/test_step13_model_quality.py
+python ml_backend/test_step14_caption_safety.py
 
-# Run Live Integration & Schema validation tests
+# End-to-end live API proxy & route integration tests
 node test_e2e_live_integration.js
 node test_frontend_schemas.js
+node test_backend.js
 ```
 
 ---
