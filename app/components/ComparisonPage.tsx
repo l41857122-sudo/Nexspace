@@ -16,6 +16,7 @@ import {
 import Sidebar from "./Sidebar";
 import type { NexSpaceChangeAnalysisResponse, AnomalyRegion } from "../types/nexspace";
 import { SAMPLE_CHANGE_A, SAMPLE_CHANGE_B } from "../utils/sampleImages";
+import { validateAndProcessImageFile, ACCEPT_FILE_ATTR } from "../utils/imageValidation";
 
 // ---------------------------------------------
 // Top bar
@@ -321,8 +322,9 @@ function AnalysisPanel({
             </button>
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-2 pt-1">
-          <input ref={fileInputARef} type="file" accept="image/*" onChange={onUploadA} className="hidden" />
+          <input ref={fileInputARef} type="file" accept={ACCEPT_FILE_ATTR} onChange={onUploadA} className="hidden" />
           <button
             onClick={() => fileInputARef.current?.click()}
             className="flex items-center justify-center gap-1 text-[11px] font-mono py-1.5 px-2 bg-slate-950 border border-slate-800 hover:border-cyan-500/40 rounded text-slate-300 cursor-pointer"
@@ -330,7 +332,7 @@ function AnalysisPanel({
             <Upload size={11} className="text-cyan-400" />
             <span>Upload Baseline A</span>
           </button>
-          <input ref={fileInputBRef} type="file" accept="image/*" onChange={onUploadB} className="hidden" />
+          <input ref={fileInputBRef} type="file" accept={ACCEPT_FILE_ATTR} onChange={onUploadB} className="hidden" />
           <button
             onClick={() => fileInputBRef.current?.click()}
             className="flex items-center justify-center gap-1 text-[11px] font-mono py-1.5 px-2 bg-slate-950 border border-slate-800 hover:border-cyan-500/40 rounded text-slate-300 cursor-pointer"
@@ -526,32 +528,30 @@ export default function ComparisonPage() {
     fetchChangeAnalysis(nextA, nextB);
   };
 
-  const handleUploadA = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleUploadA = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const file = input.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setImageA(reader.result);
-        setLabelA(file.name);
-        fetchChangeAnalysis(reader.result, imageB);
-      }
-    };
-    reader.readAsDataURL(file);
+    const result = await validateAndProcessImageFile(file);
+    if (result.valid && result.source) {
+      setImageA(result.source.dataUrl);
+      setLabelA(result.source.filename);
+      fetchChangeAnalysis(result.source.dataUrl, imageB);
+    }
+    input.value = "";
   };
 
-  const handleUploadB = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleUploadB = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const file = input.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setImageB(reader.result);
-        setLabelB(file.name);
-        fetchChangeAnalysis(imageA, reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    const result = await validateAndProcessImageFile(file);
+    if (result.valid && result.source) {
+      setImageB(result.source.dataUrl);
+      setLabelB(result.source.filename);
+      fetchChangeAnalysis(imageA, result.source.dataUrl);
+    }
+    input.value = "";
   };
 
   const handleReset = () => {

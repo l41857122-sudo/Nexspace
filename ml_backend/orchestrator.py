@@ -410,7 +410,7 @@ class GeoVLMController:
         )
         tracer.record(
             stage="result_validation",
-            status="success" if valid_results else ("partial" if unavailable_results else "failed"),
+            status="success" if (valid_results or len(selected_tools) == 0) else ("partial" if unavailable_results else "failed"),
             metadata={
                 "valid_count": len(valid_results),
                 "unavailable_count": len(unavailable_results),
@@ -459,7 +459,7 @@ class GeoVLMController:
         )
 
         # Stage 11: Completion Event
-        final_status = "completed" if (valid_results or unavailable_results) else "failed"
+        final_status = "completed" if (valid_results or unavailable_results or len(selected_tools) == 0) else "failed"
         tracer.record(
             stage="response_completed",
             status=final_status,

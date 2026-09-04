@@ -150,7 +150,7 @@ export default function UploadPage() {
                 ref={fileInputRef}
                 onChange={(e) => handleFileSelect(e.target.files)}
                 className="hidden"
-                accept=".tif,.tiff,.jp2,.nc,.zip"
+                accept=".tif,.tiff,.jp2,.nc,.zip,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,image/tiff"
               />
               <div className="p-3.5 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 mb-3 group-hover:scale-110 group-hover:border-cyan-400/60 group-hover:bg-cyan-500/20 transition-all duration-200 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
                 <UploadCloud size={28} />
@@ -159,7 +159,7 @@ export default function UploadPage() {
                 Drag &amp; Drop Imagery or Browse Local Files
               </p>
               <p className="text-[11px] text-slate-400 mt-1 font-mono">
-                Supported formats: GeoTIFF, JP2, NetCDF, Zip (Max 5GB per archive)
+                Supported formats: JPG, PNG, GeoTIFF, JP2, NetCDF, Zip (Max 5GB per archive)
               </p>
               <button
                 type="button"

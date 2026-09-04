@@ -267,6 +267,8 @@ function SuggestionChips({ onSelect }: { onSelect: (s: string) => void }) {
   );
 }
 
+import { validateAndProcessImageFile, ACCEPT_FILE_ATTR } from "../utils/imageValidation";
+
 // ----------------------------------------------------------------
 // Raster Image Selector / Upload Panel
 // ----------------------------------------------------------------
@@ -284,55 +286,20 @@ function ImageSelector({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (< 25MB)
-    if (file.size > 25 * 1024 * 1024) {
-      setUploadError(`File '${file.name}' exceeds the maximum allowed size of 25MB.`);
+    const result = await validateAndProcessImageFile(file);
+    if (!result.valid || !result.source) {
+      setUploadError(result.error || "Failed to process the uploaded image.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    // Validate Extension / MIME
-    const nameLower = file.name.toLowerCase();
-    const validExtensions = [".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff"];
-    const isExtValid = validExtensions.some((ext) => nameLower.endsWith(ext));
-
-    if (!isExtValid) {
-      setUploadError("Unsupported format. Please upload a JPG, JPEG, PNG, WEBP, or TIFF raster.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      if (typeof reader.result === "string") {
-        let hashHex = "";
-        try {
-          const arrayBuffer = await file.arrayBuffer();
-          const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
-          const hashArray = Array.from(new Uint8Array(hashBuffer));
-          hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-        } catch {
-          // Fallback if SubtleCrypto is restricted
-        }
-        const newSource: CanonicalSourceImage = {
-          id: `src-upload-${Date.now()}`,
-          filename: file.name,
-          mediaType: file.type || "image/jpeg",
-          dataUrl: reader.result,
-          source: "upload",
-          sha256: hashHex,
-          uploadedAt: new Date().toISOString(),
-        };
-        onSelectSource(newSource);
-      }
-    };
-    reader.onerror = () => {
-      setUploadError("Failed to read image file.");
-    };
-    reader.readAsDataURL(file);
+    onSelectSource(result.source);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -352,7 +319,7 @@ function ImageSelector({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/tiff,.tif,.tiff,.jpg,.jpeg,.png,.webp"
+            accept={ACCEPT_FILE_ATTR}
             onChange={handleFileUpload}
             className="hidden"
           />
