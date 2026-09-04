@@ -31,12 +31,33 @@ const querySubmenu = [
 
 export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
   const pathname = usePathname();
   const router = useRouter();
 
   const isQuerySubRoute = querySubmenu.some((item) => item.href === pathname);
   const isQueryActive = pathname === "/query";
   const [queryExpanded, setQueryExpanded] = useState(isQueryActive || isQuerySubRoute);
+
+  // Poll backend health status
+  useEffect(() => {
+    const checkHealth = () => {
+      fetch("/api/health")
+        .then((res) => {
+          if (res.ok) {
+            setBackendOnline(true);
+          } else {
+            setBackendOnline(false);
+          }
+        })
+        .catch(() => {
+          setBackendOnline(false);
+        });
+    };
+    checkHealth();
+    const interval = setInterval(checkHealth, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-expand Query submenu if user navigates to or refreshes on any sub-route or /query
   useEffect(() => {
@@ -279,12 +300,32 @@ export default function Sidebar() {
           </span>
         </Link>
 
-        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/15 text-[11px] text-emerald-300 font-mono">
+        <div className={`flex items-center justify-between px-3 py-2 rounded-lg border text-[11px] font-mono ${
+          backendOnline === false
+            ? "bg-rose-500/10 border-rose-500/25 text-rose-300"
+            : backendOnline === true
+            ? "bg-emerald-500/5 border-emerald-500/15 text-emerald-300"
+            : "bg-slate-900 border-slate-800 text-slate-400"
+        }`}>
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-            <span>System Status</span>
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              backendOnline === false
+                ? "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]"
+                : backendOnline === true
+                ? "bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+                : "bg-amber-400 animate-ping"
+            }`} />
+            <span>AI Status</span>
           </div>
-          <span className="font-semibold text-emerald-400">AI Active</span>
+          <span className={`font-semibold ${
+            backendOnline === false
+              ? "text-rose-400"
+              : backendOnline === true
+              ? "text-emerald-400"
+              : "text-slate-400"
+          }`}>
+            {backendOnline === false ? "AI Backend Offline" : backendOnline === true ? "Live ML Pipeline" : "Connecting..."}
+          </span>
         </div>
       </div>
     </div>

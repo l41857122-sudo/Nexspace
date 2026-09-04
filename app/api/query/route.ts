@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { NexSpaceQueryResponse } from "../../types/nexspace";
 
 const ML_BACKEND_URL = process.env.ML_BACKEND_URL || "http://localhost:8000";
 
@@ -11,7 +12,7 @@ interface QueryBody {
   probe_features?: string[];
 }
 
-function runFallbackRouting(queryStr: string, hasOptical: boolean, hasSar: boolean, hasChange: boolean) {
+function runOfflineFallback(queryStr: string, hasOptical: boolean, hasSar: boolean, hasChange: boolean): NexSpaceQueryResponse {
   const query = (queryStr || "").trim();
   const targetTools: string[] = [];
   const restructuredVqaQueries: string[] = [];
@@ -21,7 +22,7 @@ function runFallbackRouting(queryStr: string, hasOptical: boolean, hasSar: boole
   if (hasChange) {
     targetTools.push("Change_Analysis");
     reasoningParts.push(
-      "Before/after image pair detected -> triggering Change Analysis pipeline for pixel-level heatmap and spatial diff."
+      "Before/after image pair detected -> triggering Change Analysis pipeline."
     );
   }
 
@@ -49,7 +50,7 @@ function runFallbackRouting(queryStr: string, hasOptical: boolean, hasSar: boole
       restructuredVqaQueries.push(`how many ${obj}?`);
       requiresCountWarning = true;
       reasoningParts.push(
-        "Detected counting query -> routed to VQA with 'how many [object]?' syntax; flagged requires_count_warning=True due to known low accuracy (confidence 0.25-0.40) on counting tasks."
+        "Detected counting query -> routed to VQA; flagged requires_count_warning=True."
       );
     } else if (isOpenEnded) {
       if (hasOptical) targetTools.push("Optical_Caption");
@@ -59,23 +60,23 @@ function runFallbackRouting(queryStr: string, hasOptical: boolean, hasSar: boole
       restructuredVqaQueries.push("Is there a road present?");
       restructuredVqaQueries.push("Is there vegetation present?");
       reasoningParts.push(
-        "Open-ended query detected -> routed to Optical Captioning for free-form scene description, and decomposed into structured RSVQA-style binary sub-questions for VQA."
+        "Open-ended query -> routed to Optical Captioning and decomposed into RSVQA binary sub-questions."
       );
     } else {
       targetTools.push("VQA");
       let norm = query.endsWith("?") ? query : query + "?";
       norm = norm[0].toUpperCase() + norm.slice(1);
       restructuredVqaQueries.push(norm);
-      reasoningParts.push("Closed-ended query detected -> routed directly to VQA after RSVQA-style normalization.");
+      reasoningParts.push("Closed-ended query -> routed directly to VQA.");
     }
   } else if (hasOptical && !hasChange) {
     targetTools.push("Optical_Caption");
-    reasoningParts.push("No query text provided -> defaulting to Optical Captioning for general scene description.");
+    reasoningParts.push("No query text provided -> defaulting to Optical Captioning.");
   }
 
   if (hasSar) {
     targetTools.push("SAR_Caption");
-    reasoningParts.push("SAR imagery provided -> also routing to SAR Captioning for radar-domain description.");
+    reasoningParts.push("SAR imagery provided -> routing to SAR Captioning.");
   }
 
   const uniqueTools = Array.from(new Set(targetTools));
@@ -86,49 +87,58 @@ function runFallbackRouting(queryStr: string, hasOptical: boolean, hasSar: boole
     low_confidence: q.toLowerCase().includes("how many")
   }));
 
-  let opticalCaption = null;
-  if (uniqueTools.includes("Optical_Caption")) {
-    opticalCaption = "An aerial satellite overview showing mixed urban infrastructure, vegetation, and water bodies.";
-  }
-
-  let sarCaption = null;
-  if (uniqueTools.includes("SAR_Caption")) {
-    sarCaption = "[SAR radar scene] High-backscatter structural reflection showing urban grid and coastal line.";
-  }
-
-  let changeAnalysis = null;
-  if (uniqueTools.includes("Change_Analysis")) {
-    changeAnalysis = {
-      summary: "Change analysis detected moderate change across a notable portion of the scene between Image A (before) and Image B (after): 18.4% of pixels exceeded threshold.",
-      changed_fraction: 0.184,
-      mean_intensity_delta: 34.2
-    };
-  }
-
-  const parts: string[] = [];
-  if (opticalCaption) parts.push(`**Optical scene description:** ${opticalCaption}`);
-  if (sarCaption) parts.push(`**SAR scene description:** ${sarCaption}`);
-  if (vqaResults.length > 0) {
-    const lines = vqaResults.map(r => `- ${r.question} → ${r.answer}${r.low_confidence ? "  ⚠️ low confidence" : ""}`);
-    parts.push(`**Structured VQA findings:**\n${lines.join("\n")}`);
-  }
-  if (changeAnalysis) parts.push(`**Change analysis:** ${changeAnalysis.summary}`);
-  if (requiresCountWarning) {
-    parts.push("⚠️ Note: Exact numeric counts are derived with low model confidence (~0.25-0.40). Treat this count as an estimate.");
-  }
+  const parts: string[] = [
+    "⚠️ **Notice: Python ML backend is currently offline.** Displaying client-side structural routing fallback.",
+    `Selected tools: ${uniqueTools.join(", ")}`
+  ];
 
   return {
+    request_id: "req_offline_fallback",
+    status: "completed",
+    query: queryStr,
+    intent: isCounting ? "VQA" : (isOpenEnded ? "Optical_Caption" : "VQA"),
+    plan: {
+      task_type: isCounting ? "VQA" : (isOpenEnded ? "Optical_Caption" : "VQA"),
+      target_tools: uniqueTools,
+      parameters: { query: queryStr },
+      execution_strategy: "offline_fallback"
+    },
+    selected_tools: uniqueTools,
     routing_decision: {
       target_tools: uniqueTools,
       restructured_vqa_queries: restructuredVqaQueries,
       requires_count_warning: requiresCountWarning,
-      execution_reasoning: reasoningParts.join(" ") || "No actionable query or imagery provided."
+      execution_reasoning: reasoningParts.join(" ") || "Client-side fallback routing."
     },
     vqa_results: vqaResults,
-    optical_caption: opticalCaption,
-    sar_caption: sarCaption,
-    change_analysis: changeAnalysis,
-    response_text: parts.join("\n\n")
+    optical_caption: uniqueTools.includes("Optical_Caption") ? "[Offline Fallback: Start Python ML Server for live BLIP inference]" : null,
+    sar_caption: uniqueTools.includes("SAR_Caption") ? "[Offline Fallback: Start Python ML Server for live SAR inference]" : null,
+    change_analysis: null,
+    evidence: [],
+    evidence_graph: { query_id: "req_offline_fallback", nodes: [], edges: [] },
+    investigation_report: {
+      summary: "Python ML Backend is offline. Start FastAPI server (`python ml_backend/server.py`) on port 8000 for live neural inference.",
+      observations: ["FastAPI server at http://localhost:8000 did not respond."],
+      interpretations: ["Operating in emergency client-side fallback mode."],
+      evidence_references: [],
+      limitations: ["No live neural inference (BLIP, Grounding DINO, PaliGemma) available in offline mode."]
+    },
+    execution_trace: [
+      {
+        stage: "client_fallback",
+        status: "completed",
+        started_at: new Date().toISOString(),
+        duration_ms: 1.0,
+        metadata: { source: "nextjs_offline_router" }
+      }
+    ],
+    confidence: 0.5,
+    confidence_type: "heuristic",
+    confidence_source: "nextjs_fallback",
+    fallback_count: 1,
+    limitations: ["Python ML backend offline; using client-side structural stub."],
+    response_text: parts.join("\n\n"),
+    backend_status: "offline_fallback"
   };
 }
 
@@ -137,12 +147,12 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch (e) {
-    // Empty body fallback
+    // Empty body
   }
 
-  // Attempt to call Python FastAPI backend
+  // Forward to FastAPI backend with 60s timeout for model inference
   try {
-    const controllerSignal = AbortSignal.timeout(3000);
+    const controllerSignal = AbortSignal.timeout(60000);
     const res = await fetch(`${ML_BACKEND_URL}/api/query`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -152,13 +162,19 @@ export async function POST(req: Request) {
 
     if (res.ok) {
       const data = await res.json();
+      data.backend_status = "online";
       return NextResponse.json(data);
+    } else {
+      // Forward client/server error with proper status code
+      const errorData = await res.json().catch(() => ({ detail: "ML Backend Error" }));
+      return NextResponse.json(errorData, { status: res.status });
     }
-  } catch (err) {
-    // Backend offline or timeout -> use embedded fallback router
+  } catch (err: any) {
+    // FastAPI server unreachable
+    console.warn("[Next.js Proxy] FastAPI ML backend offline at:", ML_BACKEND_URL, err?.message);
   }
 
-  const fallback = runFallbackRouting(
+  const fallback = runOfflineFallback(
     body.query || "",
     !!body.optical_image,
     !!body.sar_image,

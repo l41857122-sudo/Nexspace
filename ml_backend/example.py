@@ -1,12 +1,16 @@
 """
 example.py
 ----------
-Runnable script demonstrating the GeoVLMController across 4 primary scenarios:
+Runnable script demonstrating the upgraded GeoVLMController across 4 primary scenarios:
   1. Open-ended optical query
   2. Low-confidence counting query
   3. Joint Optical + SAR multi-modal fusion
   4. Bi-temporal change analysis pair
 """
+
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 from PIL import Image, ImageDraw
 from orchestrator import GeoVLMController
@@ -36,7 +40,9 @@ def main():
         query="What is visible in this image? Is there a river?",
         optical_image=img_optical
     )
-    print("Routing JSON:\n", res1["routing_decision"])
+    print("Task Type:", res1["task_type"])
+    print("Confidence:", res1["confidence"])
+    print("Selected Tools:", res1["selected_tools"])
     print("\nSynthesized Response:\n", res1["response_text"])
 
     print("\n==================================================================")
@@ -46,7 +52,9 @@ def main():
         query="How many residential buildings are in this area?",
         optical_image=img_optical
     )
-    print("Routing JSON:\n", res2["routing_decision"])
+    print("Task Type:", res2["task_type"])
+    print("Confidence:", res2["confidence"])
+    print("Requires Count Warning:", res2["routing_decision"]["requires_count_warning"])
     print("\nSynthesized Response:\n", res2["response_text"])
 
     print("\n==================================================================")
@@ -57,7 +65,9 @@ def main():
         optical_image=img_optical,
         sar_image=img_sar
     )
-    print("Routing JSON:\n", res3["routing_decision"])
+    print("Task Type:", res3["task_type"])
+    print("Confidence:", res3["confidence"])
+    print("Selected Tools:", res3["selected_tools"])
     print("\nSynthesized Response:\n", res3["response_text"])
 
     print("\n==================================================================")
@@ -68,7 +78,9 @@ def main():
         change_image_a=img_before,
         change_image_b=img_after
     )
-    print("Routing JSON:\n", res4["routing_decision"])
+    print("Task Type:", res4["task_type"])
+    print("Confidence:", res4["confidence"])
+    print("Change Summary:", res4["change_analysis"]["summary"])
     print("\nSynthesized Response:\n", res4["response_text"])
 
 

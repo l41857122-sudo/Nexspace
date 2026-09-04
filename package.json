@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -n \"next,ml\" -c \"cyan,magenta\" \"next dev\" \"python ml_backend/server.py\"",
+    "dev:next": "next dev",
+    "dev:ml": "python ml_backend/server.py",
+    "demo": "node scripts/launch_demo.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -28,6 +31,7 @@
     "@types/node": "20.19.43",
     "@types/react": "19.2.18",
     "@types/react-dom": "^19",
+    "concurrently": "^10.0.5",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
     "tailwindcss": "^4",

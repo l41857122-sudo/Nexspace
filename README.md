@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌌 NexSpace / SatQuery AI — Multi-Modal Geospatial Intelligence Platform
 
-## Getting Started
+NexSpace is a production-grade Agentic Multi-Modal Remote Sensing Intelligence Platform integrating Vision-Language Models (VLM), Zero-Shot Grounding, Bi-Temporal Change Detection, Optical+SAR Multimodal Fusion, and Geospatial Intelligence into an auditable investigation terminal.
 
-First, run the development server:
+---
+
+## ⚡ Quick Start: One-Click Live Demo
+
+To launch the full live stack with both FastAPI backend and Next.js frontend and automatically open the investigation terminal in your browser:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run demo
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The demo runner automatically:
+1. Validates Python 3.11+ and Node.js environments.
+2. Checks port 8000 (FastAPI) and port 3000 (Next.js), safely reusing active services without duplicate spawns.
+3. Polls `/api/health` until backend inference runtimes are ready.
+4. Verifies the Next.js API proxy to FastAPI.
+5. Displays the active Remote-Sensing ML Capabilities table.
+6. Opens `http://localhost:3000/query` in your default browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛰️ Predefined Live Investigation Scenarios
 
-## Learn More
+Inside the NexSpace NLP Terminal (`/query`), click any scenario button for real-time model execution:
 
-To learn more about Next.js, take a look at the following resources:
+| Scenario | Objective | Specialist Model / Tool | Expected Route |
+| :--- | :--- | :--- | :--- |
+| **1. Satellite Scene Analysis** | Overview of nadir scene infrastructure | Salesforce BLIP Base | `Optical_Caption` |
+| **2. Building Detection** | Zero-shot visual bounding box localization | IDEA Grounding DINO Tiny | `Grounding` |
+| **3. Remote Sensing VQA** | Natural language land-cover question | PaliGemma / RSVQA Adapter | `VQA` |
+| **4. Combined Investigation** | Composite captioning + building detection | BLIP + Grounding DINO | `Optical_Caption` + `Grounding` |
+| **5. Temporal Change Analysis** | Bi-temporal change detection & Otsu anomalies | Classical OpenCV Difference | `Change_Analysis` + `Anomaly_Extraction` |
+| **6. Optical + SAR Fusion** | Cross-modal 1536-dim joint feature fusion | Dual-Backbone Feature Baseline | `Optical_SAR_Analysis` |
+| **7. Geospatial Intelligence** | Real CRS world bounds & ground surface area | GeoTIFF / Affine Coordinate Engine | `Geospatial Engine` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Developer Scripts
 
-## Deploy on Vercel
+```bash
+# Start Next.js and FastAPI concurrently
+npm run dev
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Launch one-click demo launcher
+npm run demo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Build production Next.js bundle
+npm run build
+
+# Run TypeScript type check
+npx tsc --noEmit
+
+# Run Next.js and ESLint checks
+npm run lint
+
+# Run Backend Python test suites
+python ml_backend/test_step10_hardening.py
+python ml_backend/test_step13_model_quality.py
+
+# Run Live Integration & Schema validation tests
+node test_e2e_live_integration.js
+node test_frontend_schemas.js
+```
+
+---
+
+## 🔬 Scientific Honesty & Methodology Disclosures
+
+Detailed model audits, empirical benchmark metrics, and domain-shift disclosures are documented in [`ml_backend/MODEL_QUALITY.md`](ml_backend/MODEL_QUALITY.md) and [`ml_backend/PRD_COMPLIANCE.md`](ml_backend/PRD_COMPLIANCE.md).

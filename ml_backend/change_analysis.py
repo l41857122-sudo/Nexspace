@@ -2,20 +2,19 @@
 change_analysis.py
 -------------------
 Registered before/after image-pair comparison: pixel-level difference
-heatmap plus a lightweight textual summary of change magnitude/location.
+heatmap plus quantitative change metrics and human-readable summary.
 
-This is a classical (non-learned) diff pipeline, which is appropriate for
-already co-registered image pairs. If your imagery isn't co-registered,
-add an alignment step (e.g. ORB feature matching + homography) before
-calling `analyze()`.
+This is a classical (non-learned) algorithmic diff pipeline, suitable for
+co-registered satellite image pairs.
 
-Requires:
-    pip install pillow numpy
+Method:
+  classical_pixel_difference
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Tuple
+import time
+from dataclasses import dataclass, field
+from typing import Tuple, Optional
 import numpy as np
 from PIL import Image
 
@@ -27,6 +26,9 @@ class ChangeResult:
     changed_fraction: float       # 0..1, fraction of pixels flagged as changed
     mean_intensity_delta: float   # average absolute intensity difference
     summary: str                  # human-readable textual comparison
+    image_dimensions: Tuple[int, int] = (0, 0)
+    processing_time_ms: float = 0.0
+    method: str = "classical_pixel_difference"
 
 
 def _to_gray_array(img: Image.Image) -> np.ndarray:
@@ -48,23 +50,25 @@ def analyze(
     image_a: Image.Image,
     image_b: Image.Image,
     change_threshold: float = 0.15,
-    resize_to: Tuple[int, int] = None,
+    resize_to: Optional[Tuple[int, int]] = None,
 ) -> ChangeResult:
     """
     Compare two co-registered images (A = before, B = after).
 
     change_threshold: fraction of dynamic range (0..1) above which a pixel
-                       is counted as "changed" for the `changed_fraction`
-                       summary statistic.
-    resize_to: optionally force both images to the same size before
-               diffing (required if A and B differ in resolution).
+                       is counted as 'changed'.
+    resize_to: optionally force both images to the same size before diffing.
     """
+    t0 = time.perf_counter()
+
     if resize_to:
         image_a = image_a.resize(resize_to)
         image_b = image_b.resize(resize_to)
     elif image_a.size != image_b.size:
         # Auto resize image_b to image_a size if different
         image_b = image_b.resize(image_a.size)
+
+    dims = image_a.size
 
     a = _to_gray_array(image_a)
     b = _to_gray_array(image_b)
@@ -97,10 +101,15 @@ def analyze(
         f"{mean_intensity_delta:.1f} (0-255 scale)."
     )
 
+    dur = (time.perf_counter() - t0) * 1000.0
+
     return ChangeResult(
         heatmap=heatmap,
         overlay=overlay,
         changed_fraction=changed_fraction,
         mean_intensity_delta=mean_intensity_delta,
         summary=summary,
+        image_dimensions=dims,
+        processing_time_ms=round(dur, 2),
+        method="classical_pixel_difference",
     )

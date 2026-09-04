@@ -257,6 +257,9 @@ const statusStyles: Record<AnalysisStatus, string> = {
   Error: "bg-red-500/15 text-red-300 border-red-500/30",
 };
 
+import type { CanonicalInvestigationState } from "../types/nexspace";
+import { getCurrentInvestigation } from "../utils/investigationStorage";
+
 interface AnalysisItem {
   name: string;
   type: string;
@@ -267,8 +270,12 @@ interface AnalysisItem {
 
 function RecentAnalyses() {
   const [analyses, setAnalyses] = useState<AnalysisItem[]>([]);
+  const [liveInvestigation, setLiveInvestigation] = useState<CanonicalInvestigationState | null>(null);
 
   useEffect(() => {
+    const inv = getCurrentInvestigation();
+    if (inv) setLiveInvestigation(inv);
+
     fetch("/api/analyses")
       .then((res) => res.json())
       .then((data) => {
@@ -281,9 +288,14 @@ function RecentAnalyses() {
     <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-white tracking-tight">
-            Recent Analyses
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-white tracking-tight">
+              Recent Analyses
+            </h3>
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+              {liveInvestigation ? "LIVE SESSION + CATALOG" : "CATALOG DEMO"}
+            </span>
+          </div>
           <p className="text-[11px] text-slate-400 font-mono mt-0.5">
             Active &amp; completed orbital extraction jobs
           </p>
@@ -306,6 +318,30 @@ function RecentAnalyses() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
+            {liveInvestigation && (
+              <tr className="bg-cyan-500/10 hover:bg-cyan-500/15 transition-colors duration-150 group">
+                <td className="py-3 pl-2 pr-3 text-cyan-200 font-semibold max-w-[240px] truncate">
+                  [LIVE] {liveInvestigation.query}
+                </td>
+                <td className="py-3 pr-3 text-cyan-300 font-mono text-[11px]">
+                  Agent Grounding &amp; VQA
+                </td>
+                <td className="py-3 pr-3">
+                  <span className="inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[10px] font-mono border font-semibold bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Live Session
+                  </span>
+                </td>
+                <td className="py-3 pr-3 text-slate-300 font-mono text-[11px]">
+                  {liveInvestigation.source_image?.filename || "Active Raster"} | {liveInvestigation.response?.grounding?.detections?.length || 0} Detections
+                </td>
+                <td className="py-3 pr-2 text-right">
+                  <a href="/results" className="p-1 rounded hover:bg-cyan-500/20 text-cyan-400 inline-block">
+                    <ArrowRight size={13} />
+                  </a>
+                </td>
+              </tr>
+            )}
             {analyses.map((row) => (
               <tr
                 key={row.name}
@@ -357,8 +393,12 @@ interface QueryItem {
 
 function RecentQueries() {
   const [queriesList, setQueriesList] = useState<QueryItem[]>([]);
+  const [liveInvestigation, setLiveInvestigation] = useState<CanonicalInvestigationState | null>(null);
 
   useEffect(() => {
+    const inv = getCurrentInvestigation();
+    if (inv) setLiveInvestigation(inv);
+
     fetch("/api/queries/recent")
       .then((res) => res.json())
       .then((data) => {
@@ -370,15 +410,47 @@ function RecentQueries() {
   return (
     <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-white tracking-tight">
-          Recent NLP Queries
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-white tracking-tight">
+            Recent NLP Queries
+          </h3>
+          <span className="text-[9px] font-mono text-slate-400">
+            {liveInvestigation ? "1 Active Session" : "Standby"}
+          </span>
+        </div>
         <p className="text-[11px] text-slate-400 font-mono mt-0.5">
           Natural language spatial searches
         </p>
       </div>
 
       <div className="space-y-2.5">
+        {liveInvestigation && (
+          <a
+            href="/results"
+            className="block p-3 rounded-lg bg-cyan-950/40 border border-cyan-500/40 hover:border-cyan-400 transition-all duration-180 group"
+          >
+            <div className="flex items-center justify-between text-[10px] font-mono text-emerald-400 mb-1">
+              <span className="flex items-center gap-1 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                ACTIVE LIVE INVESTIGATION
+              </span>
+              <span className="text-cyan-300">{liveInvestigation.investigation_id}</span>
+            </div>
+            <p className="text-xs text-white font-medium italic leading-relaxed">
+              "{liveInvestigation.query}"
+            </p>
+            <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 mt-2 pt-1.5 border-t border-cyan-500/20">
+              <span className="truncate max-w-[180px] text-slate-400">
+                Raster: {liveInvestigation.source_image?.filename}
+              </span>
+              <span className="text-cyan-300 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 font-semibold">
+                <span>View Results</span>
+                <ArrowRight size={10} />
+              </span>
+            </div>
+          </a>
+        )}
+
         {queriesList.map((q, i) => (
           <div
             key={i}

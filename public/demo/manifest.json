@@ -1,0 +1,101 @@
+[
+  {
+    "imageId": "demo-bitemporal_a",
+    "filename": "bitemporal_a.png",
+    "type": "temporal",
+    "inputMode": "BI_TEMPORAL",
+    "width": 512,
+    "height": 512,
+    "sha256": "59a4ff0df39d8cfedd96f4a27880f633f2cb0de1f9e1a54a6656aa2bfcfcfac8",
+    "url": "/demo/bitemporal_a.png",
+    "description": "Verified remote sensing raster fixture"
+  },
+  {
+    "imageId": "demo-bitemporal_b",
+    "filename": "bitemporal_b.png",
+    "type": "temporal",
+    "inputMode": "BI_TEMPORAL",
+    "width": 512,
+    "height": 512,
+    "sha256": "9f7e70bf334398e51b5e72c9b94f112de4fa551ce1e46434df75c8a3c5ace566",
+    "url": "/demo/bitemporal_b.png",
+    "description": "Verified remote sensing raster fixture"
+  },
+  {
+    "imageId": "demo-port",
+    "filename": "port.png",
+    "type": "optical",
+    "inputMode": "SINGLE_IMAGE",
+    "width": 512,
+    "height": 512,
+    "sha256": "8c9423b4cf943c79b7ef81617d7870b447a9e2a76357ae5fd1d5e613b37cb124",
+    "url": "/demo/port.png",
+    "description": "Verified remote sensing raster fixture"
+  },
+  {
+    "imageId": "demo-sar",
+    "filename": "sar.png",
+    "type": "sar",
+    "inputMode": "OPTICAL_SAR",
+    "width": 512,
+    "height": 512,
+    "sha256": "812a241835a40c43430602910544ad5ef8c785e1f0ce9016c013129b50e39484",
+    "url": "/demo/sar.png",
+    "description": "Verified remote sensing raster fixture"
+  },
+  {
+    "imageId": "demo-urban",
+    "filename": "urban.png",
+    "type": "optical",
+    "inputMode": "SINGLE_IMAGE",
+    "width": 512,
+    "height": 512,
+    "sha256": "59a4ff0df39d8cfedd96f4a27880f633f2cb0de1f9e1a54a6656aa2bfcfcfac8",
+    "url": "/demo/urban.png",
+    "description": "Verified remote sensing raster fixture"
+  },
+  {
+    "imageId": "demo-urban_buildings",
+    "filename": "urban_buildings.jpg",
+    "type": "optical",
+    "inputMode": "SINGLE_IMAGE",
+    "width": 512,
+    "height": 512,
+    "sha256": "4ceb6d73fd9bd7279f37dbe6f677508f6de6201cccdb13d9c2370a6f47cc66b4",
+    "url": "/demo/urban_buildings.jpg",
+    "description": "Verified remote sensing raster fixture"
+  },
+  {
+    "imageId": "demo-vegetation",
+    "filename": "vegetation.png",
+    "type": "optical",
+    "inputMode": "SINGLE_IMAGE",
+    "width": 512,
+    "height": 512,
+    "sha256": "403b835994a50f5e620fff72ce39d8558cbf2d331d9ffd0ee8d0e73377b0eeb4",
+    "url": "/demo/vegetation.png",
+    "description": "Verified remote sensing raster fixture"
+  },
+  {
+    "imageId": "demo-vegetation_forest",
+    "filename": "vegetation_forest.jpg",
+    "type": "optical",
+    "inputMode": "SINGLE_IMAGE",
+    "width": 512,
+    "height": 512,
+    "sha256": "d86256418dbc47827feddbb58f17bf0278b0d69f74ae7b7575df8c8250087ca6",
+    "url": "/demo/vegetation_forest.jpg",
+    "description": "Verified remote sensing raster fixture"
+  },
+  {
+    "imageId": "demo-water_coast",
+    "filename": "water_coast.jpg",
+    "type": "optical",
+    "inputMode": "SINGLE_IMAGE",
+    "width": 512,
+    "height": 512,
+    "sha256": "44c0227420b3b9368e2e0037054ede53ef7aae0eb968d2c63996bbc709077d7c",
+    "url": "/demo/water_coast.jpg",
+    "description": "Verified remote sensing raster fixture"
+  }
+]

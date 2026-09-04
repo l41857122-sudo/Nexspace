@@ -1,63 +1,179 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Search,
-  Play,
-  Waves,
-  Building2,
-  Leaf,
-  Crosshair,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
   Clock,
+  Layers,
+  Upload,
+  Info,
+  Target,
   RotateCcw,
-  Loader2,
-  ChevronRight,
-  ScanLine,
-  Activity,
-  Radio,
+  Building2,
   Ship,
+  Waves,
+  ScanLine,
   Flame,
-  TreePine,
-  CalendarDays,
-  Gauge,
-  Cloud,
-  Cpu,
+  Leaf,
+  MapPin,
   AlertTriangle,
-  FileCode,
-  CheckCircle2
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon,
+  Check,
+  Terminal,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
+import type {
+  NexSpaceQueryResponse,
+  CanonicalSourceImage,
+  CanonicalInvestigationState,
+} from "../types/nexspace";
+import {
+  SAMPLE_OPTICAL_PORT,
+  SAMPLE_OPTICAL_URBAN,
+  SAMPLE_SAR_RADAR,
+  DEMO_IMAGE_CATALOG,
+} from "../utils/sampleImages";
+import {
+  getActiveSourceImage,
+  setActiveSourceImage,
+  getCurrentInvestigation,
+  setCurrentInvestigation,
+  clearCurrentInvestigation,
+  DEFAULT_DEMO_SOURCE,
+} from "../utils/investigationStorage";
+
+interface CapabilitiesRecord {
+  captioning?: string;
+  grounding?: string;
+  vqa?: string;
+  change_analysis?: string;
+  anomaly_extraction?: string;
+  optical_sar_fusion?: string;
+  geospatial?: string;
+  [key: string]: string | undefined;
+}
 
 // ----------------------------------------------------------------
-// Inner top bar
+// Helper: Confidence Semantics Mapping
 // ----------------------------------------------------------------
-function PageHeader() {
+function getConfidenceInfo(score: number | null | undefined): {
+  label: string;
+  color: string;
+  bg: string;
+  border: string;
+} {
+  if (score === null || score === undefined || isNaN(score)) {
+    return { label: "Uncalibrated", color: "text-slate-400", bg: "bg-slate-800/60", border: "border-slate-700/60" };
+  }
+  if (score < 0.40) {
+    return { label: "Low", color: "text-amber-400", bg: "bg-amber-500/15", border: "border-amber-500/30" };
+  }
+  if (score < 0.70) {
+    return { label: "Moderate", color: "text-cyan-300", bg: "bg-cyan-500/15", border: "border-cyan-500/30" };
+  }
+  if (score < 0.90) {
+    return { label: "High", color: "text-emerald-400", bg: "bg-emerald-500/15", border: "border-emerald-500/30" };
+  }
+  return { label: "Very High", color: "text-emerald-300", bg: "bg-emerald-500/25", border: "border-emerald-500/50" };
+}
+
+// ----------------------------------------------------------------
+// Helper: Robust Grounding Bounding Box Normalizer
+// Always returns canonical [xmin, ymin, xmax, ymax] normalized 0..1000
+// ----------------------------------------------------------------
+export function normalizeBox(
+  det: unknown,
+  imgWidth = 512,
+  imgHeight = 512
+): [number, number, number, number] | null {
+  if (!det || typeof det !== "object") return null;
+
+  const d = det as Record<string, unknown>;
+  const raw = d.bbox_normalized || d.box_2d || d.bbox_pixel || d.box || d.bbox;
+  if (!Array.isArray(raw) || raw.length !== 4) return null;
+
+  const numeric = raw.map((val) => {
+    const n = Number(val);
+    return typeof n === "number" && Number.isFinite(n) ? n : NaN;
+  });
+
+  if (numeric.some((n) => isNaN(n))) return null;
+
+  let [xmin, ymin, xmax, ymax] = numeric;
+
+  // Scale if normalized 0..1 float
+  if (Math.max(xmin, ymin, xmax, ymax) <= 1.05) {
+    xmin *= 1000;
+    ymin *= 1000;
+    xmax *= 1000;
+    ymax *= 1000;
+  } else if (!d.bbox_normalized && !d.box_2d && imgWidth > 0 && imgHeight > 0) {
+    // Convert raw pixel dimensions to 0..1000
+    xmin = (xmin / imgWidth) * 1000;
+    ymin = (ymin / imgHeight) * 1000;
+    xmax = (xmax / imgWidth) * 1000;
+    ymax = (ymax / imgHeight) * 1000;
+  }
+
+  // Ensure coordinate bounds ordering
+  if (xmin > xmax) [xmin, xmax] = [xmax, xmin];
+  if (ymin > ymax) [ymin, ymax] = [ymax, ymin];
+
+  xmin = Math.round(Math.max(0, Math.min(1000, xmin)));
+  ymin = Math.round(Math.max(0, Math.min(1000, ymin)));
+  xmax = Math.round(Math.max(0, Math.min(1000, xmax)));
+  ymax = Math.round(Math.max(0, Math.min(1000, ymax)));
+
+  // Must have non-zero dimension
+  if (xmax <= xmin || ymax <= ymin) return null;
+
+  return [xmin, ymin, xmax, ymax];
+}
+
+// ----------------------------------------------------------------
+// Inner top bar with Live Capabilities
+// ----------------------------------------------------------------
+function PageHeader({ capabilities }: { capabilities: CapabilitiesRecord | null }) {
+  const caps = capabilities || {
+    captioning: "available",
+    grounding: "available",
+    vqa: "adapter_available",
+    change_analysis: "available",
+  };
+
   return (
-    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-4 border-b border-slate-800/80 bg-[#09131f]/60 backdrop-blur-md">
+    <header className="px-4 sm:px-6 lg:px-8 py-4 border-b border-slate-800/80 bg-[#09131f]/60 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <div className="flex items-center gap-2">
-          <Search size={15} className="text-cyan-400" />
+          <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+            <Sparkles size={15} />
+          </div>
           <h1 className="text-sm font-semibold text-white tracking-tight">
-            NLP Query Terminal
+            SatQuery Natural Language Intelligence
           </h1>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-            AI Controller Active
+          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+            Live ML Engine
           </span>
         </div>
-        <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-          Natural language geospatial analysis · SatQuery AI Controller
+        <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
+          Multi-specialist neural vision analysis for satellite and aerial imagery
         </p>
       </div>
 
-      <div className="flex items-center gap-2 self-end sm:self-auto">
-        <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Model: PaliGemma-3B + BLIP</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 rounded-lg px-2.5 py-1 text-[10px] font-mono text-slate-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span>BLIP Captioning: <strong>{caps.captioning}</strong></span>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-lg">
-          <Radio size={11} className="animate-pulse" />
-          <span>LAT −3.47 · LON −68.21</span>
+        <div className="flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 rounded-lg px-2.5 py-1 text-[10px] font-mono text-slate-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span>Grounding DINO: <strong>{caps.grounding}</strong></span>
         </div>
       </div>
     </header>
@@ -65,43 +181,7 @@ function PageHeader() {
 }
 
 // ----------------------------------------------------------------
-// Suggestion chips
-// ----------------------------------------------------------------
-const suggestions = [
-  { label: "Is there a river or water body present?", icon: Waves },
-  { label: "How many residential buildings are in this area?", icon: Building2 },
-  { label: "Describe the land-cover and major objects visible", icon: Ship },
-  { label: "What changed between these two dates?", icon: Flame },
-  { label: "Are there industrial structures and roads present?", icon: TreePine },
-  { label: "Describe this scene using both Optical and SAR sensors", icon: Leaf },
-];
-
-function SuggestionChips({
-  onSelect,
-}: {
-  onSelect: (label: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2 mt-3">
-      {suggestions.map(({ label, icon: Icon }) => (
-        <button
-          key={label}
-          onClick={() => onSelect(label)}
-          className="group flex items-center gap-1.5 bg-[#09131f]/70 hover:bg-cyan-500/15 border border-slate-800/80 hover:border-cyan-500/40 rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-cyan-300 transition-all duration-180 hover:scale-[1.02] hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer shadow-sm"
-        >
-          <Icon
-            size={12}
-            className="text-slate-500 group-hover:text-cyan-400 transition-colors duration-180"
-          />
-          <span>{label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------
-// AI Query input bar
+// Search & Execute Bar
 // ----------------------------------------------------------------
 function QueryBar({
   value,
@@ -116,70 +196,41 @@ function QueryBar({
   loading: boolean;
   loadingPhase: string;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [focused, setFocused] = useState(false);
-
-  const containerClass = loading
-    ? "border-cyan-400/60 shadow-[0_0_0_2px_rgba(6,182,212,0.2),0_0_24px_rgba(6,182,212,0.15)] bg-[#0a1624]"
-    : focused
-    ? "border-cyan-500/50 shadow-[0_0_0_2px_rgba(6,182,212,0.12),0_0_16px_rgba(6,182,212,0.08)] bg-[#0a1624]"
-    : "border-slate-800/90 shadow-sm hover:border-slate-700/80 bg-[#09131f]/90";
-
   return (
-    <div className="relative">
-      <div
-        className={`flex items-center gap-3 border rounded-xl px-4 py-3 sm:py-3.5 transition-all duration-180 ease-out ${containerClass}`}
-      >
-        <div className="shrink-0 flex items-center gap-1.5">
-          <div
-            className={`p-1.5 rounded-lg border transition-colors duration-180 ${
-              focused || loading
-                ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400"
-                : "bg-slate-800/60 border-slate-700/60 text-slate-500"
-            }`}
-          >
-            <Activity size={14} className={loading ? "animate-pulse" : ""} />
-          </div>
+    <div className="w-full space-y-2">
+      <div className="relative flex items-center">
+        <div className="absolute left-4 text-cyan-400">
+          <Search size={16} />
         </div>
-
         <input
-          ref={inputRef}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          onKeyDown={(e) => e.key === "Enter" && !loading && onExecute()}
-          placeholder="Ask a natural language geospatial query — e.g. How many residential buildings are in this area?..."
-          className="flex-1 bg-transparent text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none min-w-0 font-sans"
-        />
-
-        <button
-          onClick={onExecute}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !loading && value.trim()) {
+              onExecute();
+            }
+          }}
           disabled={loading}
-          className="shrink-0 flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-sky-400 hover:from-cyan-400 hover:to-sky-300 disabled:opacity-60 disabled:cursor-not-allowed text-[#071320] text-xs font-bold rounded-lg px-4 py-2 transition-all duration-180 shadow-[0_0_12px_rgba(6,182,212,0.35)] hover:shadow-[0_0_18px_rgba(6,182,212,0.55)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-        >
-          {loading ? (
-            <>
-              <Loader2 size={13} className="animate-spin text-[#071320]" />
-              <span>Routing...</span>
-            </>
-          ) : (
-            <>
-              <Play size={12} />
-              <span>Execute</span>
-            </>
-          )}
-        </button>
+          placeholder="Ask a satellite question (e.g. 'Describe this image and locate the buildings')..."
+          className="w-full bg-[#0c1624] border border-slate-800/90 rounded-xl pl-11 pr-32 py-3.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/40 transition-all font-sans disabled:opacity-60"
+        />
+        <div className="absolute right-2.5">
+          <button
+            onClick={onExecute}
+            disabled={loading || !value.trim()}
+            className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-slate-950 font-semibold px-4 py-2 rounded-lg text-xs transition-all shadow-[0_0_12px_rgba(6,182,212,0.3)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <span>{loading ? "Analyzing..." : "Analyze"}</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
       </div>
 
       {loading && (
-        <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/25 px-3 py-1.5 rounded-lg shadow-sm">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-            <span>{loadingPhase}</span>
-          </div>
-          <span className="text-[10px] text-cyan-400/80">LAT −3.46 · LON −68.21</span>
+        <div className="flex items-center gap-2 text-xs text-cyan-300 font-mono bg-cyan-500/10 border border-cyan-500/25 px-3 py-2 rounded-lg">
+          <Clock size={13} className="animate-spin text-cyan-400 shrink-0" />
+          <span>{loadingPhase}</span>
         </div>
       )}
     </div>
@@ -187,310 +238,765 @@ function QueryBar({
 }
 
 // ----------------------------------------------------------------
-// Advanced Filters
+// Suggestion Chips
 // ----------------------------------------------------------------
-function AdvancedFilters() {
-  const [cloudCover, setCloudCover] = useState(20);
-  const [selectedSensor, setSelectedSensor] = useState("SAR");
+function SuggestionChips({ onSelect }: { onSelect: (s: string) => void }) {
+  const suggestions = [
+    "Describe this image and locate the buildings",
+    "Locate the buildings",
+    "Describe this image",
+    "Is there water in this image?",
+    "Compare optical and SAR imagery",
+  ];
 
   return (
-    <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-white tracking-tight">
-          Advanced Filters
-        </h3>
-        <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-          Constrain spatial-temporal search parameters
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <label className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono mb-1.5">
-            <CalendarDays size={11} className="text-cyan-400" />
-            Date Range
-          </label>
-          <select className="w-full bg-slate-900/80 border border-slate-800 hover:border-slate-700 focus:border-cyan-500/50 focus:shadow-[0_0_0_2px_rgba(6,182,212,0.1)] rounded-lg px-3 py-2 text-xs text-slate-300 transition-all duration-180 cursor-pointer focus:outline-none appearance-none">
-            <option value="48h">Last 48 Hours</option>
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono mb-1.5">
-            <Gauge size={11} className="text-cyan-400" />
-            Spatial Resolution
-          </label>
-          <select className="w-full bg-slate-900/80 border border-slate-800 hover:border-slate-700 focus:border-cyan-500/50 focus:shadow-[0_0_0_2px_rgba(6,182,212,0.1)] rounded-lg px-3 py-2 text-xs text-slate-300 transition-all duration-180 cursor-pointer focus:outline-none appearance-none">
-            <option value="high">High (&lt; 1m GSD)</option>
-            <option value="medium">Medium (1–10m GSD)</option>
-            <option value="low">Low (10–30m GSD)</option>
-          </select>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono">
-              <Cloud size={11} className="text-cyan-400" />
-              Cloud Cover
-            </label>
-            <span className="text-[11px] font-mono font-semibold text-cyan-400">
-              &lt;{cloudCover}%
-            </span>
-          </div>
-          <div className="relative">
-            <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-cyan-500 to-sky-400 rounded-full transition-all duration-180"
-                style={{ width: `${cloudCover}%` }}
-              />
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={cloudCover}
-              onChange={(e) => setCloudCover(Number(e.target.value))}
-              className="absolute inset-0 w-full opacity-0 cursor-pointer h-4 -top-1.5"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono mb-1.5">
-            <ScanLine size={11} className="text-cyan-400" />
-            Sensor Modality
-          </label>
-          <div className="flex flex-wrap gap-1.5">
-            {["SAR", "Optical", "Multispectral", "Thermal"].map((s) => (
-              <button
-                key={s}
-                onClick={() => setSelectedSensor(s)}
-                className={`text-[10px] font-mono px-2.5 py-1 rounded-md border transition-all duration-180 cursor-pointer ${
-                  selectedSensor === s
-                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-semibold shadow-[0_0_10px_rgba(6,182,212,0.2)]"
-                    : "bg-slate-900/80 border-slate-800 text-slate-400 hover:border-cyan-500/30 hover:text-cyan-300"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+      <span className="text-[10px] text-slate-500 uppercase tracking-wider font-mono">
+        Suggested:
+      </span>
+      {suggestions.map((s, idx) => (
+        <button
+          key={idx}
+          onClick={() => onSelect(s)}
+          className="text-[11px] bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-cyan-300 border border-slate-800/90 hover:border-cyan-500/30 px-2.5 py-1 rounded-md transition-all font-mono cursor-pointer"
+        >
+          {s}
+        </button>
+      ))}
     </div>
   );
 }
 
 // ----------------------------------------------------------------
-// Live Preview (Mission Control Viewport)
+// Raster Image Selector / Upload Panel
 // ----------------------------------------------------------------
-function LivePreview() {
-  return (
-    <div className="w-full border border-cyan-500/25 bg-[#0c1624]/75 backdrop-blur-md rounded-xl p-4 sm:p-5 relative overflow-hidden min-h-[340px] flex flex-col shadow-[0_0_30px_rgba(6,182,212,0.06)]">
-      <div
-        className="absolute inset-0 opacity-[0.08] pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(56,189,248,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.3) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-      />
+function ImageSelector({
+  canonicalSource,
+  onSelectSource,
+  sarImage,
+  onSelectSarImage,
+}: {
+  canonicalSource: CanonicalSourceImage;
+  onSelectSource: (src: CanonicalSourceImage) => void;
+  sarImage: string | null;
+  onSelectSarImage: (b64: string | null) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
-      <div className="flex items-center justify-between mb-4 relative z-10">
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size (< 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      setUploadError(`File '${file.name}' exceeds the maximum allowed size of 25MB.`);
+      return;
+    }
+
+    // Validate Extension / MIME
+    const nameLower = file.name.toLowerCase();
+    const validExtensions = [".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff"];
+    const isExtValid = validExtensions.some((ext) => nameLower.endsWith(ext));
+
+    if (!isExtValid) {
+      setUploadError("Unsupported format. Please upload a JPG, JPEG, PNG, WEBP, or TIFF raster.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      if (typeof reader.result === "string") {
+        let hashHex = "";
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        } catch {
+          // Fallback if SubtleCrypto is restricted
+        }
+        const newSource: CanonicalSourceImage = {
+          id: `src-upload-${Date.now()}`,
+          filename: file.name,
+          mediaType: file.type || "image/jpeg",
+          dataUrl: reader.result,
+          source: "upload",
+          sha256: hashHex,
+          uploadedAt: new Date().toISOString(),
+        };
+        onSelectSource(newSource);
+      }
+    };
+    reader.onerror = () => {
+      setUploadError("Failed to read image file.");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-white tracking-tight">
-            Live Preview
+          <h3 className="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
+            <Layers size={14} className="text-cyan-400" />
+            Input Imagery Selection
           </h3>
           <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-            Orbital sensor footprint · Real-time acquisition
+            Supported: JPG, JPEG, PNG, WEBP, TIFF · Max 25 MB
           </p>
         </div>
-        <span className="flex items-center gap-1.5 text-[10px] font-mono font-semibold text-cyan-300 bg-cyan-500/15 px-2.5 py-1 rounded-md border border-cyan-500/30">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          Target: Sector 9B
-        </span>
+
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/tiff,.tif,.tiff,.jpg,.jpeg,.png,.webp"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer font-mono"
+          >
+            <Upload size={12} className="text-cyan-400" />
+            <span>Upload Image</span>
+          </button>
+        </div>
       </div>
 
-      <div className="relative flex-1 rounded-xl bg-[#08121e] border border-cyan-500/15 flex items-center justify-center overflow-hidden min-h-[220px]">
-        {/* Real High-Resolution Satellite Raster Imagery Background */}
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-85 contrast-125 brightness-95 transition-all duration-300 pointer-events-none"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?q=80&w=1600&auto=format&fit=crop')",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#08121e]/90 via-[#08121e]/40 to-[#08121e]/80 pointer-events-none" />
+      {uploadError && (
+        <div className="bg-rose-500/10 border border-rose-500/30 px-3 py-1.5 rounded-lg text-rose-300 text-xs font-mono flex items-center gap-2">
+          <AlertTriangle size={13} className="text-rose-400 shrink-0" />
+          <span>{uploadError}</span>
+        </div>
+      )}
 
-        <div className="absolute top-3 left-3 text-[10px] font-mono text-cyan-300 font-semibold z-20 bg-slate-900/80 px-2 py-0.5 rounded border border-cyan-500/30">
-          BBOX: [−62.5, −4.2, −58.1, −1.0]
-        </div>
-        <div className="absolute top-3 right-3 text-[10px] font-mono text-slate-200 z-20 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">
-          ZOOM: 16.4× · GSD: 0.5M
-        </div>
+      {/* Visual Image Catalog Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        {DEMO_IMAGE_CATALOG.map((item) => {
+          const isSelected = canonicalSource.dataUrl === item.base64 || (item.category === "sar" && canonicalSource.filename === "sar.png");
 
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-15">
-          <div
-            className="w-full h-10 bg-gradient-to-b from-cyan-400/30 via-cyan-500/10 to-transparent border-b-2 border-cyan-400 animate-scan shadow-[0_0_15px_rgba(6,182,212,0.6)]"
-            style={{ animationDuration: "3.5s" }}
-          />
-        </div>
+          return (
+            <button
+              key={item.id}
+              onClick={() => {
+                const demoSource: CanonicalSourceImage = {
+                  id: `src-demo-${item.id}`,
+                  filename: `${item.id}.png`,
+                  mediaType: "image/png",
+                  dataUrl: item.base64,
+                  source: "demo",
+                };
+                onSelectSource(demoSource);
+                if (item.category === "sar") {
+                  onSelectSarImage(item.base64);
+                } else {
+                  onSelectSarImage(null);
+                }
+              }}
+              className={`group relative flex flex-col rounded-lg border overflow-hidden transition-all text-left cursor-pointer ${
+                isSelected
+                  ? "border-cyan-400 bg-cyan-500/15 shadow-[0_0_12px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/50"
+                  : "border-slate-800 bg-slate-950/80 hover:border-slate-700 hover:bg-slate-900/60"
+              }`}
+            >
+              <div className="relative aspect-square w-full bg-slate-900 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.url}
+                  alt={item.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                />
+                <span
+                  className={`absolute top-1.5 right-1.5 text-[9px] font-mono px-1.5 py-0.5 rounded backdrop-blur-md ${
+                    item.category === "sar"
+                      ? "bg-purple-900/80 text-purple-300 border border-purple-500/30"
+                      : "bg-slate-900/80 text-cyan-300 border border-cyan-500/30"
+                  }`}
+                >
+                  {item.category.toUpperCase()}
+                </span>
+                {isSelected && (
+                  <span className="absolute bottom-1.5 left-1.5 bg-cyan-500 text-slate-950 p-0.5 rounded-full shadow">
+                    <Check size={10} className="stroke-[3]" />
+                  </span>
+                )}
+              </div>
+              <div className="p-2 space-y-0.5">
+                <div className="text-xs font-semibold text-slate-200 group-hover:text-white truncate">
+                  {item.name}
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono truncate">
+                  {item.dimensions}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
-        <div className="absolute inset-8 border border-cyan-500/20 rounded-md pointer-events-none z-10">
-          {[
-            "top-0 left-0 border-t-2 border-l-2",
-            "top-0 right-0 border-t-2 border-r-2",
-            "bottom-0 left-0 border-b-2 border-l-2",
-            "bottom-0 right-0 border-b-2 border-r-2",
-          ].map((cls, i) => (
-            <div
-              key={i}
-              className={`absolute w-4 h-4 border-cyan-400/70 ${cls}`}
-            />
-          ))}
+      {/* Active Selection Details Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono text-slate-400 pt-2 border-t border-slate-800/60 gap-2">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="flex items-center gap-1.5">
+            <ImageIcon size={12} className="text-cyan-400" />
+            <span>Active Source:</span>
+            <strong className="text-slate-200">{canonicalSource.filename}</strong>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700">
+              {canonicalSource.source === "upload" ? "Uploaded File" : "Sample Raster"}
+            </span>
+          </span>
+          {sarImage && (
+            <span className="text-purple-300 bg-purple-950/60 border border-purple-500/30 px-2 py-0.5 rounded text-[10px]">
+              + Dual SAR Channel Active
+            </span>
+          )}
         </div>
-
-        <div className="relative flex items-center justify-center z-20">
-          <span
-            className="absolute w-20 h-20 rounded-full border border-cyan-400/15 animate-ping"
-            style={{ animationDuration: "3s" }}
-          />
-          <span
-            className="absolute w-12 h-12 rounded-full border border-cyan-400/25 animate-ping"
-            style={{ animationDuration: "2s", animationDelay: "0.5s" }}
-          />
-
-          <div className="relative w-10 h-10 flex items-center justify-center">
-            <Crosshair size={36} className="text-cyan-400/80" />
-            <span className="absolute w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(252,211,77,0.9)]" />
-          </div>
-        </div>
-
-        <div className="absolute bottom-3 left-3 text-[10px] font-mono text-slate-300 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800 z-10">
-          −1.9° S, −58.1° E
-        </div>
-        <div className="absolute bottom-3 right-3 text-[10px] font-mono text-cyan-400/90 bg-slate-900/80 px-2 py-0.5 rounded border border-cyan-500/20 z-10">
-          ALT: 450 km · PASS 892
-        </div>
+        {sarImage && (
+          <button
+            onClick={() => onSelectSarImage(null)}
+            className="text-slate-500 hover:text-rose-400 transition-colors cursor-pointer text-[11px]"
+          >
+            Remove SAR Layer
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
 // ----------------------------------------------------------------
-// ML Controller Output Panel
+// Grounding Visual Bounding Box Overlay Component (Safe & Robust)
 // ----------------------------------------------------------------
-function ControllerResultPanel({ result }: { result: any }) {
+function GroundingVisualOverlay({
+  imageSrc,
+  detections,
+}: {
+  imageSrc: string;
+  detections?: unknown[];
+}) {
+  return (
+    <div className="relative w-full rounded-xl overflow-hidden border border-cyan-500/25 bg-[#08121e]">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={imageSrc}
+        alt="Satellite Target Raster"
+        className="w-full h-auto max-h-[380px] object-contain mx-auto block"
+      />
+
+      {/* Real Grounding Bounding Boxes (Normalized & Protected) */}
+      {detections?.map((rawDet, idx) => {
+        const box = normalizeBox(rawDet);
+        if (!box) return null;
+
+        const [xmin, ymin, xmax, ymax] = box;
+        const top = (ymin / 1000) * 100;
+        const left = (xmin / 1000) * 100;
+        const width = Math.max(1, ((xmax - xmin) / 1000) * 100);
+        const height = Math.max(1, ((ymax - ymin) / 1000) * 100);
+
+        const detObj = rawDet as { label?: string; score?: number };
+        const label = detObj.label || "Detected Structure";
+        const score = typeof detObj.score === "number" ? detObj.score : null;
+        const conf = getConfidenceInfo(score);
+
+        return (
+          <div
+            key={idx}
+            style={{
+              top: `${top}%`,
+              left: `${left}%`,
+              width: `${width}%`,
+              height: `${height}%`,
+            }}
+            className="absolute border-2 border-cyan-400 bg-cyan-400/15 pointer-events-none shadow-[0_0_12px_rgba(6,182,212,0.6)] flex items-start justify-start p-1"
+          >
+            <span className="bg-slate-900/90 text-cyan-300 font-mono text-[9px] px-1.5 py-0.5 rounded border border-cyan-500/40 shadow-sm whitespace-nowrap">
+              {label} · {conf.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------
+// Scan Results Panel (Human-Friendly & Executive Ready)
+// ----------------------------------------------------------------
+function ScanResultsPanel({
+  result,
+  sourceImage,
+}: {
+  result: NexSpaceQueryResponse;
+  sourceImage: CanonicalSourceImage;
+}) {
+  const [showTechnical, setShowTechnical] = useState(false);
+
   if (!result) return null;
 
-  const decision = result.routing_decision || {};
-  const vqaResults = result.vqa_results || [];
-  const requiresWarning = decision.requires_count_warning;
+  const grounding = result.grounding;
+  const detections = Array.isArray(grounding?.detections) ? grounding.detections : [];
+  const vqaResults = Array.isArray(result.vqa_results) ? result.vqa_results : [];
+  const report = result.investigation_report;
+  const trace = Array.isArray(result.execution_trace) ? result.execution_trace : [];
+  const limitations = result.limitations || report?.limitations || [];
+
+  const overallConf = getConfidenceInfo(result.confidence);
+
+  const isOffline = result.backend_status === "offline_fallback";
+  const isDemo = sourceImage.source === "demo";
+  const hasFallbackTool = result.selected_tools?.includes("VQA");
 
   return (
-    <div className="w-full border border-cyan-500/30 bg-[#091524] rounded-xl p-5 shadow-[0_0_24px_rgba(6,182,212,0.12)] space-y-4">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div className="flex items-center gap-2">
-          <Cpu className="text-cyan-400" size={18} />
-          <h3 className="text-sm font-semibold text-white font-mono">
-            Agentic Controller Execution Output
-          </h3>
-        </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-          Status: 200 OK
-        </span>
-      </div>
-
-      {/* Target Tools Badges */}
-      <div>
-        <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
-          <FileCode size={12} className="text-cyan-400" />
-          <span>Target Tools Selected</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {decision.target_tools?.map((tool: string) => (
-            <span
-              key={tool}
-              className="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-            >
-              {tool}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Execution Reasoning */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-lg p-3">
-        <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider mb-1">
-          Execution Reasoning
-        </div>
-        <p className="text-xs text-slate-300 leading-relaxed font-sans">
-          {decision.execution_reasoning}
-        </p>
-      </div>
-
-      {/* Counting Warning Banner */}
-      {requiresWarning && (
-        <div className="flex items-start gap-2.5 bg-amber-500/15 border border-amber-500/30 p-3 rounded-lg text-amber-300 text-xs font-mono">
-          <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-400" />
-          <div>
-            <div className="font-bold">Low Confidence Counting Warning</div>
-            <div>Exact numeric counts are derived with low model confidence (~0.25-0.40). Treat this count as an estimate.</div>
+    <div className="w-full border border-cyan-500/30 bg-[#091524] rounded-xl p-5 shadow-[0_0_24px_rgba(6,182,212,0.12)] space-y-6">
+      {/* 1. Header with Source Info & Overall Confidence */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="text-cyan-400" size={18} />
+            <h2 className="text-base font-semibold text-white tracking-tight">
+              Investigation Findings
+            </h2>
+            {isOffline ? (
+              <span className="text-[10px] font-mono text-rose-300 bg-rose-500/20 border border-rose-500/40 px-2 py-0.5 rounded-full font-bold">
+                🔴 AI BACKEND OFFLINE
+              </span>
+            ) : isDemo ? (
+              <span className="text-[10px] font-mono text-blue-300 bg-blue-500/20 border border-blue-500/40 px-2 py-0.5 rounded-full font-bold">
+                🔵 VERIFIED DEMO IMAGE
+              </span>
+            ) : hasFallbackTool ? (
+              <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">
+                🟡 FALLBACK ANALYSIS
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">
+                🟢 LIVE AI ANALYSIS
+              </span>
+            )}
           </div>
+          <p className="text-xs text-slate-400 font-mono mt-0.5">
+            Source Imagery: <strong className="text-cyan-300">{sourceImage.filename}</strong> · {sourceImage.source === "upload" ? "Uploaded by user" : "Verified demo tile"}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-mono ${overallConf.bg} ${overallConf.border} ${overallConf.color}`}>
+            <span>Confidence:</span>
+            <strong>{isOffline ? "Not available" : overallConf.label}</strong>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Priority 1: WHAT DID WE FIND? (Executive-Level Cards) */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <Sparkles size={13} className="text-cyan-400" />
+          <span>What We Found</span>
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Grounding Buildings / Objects Findings */}
+          {detections.length > 0 && (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-2 md:col-span-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Building2 size={16} className="text-cyan-400" />
+                  <span>Structures &amp; Objects Identified</span>
+                </span>
+                <span className="text-xs font-mono font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded">
+                  {detections.length} location{detections.length === 1 ? "" : "s"} flagged
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 font-sans">
+                We identified {detections.length} candidate structure{detections.length === 1 ? "" : "s"} in the imagery matching your target search.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-1">
+                {detections.map((d, i) => {
+                  const det = d as { label?: string; score?: number };
+                  const cInfo = getConfidenceInfo(det.score);
+                  return (
+                    <div key={i} className="bg-slate-950/80 border border-slate-800/80 rounded p-2 text-xs font-mono flex items-center justify-between">
+                      <span className="text-slate-300 font-medium truncate">{det.label || `Structure ${i + 1}`}</span>
+                      <span className={`text-[10px] ${cInfo.color}`}>{cInfo.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Optical Scene Overview */}
+          {result.optical_caption && (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-1.5">
+              <div className="text-xs font-semibold text-white flex items-center gap-2">
+                <Ship size={15} className="text-cyan-400" />
+                <span>🛰️ Scene Summary</span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                {result.optical_caption}
+              </p>
+            </div>
+          )}
+
+          {/* Visual Q&A Findings */}
+          {vqaResults.length > 0 && (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-2">
+              <div className="text-xs font-semibold text-white flex items-center gap-2">
+                <Waves size={15} className="text-cyan-400" />
+                <span>Visual Question Analysis</span>
+              </div>
+              {vqaResults.map((v, i) => {
+                const conf = getConfidenceInfo(v.confidence);
+                return (
+                  <div key={i} className="bg-slate-950/60 border border-slate-800/80 rounded-lg p-2.5 space-y-1 text-xs font-sans">
+                    <div className="text-slate-400 text-[11px] font-mono">Q: {v.question}</div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-100 font-medium">Answer: <strong className="text-cyan-300 capitalize">{v.answer}</strong></span>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${conf.bg} ${conf.color}`}>
+                        {conf.label}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Cross-Modal SAR Findings */}
+          {result.optical_sar_analysis && (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-1.5 md:col-span-2">
+              <div className="text-xs font-semibold text-white flex items-center gap-2">
+                <Leaf size={15} className="text-purple-400" />
+                <span>Cross-Image Comparison (Optical &amp; SAR)</span>
+              </div>
+              <p className="text-xs text-slate-300 font-sans">
+                {result.optical_sar_analysis.correlation_summary || "Optical and SAR imagery exhibit consistent structural patterns across the scene."}
+              </p>
+              <div className="text-[10px] font-mono text-slate-400 pt-1">
+                Analysis type: Preliminary feature comparison baseline
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Synthesis & Analyst Explanation */}
+      {report && (
+        <div className="bg-cyan-950/20 border border-cyan-500/20 rounded-xl p-4 space-y-2.5">
+          <div className="text-xs font-semibold text-cyan-300 uppercase tracking-wide font-mono flex items-center gap-1.5">
+            <Info size={14} />
+            <span>Investigation Summary</span>
+          </div>
+          <p className="text-xs text-slate-200 leading-relaxed font-sans">
+            {report.summary}
+          </p>
+          {report.observations && report.observations.length > 0 && (
+            <div className="space-y-1 pt-2 border-t border-cyan-500/15">
+              <div className="text-[10px] font-mono text-cyan-400 uppercase">Key Observations</div>
+              <ul className="list-disc list-inside text-xs text-slate-300 space-y-0.5">
+                {report.observations.map((obs, i) => (
+                  <li key={i}>{obs}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Restructured Queries / VQA findings */}
-      {vqaResults.length > 0 && (
-        <div className="space-y-2">
-          <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">
-            Structured RSVQA Sub-Queries & Findings
+      {/* 4. Limitations & Notes (Always Honest) */}
+      {limitations.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 text-amber-200 text-xs font-mono space-y-1">
+          <div className="font-bold flex items-center gap-1.5 text-amber-300">
+            <AlertTriangle size={13} />
+            <span>Important Analysis Notes</span>
           </div>
-          <div className="space-y-1.5">
-            {vqaResults.map((r: any, idx: number) => (
-              <div key={idx} className="flex items-center justify-between bg-slate-900/60 border border-slate-800/80 px-3 py-2 rounded text-xs">
-                <span className="font-mono text-slate-300">{r.question}</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-cyan-300">{r.answer}</span>
-                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${r.low_confidence ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "bg-emerald-500/20 text-emerald-300"}`}>
-                    conf: {r.confidence}
-                  </span>
+          <ul className="list-disc list-inside space-y-0.5 text-[11px]">
+            {limitations.map((lim, i) => (
+              <li key={i}>{lim}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 5. Collapsible Advanced Technical Details */}
+      <div className="border-t border-slate-800/80 pt-3">
+        <button
+          onClick={() => setShowTechnical(!showTechnical)}
+          className="w-full flex items-center justify-between text-xs font-mono text-slate-400 hover:text-cyan-300 transition-colors py-1 cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5">
+            <Terminal size={13} />
+            <span>Advanced Technical Details &amp; Execution Telemetry</span>
+          </span>
+          {showTechnical ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
+
+        {showTechnical && (
+          <div className="mt-3 space-y-3 bg-[#060e18] border border-slate-800 rounded-xl p-4 text-xs font-mono">
+            <div>
+              <span className="text-slate-400 uppercase text-[10px]">Active Routing Tools: </span>
+              <span className="text-cyan-300">{result.selected_tools?.join(", ") || "None"}</span>
+            </div>
+
+            {trace.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="text-[10px] text-cyan-400 uppercase">12-Stage Lifecycle Telemetry:</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {trace.map((st, i) => (
+                    <div key={i} className="bg-slate-900/80 border border-slate-800 p-2 rounded text-[10px]">
+                      <div className="text-slate-300 font-semibold truncate">{st.stage}</div>
+                      <div className="flex justify-between text-slate-400">
+                        <span className="text-emerald-400">{st.status}</span>
+                        <span>{st.duration_ms.toFixed(1)} ms</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            )}
 
-      {/* Synthesized Response */}
-      <div className="bg-cyan-950/30 border border-cyan-500/20 p-3.5 rounded-lg space-y-1">
-        <div className="text-[10px] font-mono text-cyan-300 uppercase tracking-wider font-semibold">
-          Synthesized User Response
-        </div>
-        <div className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
-          {result.response_text}
-        </div>
+            {result.spatial_summary && (
+              <div>
+                <span className="text-slate-400 uppercase text-[10px]">Geospatial Metadata: </span>
+                <span className="text-slate-300">
+                  {result.spatial_summary.geospatial_available
+                    ? `CRS: ${result.spatial_summary.crs || "Projected"} · World Bounds: Active`
+                    : "Location information is not embedded in this raster."}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Action Navigation Buttons */}
+      {/* 6. Navigation Actions */}
       <div className="flex flex-wrap gap-3 pt-2 border-t border-slate-800">
         <Link
-          href="/execution"
-          className="flex items-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 rounded-lg px-3 py-2 text-xs font-mono font-semibold transition-all cursor-pointer"
+          href="/evidence"
+          className="flex items-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 rounded-lg px-3.5 py-2 text-xs font-mono font-semibold transition-all cursor-pointer"
         >
-          <Activity size={13} />
-          <span>View Execution Trace Stage Topology →</span>
+          <Target size={13} />
+          <span>Open in Evidence Viewer →</span>
         </Link>
         <Link
-          href="/results"
-          className="flex items-center gap-1.5 bg-[#091522] hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-cyan-300 rounded-lg px-3 py-2 text-xs font-mono font-semibold transition-all cursor-pointer"
+          href="/execution"
+          className="flex items-center gap-1.5 bg-[#091522] hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-cyan-300 rounded-lg px-3.5 py-2 text-xs font-mono font-semibold transition-all cursor-pointer"
         >
-          <ScanLine size={13} className="text-cyan-400" />
-          <span>View Scan Results Target Bounding Boxes →</span>
+          <Clock size={13} />
+          <span>View Execution Log →</span>
         </Link>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------
+// Demo Mode Predefined Investigation Scenarios
+// ----------------------------------------------------------------
+const DEMO_SCENARIOS = [
+  {
+    id: "demo-1",
+    title: "1. Satellite Scene Analysis",
+    badge: "Optical Caption",
+    icon: Ship,
+    query: "Describe this image",
+    source: {
+      id: "src-demo-port",
+      filename: "port.png",
+      mediaType: "image/png",
+      dataUrl: SAMPLE_OPTICAL_PORT,
+      source: "demo" as const,
+    },
+    sarImage: null,
+    model: "BLIP Base",
+  },
+  {
+    id: "demo-2",
+    title: "2. Building Detection",
+    badge: "Grounding DINO",
+    icon: Building2,
+    query: "Locate the buildings",
+    source: {
+      id: "src-demo-urban",
+      filename: "urban.png",
+      mediaType: "image/png",
+      dataUrl: SAMPLE_OPTICAL_URBAN,
+      source: "demo" as const,
+    },
+    sarImage: null,
+    model: "Grounding DINO",
+  },
+  {
+    id: "demo-3",
+    title: "3. Remote Sensing VQA",
+    badge: "RSVQA",
+    icon: Waves,
+    query: "Is there water in this image?",
+    source: {
+      id: "src-demo-port",
+      filename: "port.png",
+      mediaType: "image/png",
+      dataUrl: SAMPLE_OPTICAL_PORT,
+      source: "demo" as const,
+    },
+    sarImage: null,
+    model: "PaliGemma / Fallback",
+  },
+  {
+    id: "demo-4",
+    title: "4. Combined Investigation",
+    badge: "Multi-Tool",
+    icon: ScanLine,
+    query: "Describe this image and locate the buildings",
+    source: {
+      id: "src-demo-urban",
+      filename: "urban.png",
+      mediaType: "image/png",
+      dataUrl: SAMPLE_OPTICAL_URBAN,
+      source: "demo" as const,
+    },
+    sarImage: null,
+    model: "BLIP + Grounding DINO",
+  },
+  {
+    id: "demo-5",
+    title: "5. Temporal Change Analysis",
+    badge: "Bi-Temporal",
+    icon: Flame,
+    href: "/comparison",
+    model: "Dynamic Otsu Differencing",
+  },
+  {
+    id: "demo-6",
+    title: "6. Optical + SAR Fusion",
+    badge: "Cross-Modal",
+    icon: Leaf,
+    query: "Compare optical and SAR imagery",
+    source: {
+      id: "src-demo-port",
+      filename: "port.png",
+      mediaType: "image/png",
+      dataUrl: SAMPLE_OPTICAL_PORT,
+      source: "demo" as const,
+    },
+    sarImage: SAMPLE_SAR_RADAR,
+    model: "Feature Fusion Baseline",
+  },
+  {
+    id: "demo-7",
+    title: "7. Geospatial Intelligence",
+    badge: "Geospatial",
+    icon: MapPin,
+    query: "Locate the buildings and estimate spatial area",
+    source: {
+      id: "src-demo-urban",
+      filename: "urban.png",
+      mediaType: "image/png",
+      dataUrl: SAMPLE_OPTICAL_URBAN,
+      source: "demo" as const,
+    },
+    sarImage: null,
+    model: "Geospatial Engine",
+  },
+];
+
+function DemoScenarioPanel({
+  activeScenario,
+  onSelectScenario,
+  onReset,
+  loading,
+}: {
+  activeScenario: string | null;
+  onSelectScenario: (sc: (typeof DEMO_SCENARIOS)[0]) => void;
+  onReset: () => void;
+  loading: boolean;
+}) {
+  return (
+    <div className="bg-[#08121e]/90 border border-slate-800/90 rounded-xl p-3.5 space-y-3 shadow-md backdrop-blur-md">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-xs font-bold text-white font-mono tracking-wide uppercase">
+            ⚡ One-Click Live Investigation Scenarios
+          </span>
+          <span className="text-[10px] text-cyan-400/90 font-mono px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+            Real Backend Inference
+          </span>
+        </div>
+
+        <button
+          onClick={onReset}
+          disabled={loading}
+          className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 hover:text-rose-300 bg-slate-900/80 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/30 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+        >
+          <RotateCcw size={11} />
+          <span>Reset Demo</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        {DEMO_SCENARIOS.map((sc) => {
+          const Icon = sc.icon;
+          const isSelected = activeScenario === sc.id;
+
+          if (sc.href) {
+            return (
+              <Link
+                key={sc.id}
+                href={sc.href}
+                className="group flex flex-col justify-between p-2.5 rounded-lg border border-slate-800 bg-[#060e18]/80 hover:bg-cyan-500/10 hover:border-cyan-500/40 transition-all text-left"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[9px] font-mono text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+                    {sc.badge}
+                  </span>
+                  <Icon size={13} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
+                </div>
+                <div className="text-xs font-semibold text-slate-200 group-hover:text-white truncate">
+                  {sc.title}
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono truncate mt-0.5">
+                  {sc.model} →
+                </div>
+              </Link>
+            );
+          }
+
+          return (
+            <button
+              key={sc.id}
+              onClick={() => onSelectScenario(sc)}
+              disabled={loading}
+              className={`group flex flex-col justify-between p-2.5 rounded-lg border transition-all text-left cursor-pointer ${
+                isSelected
+                  ? "border-cyan-400/80 bg-cyan-500/15 shadow-[0_0_12px_rgba(6,182,212,0.25)]"
+                  : "border-slate-800 bg-[#060e18]/80 hover:bg-cyan-500/10 hover:border-cyan-500/40"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[9px] font-mono text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+                  {sc.badge}
+                </span>
+                <Icon
+                  size={13}
+                  className={`transition-colors ${
+                    isSelected ? "text-cyan-400" : "text-slate-500 group-hover:text-cyan-400"
+                  }`}
+                />
+              </div>
+              <div className="text-xs font-semibold text-slate-200 group-hover:text-white truncate">
+                {sc.title}
+              </div>
+              <div className="text-[10px] text-slate-400 font-mono truncate mt-0.5">
+                {sc.model}
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -500,22 +1006,87 @@ function ControllerResultPanel({ result }: { result: any }) {
 // Query Page Main Component
 // ----------------------------------------------------------------
 export default function QueryPage() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("Describe this image and locate the buildings");
+  const [canonicalSource, setCanonicalSource] = useState<CanonicalSourceImage>(() => {
+    return getActiveSourceImage() || DEFAULT_DEMO_SOURCE;
+  });
+  const [sarImage, setSarImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadingPhase, setLoadingPhase] = useState("ROUTING QUERY VIA AGENT...");
-  const [apiResult, setApiResult] = useState<any>(null);
+  const [loadingPhase, setLoadingPhase] = useState("ROUTING QUERY VIA AGENT CONTROLLER...");
+  const [apiResult, setApiResult] = useState<NexSpaceQueryResponse | null>(() => {
+    const inv = getCurrentInvestigation();
+    return inv?.response || null;
+  });
+  const [capabilities, setCapabilities] = useState<CapabilitiesRecord | null>(null);
+  const [activeScenario, setActiveScenario] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Sync canonical source to storage and purge stale investigation
+  const updateSourceImage = (src: CanonicalSourceImage) => {
+    setCanonicalSource(src);
+    setApiResult(null);
+    setErrorMsg(null);
+    setActiveSourceImage(src);
+    clearCurrentInvestigation(true);
+  };
+
+  const fetchHealth = () => {
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((d) => {
+        setCapabilities(d.capabilities);
+        setErrorMsg(null);
+      })
+      .catch(() => {
+        setErrorMsg("FastAPI backend service is currently unreachable on port 8000.");
+      });
+  };
+
+  useEffect(() => {
+    fetchHealth();
+    // Re-sync with storage if present without overriding existing image
+    const active = getActiveSourceImage(false);
+    if (active) {
+      setCanonicalSource(active);
+    } else {
+      setActiveSourceImage(DEFAULT_DEMO_SOURCE);
+    }
+
+    const currentInv = getCurrentInvestigation();
+    if (currentInv?.response) {
+      setApiResult(currentInv.response);
+      if (currentInv.query) setQuery(currentInv.query);
+      if (currentInv.source_image) setCanonicalSource(currentInv.source_image);
+      if (currentInv.sar_image) setSarImage(currentInv.sar_image);
+    }
+  }, []);
 
   const phases = [
-    "CLASSIFYING INTENT...",
-    "RESTRUCTURING QUERY FOR RSVQA...",
-    "SELECTING TARGET TOOLS...",
-    "EXECUTING VQA & CAPTIONING PIPELINE...",
-    "SYNTHESIZING AGENT RESPONSE...",
+    "CLASSIFYING INTENT & ROUTING...",
+    "EXTRACTING SPATIAL & TENSOR FEATURES...",
+    "RUNNING SPECIALIST VISION-LANGUAGE MODELS...",
+    "EXTRACTING & VALIDATING EVIDENCE NODES...",
+    "SYNTHESIZING INVESTIGATION REPORT...",
   ];
 
-  const handleExecute = async () => {
-    if (!query.trim() || loading) return;
+  const handleExecuteWith = async (
+    qText: string,
+    srcImage: CanonicalSourceImage,
+    sImg: string | null
+  ) => {
+    if (!qText.trim() || loading) return;
+
+    // Abort previous in-flight query request if still active
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     setLoading(true);
+    setErrorMsg(null);
     setApiResult(null);
 
     let phaseIndex = 0;
@@ -525,29 +1096,82 @@ export default function QueryPage() {
       if (phaseIndex < phases.length) {
         setLoadingPhase(phases[phaseIndex]);
       }
-    }, 400);
+    }, 800);
 
     try {
       const res = await fetch("/api/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: abortController.signal,
         body: JSON.stringify({
-          query: query,
-          optical_image: "dummy_data",
-        })
+          query: qText,
+          optical_image: srcImage.dataUrl || undefined,
+          sar_image: sImg || undefined,
+        }),
       });
+
+      if (!res.ok) {
+        throw new Error(`Backend HTTP error ${res.status}`);
+      }
+
       const data = await res.json();
       setApiResult(data);
-    } catch (err) {
-      console.error(err);
+
+      // Persist canonical investigation state across pages
+      const invState: CanonicalInvestigationState = {
+        investigation_id: data.request_id || `INV-${Date.now()}`,
+        query: qText,
+        source_image: srcImage,
+        sar_image: sImg,
+        selectedTargetId: null,
+        timestamp: new Date().toISOString(),
+        response: data,
+      };
+      setCurrentInvestigation(invState);
+      setActiveSourceImage(srcImage);
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return; // Clean cancellation
+      }
+      console.error("[QueryPage] Error executing query:", err);
+      const msg = err instanceof Error ? err.message : "Failed to execute live investigation request.";
+      setErrorMsg(msg);
     } finally {
       clearInterval(interval);
       setLoading(false);
     }
   };
 
-  const handleSuggestion = (label: string) => {
-    setQuery(label);
+  const handleExecute = () => {
+    handleExecuteWith(query, canonicalSource, sarImage);
+  };
+
+  const handleSelectScenario = (sc: (typeof DEMO_SCENARIOS)[0]) => {
+    if (!sc.query) return;
+    setActiveScenario(sc.id);
+    setQuery(sc.query);
+    const targetSource = sc.source || canonicalSource;
+    if (sc.source) {
+      updateSourceImage(sc.source);
+    }
+    if (sc.sarImage !== undefined) {
+      setSarImage(sc.sarImage);
+    }
+    handleExecuteWith(sc.query, targetSource, sc.sarImage ?? sarImage);
+  };
+
+  const handleReset = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setActiveScenario(null);
+    setQuery("");
+    setApiResult(null);
+    clearCurrentInvestigation(false);
+    setCanonicalSource(DEFAULT_DEMO_SOURCE);
+    setActiveSourceImage(DEFAULT_DEMO_SOURCE);
+    setSarImage(null);
+    setErrorMsg(null);
   };
 
   return (
@@ -555,34 +1179,93 @@ export default function QueryPage() {
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <PageHeader />
+        <PageHeader capabilities={capabilities} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6">
+          {/* Demo Mode Scenario Selector Panel */}
+          <DemoScenarioPanel
+            activeScenario={activeScenario}
+            onSelectScenario={handleSelectScenario}
+            onReset={handleReset}
+            loading={loading}
+          />
+
+          {/* Backend Error Alert & Retry */}
+          {errorMsg && (
+            <div className="bg-rose-500/10 border border-rose-500/30 p-3.5 rounded-xl flex items-center justify-between gap-3 text-rose-300 text-xs font-mono">
+              <div className="flex items-center gap-2">
+                <AlertTriangle size={15} className="text-rose-400 shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+              <button
+                onClick={fetchHealth}
+                className="bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer shrink-0"
+              >
+                Retry Connection
+              </button>
+            </div>
+          )}
+
           {/* Query input + chips */}
           <div>
             <QueryBar
               value={query}
-              onChange={setQuery}
+              onChange={(v) => {
+                setQuery(v);
+                setActiveScenario(null);
+              }}
               onExecute={handleExecute}
               loading={loading}
               loadingPhase={loadingPhase}
             />
-            <SuggestionChips onSelect={handleSuggestion} />
+            <SuggestionChips onSelect={(s) => {
+              setQuery(s);
+              setActiveScenario(null);
+            }} />
           </div>
 
-          {/* Controller execution output panel */}
-          {apiResult && <ControllerResultPanel result={apiResult} />}
+          {/* Raster Image Selector */}
+          <ImageSelector
+            canonicalSource={canonicalSource}
+            onSelectSource={(src) => {
+              updateSourceImage(src);
+              setActiveScenario(null);
+            }}
+            sarImage={sarImage}
+            onSelectSarImage={(img) => {
+              setSarImage(img);
+              setActiveScenario(null);
+            }}
+          />
 
-          {/* Main panels grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-5">
-            <div className="md:col-span-1 xl:col-span-1">
-              <AdvancedFilters />
+          {/* Visual Grounding Overlay on Active Viewport */}
+          {canonicalSource.dataUrl && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <Target size={13} className="text-cyan-400" />
+                  <span>Target Image Viewport ({canonicalSource.filename})</span>
+                </span>
+                <span>
+                  {apiResult?.grounding?.num_detections
+                    ? `${apiResult.grounding.num_detections} Structure(s) Localized`
+                    : "Ready for Analysis"}
+                </span>
+              </div>
+              <GroundingVisualOverlay
+                imageSrc={canonicalSource.dataUrl}
+                detections={apiResult?.grounding?.detections}
+              />
             </div>
+          )}
 
-            <div className="md:col-span-2 xl:col-span-3">
-              <LivePreview />
-            </div>
-          </div>
+          {/* Scan Results Panel */}
+          {apiResult && (
+            <ScanResultsPanel
+              result={apiResult}
+              sourceImage={canonicalSource}
+            />
+          )}
         </main>
       </div>
     </div>
