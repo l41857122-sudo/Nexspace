@@ -62,12 +62,21 @@ interface CapabilitiesRecord {
 // ----------------------------------------------------------------
 // Helper: Confidence Semantics Mapping
 // ----------------------------------------------------------------
-function getConfidenceInfo(score: number | null | undefined): {
+function getConfidenceInfo(
+  score: number | null | undefined,
+  confType?: string | null
+): {
   label: string;
   color: string;
   bg: string;
   border: string;
 } {
+  if (confType === "generation_failure" || confType === "invalid_generation") {
+    return { label: "Unverified (Quality Filter Rejected)", color: "text-rose-400", bg: "bg-rose-500/15", border: "border-rose-500/30" };
+  }
+  if (confType === "unavailable") {
+    return { label: "Unavailable", color: "text-slate-400", bg: "bg-slate-800/60", border: "border-slate-700/60" };
+  }
   if (score === null || score === undefined || isNaN(score)) {
     return { label: "Uncalibrated", color: "text-slate-400", bg: "bg-slate-800/60", border: "border-slate-700/60" };
   }
@@ -511,7 +520,7 @@ function ScanResultsPanel({
   const trace = Array.isArray(result.execution_trace) ? result.execution_trace : [];
   const limitations = result.limitations || report?.limitations || [];
 
-  const overallConf = getConfidenceInfo(result.confidence);
+  const overallConf = getConfidenceInfo(result.confidence, result.confidence_type);
 
   const isOffline = result.backend_status === "offline_fallback";
   const isDemo = sourceImage.source === "demo";

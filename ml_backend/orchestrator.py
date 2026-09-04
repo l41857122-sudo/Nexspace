@@ -748,22 +748,37 @@ class GeoVLMController:
         if not valid_results:
             return None, "heuristic", "none"
 
-        # Check if genuine model inference confidence is present
-        model_confs = [r.confidence for r in valid_results if r.confidence_type == "model" and r.confidence is not None]
-        if model_confs:
-            return round(sum(model_confs) / len(model_confs), 2), "model", "transformers_pipeline"
+        # Check if any tool suffered a critical generation failure / safety rejection
+        gen_failures = [r for r in valid_results if getattr(r, "confidence_type", "") == "generation_failure" or getattr(r, "status", "") == "invalid_generation"]
 
-        # Check if genuine model executed without scalar logit confidence (e.g. BLIP text generation)
+        # Check if genuine model inference confidence is present from successful tools
+        successful_model_confs = [
+            r.confidence for r in valid_results
+            if r.confidence_type == "model" and r.status == "success" and r.confidence is not None
+        ]
+        if successful_model_confs:
+            avg_conf = round(sum(successful_model_confs) / len(successful_model_confs), 2)
+            src = next((r.confidence_source for r in valid_results if r.confidence_type == "model" and r.status == "success"), "transformers_pipeline")
+            return avg_conf, "model", src
+
+        # If generation failure occurred and no other model succeeded, strictly declare generation failure
+        if gen_failures:
+            return 0.20, "generation_failure", "caption_quality_validator"
+
+        # Check if genuine model executed without scalar logit confidence
         has_real_model = any(r.confidence_type == "model" and r.status == "success" for r in valid_results)
         if has_real_model:
             src = next((r.confidence_source for r in valid_results if r.confidence_type == "model"), "transformers_pipeline")
             return None, "model", src
 
         # Check for estimated / fallback confidences
-        est_confs = [r.confidence for r in valid_results if r.confidence is not None]
+        est_confs = [r.confidence for r in valid_results if r.confidence is not None and r.status != "failed"]
         if est_confs:
             tool_avg = sum(est_confs) / len(est_confs)
             combined = (tool_avg * 0.7) + (classification.confidence * 0.3)
+            # Downgrade fallback confidence if any tool failed
+            if gen_failures:
+                combined = min(combined, 0.35)
             return round(combined, 2), "estimated", "ensemble_controller"
 
         return None, "heuristic", "adapter_uncalibrated"

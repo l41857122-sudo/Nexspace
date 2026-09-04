@@ -261,39 +261,83 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
         if not self.is_available():
             raise RuntimeError(f"BLIP model runtime is unavailable: {self.load_error}")
 
+        from caption_validator import validate_caption_quality
+
         t0 = time.perf_counter()
-        w, h = image.size
-        inf_image = image
+        
+        # 1. Clean RGB conversion (prevents palette/RGBA decoding artifacts)
+        rgb_image = image.convert("RGB")
+        w, h = rgb_image.size
+        inf_image = rgb_image
+
+        # 2. Aspect-ratio preserving rescale (never center-crop main architectural/scene content)
         if max(w, h) > 768:
             scale = 768.0 / max(w, h)
             new_w = max(1, int(round(w * scale)))
             new_h = max(1, int(round(h * scale)))
-            inf_image = image.resize((new_w, new_h), Image.Resampling.BILINEAR)
+            inf_image = rgb_image.resize((new_w, new_h), Image.Resampling.BICUBIC)
 
+        # 3. Deterministic Beam Search + N-gram Loop Prohibition
         inputs = self._processor(inf_image, return_tensors="pt")
         if self.device == "cuda":
             inputs = {k: v.to("cuda") for k, v in inputs.items()}
-        out = self._model.generate(**inputs, max_new_tokens=30)
+
+        out = self._model.generate(
+            **inputs,
+            num_beams=3,
+            max_new_tokens=40,
+            min_new_tokens=4,
+            repetition_penalty=1.25,
+            no_repeat_ngram_size=3,
+            early_stopping=True,
+            do_sample=False,
+        )
+        token_ids_list = out[0].tolist() if hasattr(out[0], "tolist") else list(out[0])
         raw_caption = self._processor.decode(out[0], skip_special_tokens=True).strip()
         dur = (time.perf_counter() - t0) * 1000.0
 
-        if modality == "sar":
-            caption = f"[SAR radar scene] {raw_caption}"
-            capability = "generic_captioning_on_SAR (non-SAR specialized vision model)"
-        else:
-            caption = raw_caption
-            capability = "generic_image_captioning"
+        # 4. Rigorous Output Validation Filter
+        val_result = validate_caption_quality(raw_caption, token_ids=token_ids_list)
 
-        return {
-            "caption": caption,
-            "modality": modality,
-            "model_capability": capability,
-            "confidence": None,
-            "confidence_type": "model",
-            "confidence_source": self.model_id,
-            "inference_time_ms": round(dur, 2),
-            "model_metadata": self.get_metadata(),
-        }
+        if val_result.is_valid:
+            if modality == "sar":
+                caption = f"[SAR radar scene] {val_result.clean_caption}"
+                capability = "generic_captioning_on_SAR (non-SAR specialized vision model)"
+            else:
+                caption = val_result.clean_caption
+                capability = "generic_image_captioning"
+
+            return {
+                "caption": caption,
+                "raw_caption": raw_caption,
+                "caption_status": "success",
+                "modality": modality,
+                "model_capability": capability,
+                "confidence": 0.65,
+                "confidence_type": "model",
+                "confidence_source": self.model_id,
+                "lexical_diversity": val_result.lexical_diversity,
+                "validation_passed": True,
+                "inference_time_ms": round(dur, 2),
+                "model_metadata": self.get_metadata(),
+            }
+        else:
+            # Degenerate / pathological output caught by safety gate
+            return {
+                "caption": None,
+                "raw_caption": raw_caption,
+                "caption_status": "invalid_generation",
+                "rejection_reason": val_result.reason,
+                "modality": modality,
+                "model_capability": "rejected_by_quality_gate",
+                "confidence": 0.20,
+                "confidence_type": "generation_failure",
+                "confidence_source": "caption_quality_validator",
+                "lexical_diversity": val_result.lexical_diversity,
+                "validation_passed": False,
+                "inference_time_ms": round(dur, 2),
+                "model_metadata": self.get_metadata(),
+            }
 
 
 # ---------------------------------------------------------------------------

@@ -268,7 +268,7 @@ class VQATool(BaseSpecialistTool):
 class OpticalCaptioningTool(BaseSpecialistTool):
     name = "Optical_Caption"
     task_type = TaskType.CAPTIONING
-    description = "BLIP image captioning specialist for optical multi-spectral satellite imagery."
+    description = "BLIP image captioning specialist for optical multi-spectral satellite imagery and photographs."
     input_requirements = ["image"]
 
     def __init__(self, runtime: Optional[BaseModelRuntime] = None):
@@ -277,24 +277,39 @@ class OpticalCaptioningTool(BaseSpecialistTool):
     def _run(self, params: Dict[str, Any]) -> ToolExecutionResult:
         image: Image.Image = params["image"]
         is_real_model = self.runtime.is_available()
+        raw_caption = ""
+        rejection_reason = None
 
         if is_real_model:
             try:
                 inf = self.runtime.infer(image=image, modality="optical")
-                caption_text = inf["caption"]
+                caption_text = inf.get("caption")
+                raw_caption = inf.get("raw_caption", "")
+                cap_status = inf.get("caption_status", "success")
                 capability = inf.get("model_capability", "generic_image_captioning")
-                conf_type = "model"
-                conf_source = self.runtime.model_id
-                status = "success"
-            except Exception:
+                conf_val = inf.get("confidence", 0.65)
+                conf_type = inf.get("confidence_type", "model")
+                conf_source = inf.get("confidence_source", self.runtime.model_id)
+
+                if cap_status == "invalid_generation" or not caption_text:
+                    status = "invalid_generation"
+                    rejection_reason = inf.get("rejection_reason", "Pathological repetition loop or low diversity")
+                    evidence_list = []
+                else:
+                    status = "success"
+                    evidence_list = [{"modality": "optical", "caption": caption_text, "capability": capability}]
+            except Exception as ex:
                 is_real_model = False
+                rejection_reason = str(ex)
 
         if not is_real_model:
             caption_text = "An aerial satellite overview showing mixed urban infrastructure, vegetation, and water bodies."
             capability = "generic_image_captioning_fallback"
-            conf_type = "estimated"
+            conf_val = 0.50
+            conf_type = "heuristic"
             conf_source = "optical_caption_fallback"
             status = "fallback"
+            evidence_list = [{"modality": "optical", "caption": caption_text, "capability": capability}]
 
         return ToolExecutionResult(
             tool_name=self.name,
@@ -302,15 +317,18 @@ class OpticalCaptioningTool(BaseSpecialistTool):
             status=status,
             data={
                 "caption": caption_text,
+                "raw_caption": raw_caption,
+                "caption_status": status,
+                "rejection_reason": rejection_reason,
                 "modality": "optical",
                 "model_capability": capability,
                 "inference_mode": "model_pipeline" if is_real_model else "deterministic_fallback",
             },
-            confidence=0.88 if is_real_model else 0.82,
+            confidence=conf_val,
             confidence_type=conf_type,
             confidence_source=conf_source,
             model_metadata=self.runtime.get_metadata(),
-            evidence=[{"modality": "optical", "caption": caption_text, "capability": capability}],
+            evidence=evidence_list,
         )
 
     # Legacy convenience helper
@@ -336,24 +354,39 @@ class SARCaptioningTool(BaseSpecialistTool):
     def _run(self, params: Dict[str, Any]) -> ToolExecutionResult:
         image: Image.Image = params["image"]
         is_real_model = self.runtime.is_available()
+        raw_caption = ""
+        rejection_reason = None
 
         if is_real_model:
             try:
                 inf = self.runtime.infer(image=image, modality="sar")
-                caption_text = inf["caption"]
+                caption_text = inf.get("caption")
+                raw_caption = inf.get("raw_caption", "")
+                cap_status = inf.get("caption_status", "success")
                 capability = inf.get("model_capability", "generic_captioning_on_SAR")
-                conf_type = "model"
-                conf_source = self.runtime.model_id
-                status = "success"
-            except Exception:
+                conf_val = inf.get("confidence", 0.60)
+                conf_type = inf.get("confidence_type", "model")
+                conf_source = inf.get("confidence_source", self.runtime.model_id)
+
+                if cap_status == "invalid_generation" or not caption_text:
+                    status = "invalid_generation"
+                    rejection_reason = inf.get("rejection_reason", "Pathological repetition loop or low diversity")
+                    evidence_list = []
+                else:
+                    status = "success"
+                    evidence_list = [{"modality": "sar", "caption": caption_text, "capability": capability}]
+            except Exception as ex:
                 is_real_model = False
+                rejection_reason = str(ex)
 
         if not is_real_model:
             caption_text = "[SAR radar scene] High-backscatter structural reflection showing urban grid, roads, and coastal line."
             capability = "generic_captioning_on_SAR (fallback notice: non-SAR-specialized generic vision model)"
-            conf_type = "estimated"
+            conf_val = 0.45
+            conf_type = "heuristic"
             conf_source = "sar_caption_fallback"
             status = "fallback"
+            evidence_list = [{"modality": "sar", "caption": caption_text, "capability": capability}]
 
         return ToolExecutionResult(
             tool_name=self.name,
@@ -361,16 +394,19 @@ class SARCaptioningTool(BaseSpecialistTool):
             status=status,
             data={
                 "caption": caption_text,
+                "raw_caption": raw_caption,
+                "caption_status": status,
+                "rejection_reason": rejection_reason,
                 "modality": "sar",
                 "model_capability": capability,
                 "limitation_notice": "Generic optical/vision model operating on radar backscatter data.",
                 "inference_mode": "model_pipeline" if is_real_model else "deterministic_fallback",
             },
-            confidence=0.85 if is_real_model else 0.78,
+            confidence=conf_val,
             confidence_type=conf_type,
             confidence_source=conf_source,
             model_metadata=self.runtime.get_metadata(),
-            evidence=[{"modality": "sar", "caption": caption_text, "capability": capability}],
+            evidence=evidence_list,
         )
 
     # Legacy convenience helper

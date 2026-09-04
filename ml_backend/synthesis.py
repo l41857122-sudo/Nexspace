@@ -113,13 +113,21 @@ class InvestigationSynthesizer:
                 )
 
             # Extract tool data
-            if t_name == "Optical_Caption" and t_status == "success":
-                caption_text = data.get("caption", "")
-                observations.append(f"Optical vision model described the scene: \"{caption_text}\".")
+            if t_name == "Optical_Caption":
+                if t_status == "success" and data.get("caption"):
+                    caption_text = data.get("caption", "")
+                    observations.append(f"Optical vision model described the scene: \"{caption_text}\".")
+                elif t_status in ("invalid_generation", "failed") or not data.get("caption"):
+                    reason = data.get("rejection_reason") or "Repetitive token loop or low lexical diversity detected"
+                    limitations.append(f"Optical scene description was rejected by quality filters: {reason}.")
 
-            elif t_name == "SAR_Caption" and t_status == "success":
-                sar_caption_text = data.get("caption", "")
-                observations.append(f"SAR stream described radar backscatter: \"{sar_caption_text}\".")
+            elif t_name == "SAR_Caption":
+                if t_status == "success" and data.get("caption"):
+                    sar_caption_text = data.get("caption", "")
+                    observations.append(f"SAR stream described radar backscatter: \"{sar_caption_text}\".")
+                elif t_status in ("invalid_generation", "failed") or not data.get("caption"):
+                    reason = data.get("rejection_reason") or "Repetitive token loop or low lexical diversity detected"
+                    limitations.append(f"SAR scene description was rejected by quality filters: {reason}.")
 
             elif t_name == "Grounding" and t_status == "success":
                 grounding_detections = data.get("detections", [])
@@ -224,6 +232,7 @@ class InvestigationSynthesizer:
             crs=crs,
             exec_summary=exec_summary,
             observations=observations,
+            plan=plan,
         )
 
         return report, exec_summary, response_text
@@ -243,6 +252,7 @@ class InvestigationSynthesizer:
         crs: Optional[str],
         exec_summary: Dict[str, Any],
         observations: List[str],
+        plan: Optional[Dict[str, Any]] = None,
     ) -> str:
         q_lower = query.lower().strip()
         sections: List[str] = []
@@ -276,6 +286,8 @@ class InvestigationSynthesizer:
                 sections.append("*(Note: Grounding DINO identified candidate regions matching your query. These are model proposals and have not been ground-truth validated.)*")
             if caption_text:
                 sections.append(f"**Scene Overview:** {caption_text}")
+            elif "Optical_Caption" in plan.get("selected_tools", []):
+                sections.append("*(Scene description could not be generated reliably for this image.)*")
             return "\n\n".join(sections)
 
         # Case 4: Spatial / Location Queries ("Where are...", "Which side...")
@@ -294,6 +306,8 @@ class InvestigationSynthesizer:
                 sections.append(f"**Location:** No clear {plural} could be pinpointed in this raster.")
             if caption_text:
                 sections.append(f"**Scene Context:** {caption_text}")
+            elif plan and "Optical_Caption" in plan.get("selected_tools", []):
+                sections.append("*(Scene description could not be generated reliably for this image.)*")
             return "\n\n".join(sections)
 
         # Case 5: Open-Ended Land-Use / Environmental Suitability
@@ -339,13 +353,20 @@ class InvestigationSynthesizer:
         # Case 9: General Visual & Multi-Tool Output
         if caption_text:
             sections.append(f"**Scene Description:** {caption_text}")
-
-        if grounding_detections:
+            if grounding_detections:
+                target_display = grounding_target or "structure"
+                plural_name = f"{target_display}s" if not target_display.endswith("s") else target_display
+                sections.append(
+                    f"**Objects Located:** We found {len(grounding_detections)} possible {plural_name} in this image."
+                )
+        elif grounding_detections:
             target_display = grounding_target or "structure"
             plural_name = f"{target_display}s" if not target_display.endswith("s") else target_display
             sections.append(
-                f"**Objects Located:** We found {len(grounding_detections)} possible {plural_name} in this image."
+                f"Scene description could not be generated reliably for this image. However, the vision grounding model identified **{len(grounding_detections)}** candidate region(s) matching '{target_display}'."
             )
+        elif not sections:
+            sections.append("Scene description could not be generated reliably for this image. The visual content could not be interpreted with sufficient confidence from the available model weights.")
 
         if vqa_answers:
             sections.append(f"**Answer:** {' | '.join(vqa_answers)}")
