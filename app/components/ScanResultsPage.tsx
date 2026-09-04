@@ -43,7 +43,7 @@ function TopBar({
   return (
     <header className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 lg:px-8 py-4 border-b border-slate-800/80 bg-[#09131f]/60 backdrop-blur-md gap-3">
       <div className="flex flex-wrap items-center gap-1.5 text-sm">
-        <span className="text-white font-bold tracking-tight">SatQuery AI</span>
+        <span className="text-white font-bold tracking-tight">NexSpace</span>
         <ChevronRight size={12} className="text-slate-600" />
         <span className="text-slate-400">Scan Results</span>
         <ChevronRight size={12} className="text-slate-600" />

@@ -100,7 +100,7 @@ def export_evidence_to_geojson(
             "evidence_id": feature_id,
             "type": feature_type,
             "label": item.get("label", feature_type),
-            "source": item.get("source", "SatQuery"),
+            "source": item.get("source", "NexSpace"),
             "confidence": item.get("score") or item.get("confidence"),
             "severity_score": item.get("severity_score"),
             "ground_area": item.get("ground_area"),

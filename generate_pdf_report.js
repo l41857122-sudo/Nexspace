@@ -60,7 +60,7 @@ function addBullet(title, desc) {
 // -------------------------------------------------------------
 doc.rect(0, 0, 595.28, 841.89).fill("#07111C");
 
-doc.fontSize(24).fillColor("#00E5FF").font("Helvetica-Bold").text("NexSpace / SatQuery AI", 45, 120);
+doc.fontSize(24).fillColor("#00E5FF").font("Helvetica-Bold").text("NexSpace", 45, 120);
 doc.fontSize(14).fillColor("#38BDF8").font("Helvetica-Bold").text("Complete Architecture & Component-by-Component Deep Dive Report");
 doc.fontSize(9).fillColor("#94A3B8").font("Helvetica").text("Planetary-Scale Geospatial Intelligence & Autonomous Neural Telemetry");
 
@@ -101,7 +101,7 @@ doc.addPage();
 addHeader("1. Executive System Architecture & Topology", "End-to-end data flow from user interaction to deep learning inference");
 
 addParagraph(
-  "NexSpace (SatQuery AI) is a hybrid satellite imagery intelligence platform built on Next.js 16 (React 19), " +
+  "NexSpace is a hybrid satellite imagery intelligence platform built on Next.js 16 (React 19), " +
   "TypeScript, Tailwind CSS v4, OGL (hardware-accelerated WebGL), Prisma ORM, and a dedicated Python FastAPI ML backend."
 );
 
@@ -238,7 +238,7 @@ addBullet("2. Missing .env & PostgreSQL Connection", "prisma/schema.prisma requi
 addBullet("3. Advanced Filters Not Passed in QueryPage.tsx", "Selected sensor, date range, resolution, and cloud cover are not passed in the handleExecute() request body. Fix: Pass filter state in the JSON payload to /api/query.");
 addBullet("4. Unhooked Dashboard & Scan Results Buttons", "+ New Analysis in Dashboard, and Export GeoJSON / CSV in Scan Results have no click handlers. Fix: Attach router navigation and file download handlers.");
 addBullet("5. Python Backend Not Running Concurrently", "Running only npm run dev leaves the ML service on port 8000 offline. Fix: Use concurrently or start uvicorn ml_backend.server:app --port 8000 alongside Next.js.");
-addBullet("6. Branding Discrepancy (NexSpace vs SatQuery AI)", "Top navigation shows NexSpace while Sidebar shows SatQuery AI. Fix: Standardize brand labels across all components.");
+addBullet("6. Brand Consistency (NexSpace)", "Standardized brand labels across all components, headers, and reports.");
 
 doc.moveDown(1.5);
 doc.fontSize(10).fillColor("#10B981").font("Helvetica-Bold").text("SUMMARY CONCLUSION:");

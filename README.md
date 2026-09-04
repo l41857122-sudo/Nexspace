@@ -1,4 +1,4 @@
-# 🌌 NexSpace / SatQuery AI — Multi-Modal Geospatial Intelligence Platform
+# 🌌 NexSpace — Multi-Modal Geospatial Intelligence Platform
 
 NexSpace is a production-grade Agentic Multi-Modal Remote Sensing Intelligence Platform integrating Vision-Language Models (VLM), Zero-Shot Grounding, Bi-Temporal Change Detection, Optical+SAR Multimodal Fusion, and Geospatial Intelligence into an auditable investigation terminal.
 

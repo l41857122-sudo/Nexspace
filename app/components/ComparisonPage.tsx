@@ -40,7 +40,7 @@ function TopBar({
               Bi-Temporal Change Analysis Terminal
             </h1>
             <p className="text-[10px] text-slate-400 font-mono">
-              Co-registered differential pixel analysis · SatQuery ML Engine
+              Co-registered differential pixel analysis · NexSpace ML Engine
             </p>
           </div>
         </div>

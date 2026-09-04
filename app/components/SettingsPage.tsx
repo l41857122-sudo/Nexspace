@@ -222,7 +222,7 @@ export default function SettingsPage() {
                   <Satellite size={24} />
                 </div>
                 <div className="text-sm font-bold text-white tracking-tight">
-                  SatQuery AI Platform
+                  NexSpace Platform
                 </div>
                 <div className="text-xs text-slate-400 font-mono mt-1 mb-5">
                   Version v2.4.1 (Build 8902)
@@ -239,7 +239,7 @@ export default function SettingsPage() {
                   Neural models trained on open datasets provided by the European
                   Space Agency (ESA) Copernicus program and USGS Landsat
                   archives. Core computer vision architecture developed in
-                  collaboration with SatQuery AI Research Labs.
+                  collaboration with NexSpace Research Labs.
                 </p>
               </Panel>
             </div>

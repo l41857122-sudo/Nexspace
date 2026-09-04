@@ -8,8 +8,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       user: {
         id: "usr_active_admin",
-        email: email || "operator@satquery.ai",
-        apiKey: "sq_live_8f92a4b928104719x921k",
+        email: email || "operator@nexspace.ai",
+        apiKey: "nx_live_8f92a4b928104719x921k",
         twoFactorOn: true
       },
       token: "mock_session_token_valid"

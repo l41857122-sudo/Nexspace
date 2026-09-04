@@ -2,7 +2,7 @@
 /**
  * scripts/launch_demo.js
  * ----------------------
- * One-click demo launcher for NexSpace / SatQuery AI.
+ * One-click demo launcher for NexSpace.
  * 
  * Features:
  *   1. Environment checks (Python 3, Node.js).
@@ -106,7 +106,7 @@ function openBrowser(url) {
 
 async function main() {
   console.log("\x1b[36m" + "=".repeat(70) + "\x1b[0m");
-  console.log("\x1b[1m\x1b[36m  🌌 NEXSPACE / SATQUERY AI — ONE-CLICK LIVE DEMO LAUNCHER\x1b[0m");
+  console.log("\x1b[1m\x1b[36m  🌌 NEXSPACE — ONE-CLICK LIVE DEMO LAUNCHER\x1b[0m");
   console.log("\x1b[36m" + "=".repeat(70) + "\x1b[0m\n");
 
   // 1. Check Python and Node

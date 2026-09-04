@@ -1,6 +1,6 @@
 # Geospatial Vision-Language Interface Controller (ML CV Core)
 
-Agentic controller & ML CV pipeline for the SatQuery AI system.
+Agentic controller & ML CV pipeline for the NexSpace system.
 
 ## Modules Overview
 

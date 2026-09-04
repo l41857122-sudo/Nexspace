@@ -76,7 +76,7 @@ function addAuditItem({ requirement, file, status, statusColor, currentDoes, prd
 // -------------------------------------------------------------
 doc.rect(0, 0, 595.28, 841.89).fill("#07111C");
 
-doc.fontSize(22).fillColor("#00E5FF").font("Helvetica-Bold").text("NexSpace / SatQuery AI", 45, 110);
+doc.fontSize(22).fillColor("#00E5FF").font("Helvetica-Bold").text("NexSpace", 45, 110);
 doc.fontSize(14).fillColor("#38BDF8").font("Helvetica-Bold").text("Backend & Agent Controller PRD Technical Audit");
 doc.fontSize(9).fillColor("#94A3B8").font("Helvetica").text("Comprehensive Codebase Inspection, Ground-Truth Verification & Gap Analysis");
 

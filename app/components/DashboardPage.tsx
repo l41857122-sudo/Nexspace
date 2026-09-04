@@ -31,7 +31,7 @@ function TopBar() {
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
           <p className="text-[10px] tracking-widest text-slate-400 uppercase font-mono">
-            Workspace: SatQuery AI · Global Ops
+            Workspace: NexSpace · Global Ops
           </p>
         </div>
         <h1 className="text-base font-semibold text-white mt-0.5 tracking-tight flex items-center gap-2">

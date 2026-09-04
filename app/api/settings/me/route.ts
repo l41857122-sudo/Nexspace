@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 
 let currentSettings = {
   id: "usr_active_admin",
-  email: "operator@satquery.ai",
-  apiKey: "sq_live_8f92a4b928104719x921k",
+  email: "operator@nexspace.ai",
+  apiKey: "nx_live_8f92a4b928104719x921k",
   twoFactorOn: true,
   credits: { used: 45200, total: 190000, percent: 24 },
   gpuHours: { used: 112.5, total: 250, percent: 45 },

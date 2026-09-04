@@ -338,7 +338,7 @@ export default function Sidebar() {
         <Link href="/" className="flex items-center gap-2 group">
           <Satellite size={18} className="text-cyan-400 group-hover:rotate-45 transition-transform duration-200" />
           <span className="text-sm font-bold text-white tracking-tight group-hover:text-cyan-300 transition-colors">
-            SatQuery AI
+            NexSpace
           </span>
           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
             v2.4
@@ -378,7 +378,7 @@ export default function Sidebar() {
                   <Satellite size={20} className="text-cyan-400" />
                   <div>
                     <p className="text-sm font-bold text-white leading-tight">
-                      SatQuery AI
+                      NexSpace
                     </p>
                     <p className="text-[10px] tracking-widest text-slate-400 uppercase font-mono">
                       Orbital Intel
@@ -406,7 +406,7 @@ export default function Sidebar() {
           <Satellite size={20} className="text-cyan-400" />
           <div>
             <p className="text-sm font-bold text-white leading-tight">
-              SatQuery AI
+              NexSpace
             </p>
             <p className="text-[10px] tracking-widest text-slate-400 uppercase font-mono">
               Orbital Intel

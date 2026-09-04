@@ -2,7 +2,7 @@
 config.py
 ---------
 Production configuration, environment variables, security thresholds,
-and resource limits for the SatQuery AI / NexSpace ML Backend.
+and resource limits for the NexSpace ML Backend.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ class Settings:
     """Centralized production settings with safe defaults and environment overrides."""
 
     # Service Metadata
-    SERVICE_NAME: str = "SatQuery AI ML CV Engine"
+    SERVICE_NAME: str = "NexSpace ML CV Engine"
     SERVICE_VERSION: str = "1.0.0"
 
     # Security & Resource Limits

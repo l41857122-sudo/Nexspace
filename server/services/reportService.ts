@@ -25,7 +25,7 @@ export function generateReportPDF(data: ReportData): Promise<Buffer> {
       doc.on("end", () => resolve(Buffer.concat(buffers)));
 
       // Title & Header
-      doc.fontSize(18).fillColor("#06b6d4").text("SatQuery AI — Orbital Intelligence Report", { align: "left" });
+      doc.fontSize(18).fillColor("#06b6d4").text("NexSpace — Orbital Intelligence Report", { align: "left" });
       doc.fontSize(14).fillColor("#1e293b").text(data.title);
       doc.fontSize(9).fillColor("#64748b").text(`ID: ${data.reportId} | Generated: ${data.generatedAt} | Target: ${data.target}`);
       doc.moveDown(1.5);

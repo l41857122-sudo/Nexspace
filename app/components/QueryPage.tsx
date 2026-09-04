@@ -164,7 +164,7 @@ function PageHeader({ capabilities }: { capabilities: CapabilitiesRecord | null 
             <Sparkles size={15} />
           </div>
           <h1 className="text-sm font-semibold text-white tracking-tight">
-            SatQuery Natural Language Intelligence
+            NexSpace Natural Language Intelligence
           </h1>
           <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
             Live ML Engine

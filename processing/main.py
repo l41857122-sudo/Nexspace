@@ -7,7 +7,7 @@ import io
 
 from pipeline import compute_ndvi, compute_cloud_mask, generate_pixel_diff_heatmap, detect_objects_placeholder
 
-app = FastAPI(title="SatQuery ML Processing Microservice", version="2.4.0")
+app = FastAPI(title="NexSpace ML Processing Microservice", version="2.4.0")
 
 app.add_middleware(
     CORSMiddleware,

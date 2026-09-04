@@ -57,7 +57,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   return new Response(new Uint8Array(pdfBuffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="SatQuery_Intel_Report_${id}.pdf"`
+      "Content-Disposition": `attachment; filename="NexSpace_Intel_Report_${id}.pdf"`
     }
   });
 }

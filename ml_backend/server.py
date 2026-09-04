@@ -1,7 +1,7 @@
 """
 server.py
 ---------
-Production-hardened FastAPI REST server exposing the SatQuery AI ML CV Controller.
+Production-hardened FastAPI REST server exposing the NexSpace ML CV Controller.
 
 Features:
 - Centralized configuration and resource thresholds (MAX_UPLOAD_SIZE_MB, MAX_IMAGE_PIXELS)

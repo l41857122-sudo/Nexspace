@@ -1,4 +1,4 @@
-// Node.js test script verifying the SatQuery AI ML Controller Backend Router logic
+// Node.js test script verifying the NexSpace ML Controller Backend Router logic
 
 function runBackendRouter(queryStr, hasOptical = true, hasSar = false, hasChange = false) {
   const query = (queryStr || "").trim();
