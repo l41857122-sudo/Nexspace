@@ -15,8 +15,15 @@ from __future__ import annotations
 import os
 import sys
 import time
+import threading
 from typing import Optional, Dict, Any, List
 from PIL import Image
+
+_dir = os.path.dirname(os.path.abspath(__file__))
+if _dir not in sys.path:
+    sys.path.insert(0, _dir)
+
+from config import settings
 
 
 # ---------------------------------------------------------------------------
@@ -27,9 +34,22 @@ class DeviceManager:
     """Probes and manages compute devices for PyTorch and Hugging Face."""
 
     _cached_device: Optional[str] = None
+    _threads_configured: bool = False
+
+    @classmethod
+    def configure_threads(cls) -> None:
+        if not cls._threads_configured:
+            try:
+                import torch
+                cpu_threads = min(8, os.cpu_count() or 4)
+                torch.set_num_threads(cpu_threads)
+                cls._threads_configured = True
+            except Exception:
+                pass
 
     @classmethod
     def get_device(cls) -> str:
+        cls.configure_threads()
         if cls._cached_device is not None:
             return cls._cached_device
 
@@ -60,13 +80,17 @@ class DeviceManager:
             if info["cuda_available"]:
                 info["gpu_name"] = torch.cuda.get_device_name(0)
                 info["device_count"] = torch.cuda.device_count()
+            info["torch_threads"] = torch.get_num_threads()
         except Exception as e:
             info["torch_error"] = str(e)
         return info
 
 
-import threading
-from config import settings
+# ---------------------------------------------------------------------------
+# Global Process-Wide Singleton Model Cache
+# ---------------------------------------------------------------------------
+_SHARED_MODEL_CACHE: Dict[str, Dict[str, Any]] = {}
+_SHARED_CACHE_LOCK = threading.Lock()
 
 
 # ---------------------------------------------------------------------------
@@ -158,6 +182,14 @@ class PaliGemmaVQARuntime(BaseModelRuntime):
         super().__init__(model_id=mid, task_name="VQA")
 
     def _do_load(self) -> bool:
+        with _SHARED_CACHE_LOCK:
+            if self.model_id in _SHARED_MODEL_CACHE:
+                cached = _SHARED_MODEL_CACHE[self.model_id]
+                self._processor = cached["processor"]
+                self._model = cached["model"]
+                self.is_loaded = True
+                return True
+
         # Check authentication for gated PaliGemma model
         if "google/paligemma" in self.model_id.lower() and not os.environ.get("HF_TOKEN"):
             self.load_error = "MODEL UNAVAILABLE — AUTHENTICATION REQUIRED (Gated checkpoint requires HF_TOKEN with accepted license agreement)"
@@ -169,15 +201,20 @@ class PaliGemmaVQARuntime(BaseModelRuntime):
             from transformers import PaliGemmaProcessor, PaliGemmaForConditionalGeneration
 
             token_arg = os.environ.get("HF_TOKEN")
-            self._processor = PaliGemmaProcessor.from_pretrained(self.model_id, token=token_arg)
-            self._model = PaliGemmaForConditionalGeneration.from_pretrained(
+            processor = PaliGemmaProcessor.from_pretrained(self.model_id, token=token_arg)
+            model = PaliGemmaForConditionalGeneration.from_pretrained(
                 self.model_id,
                 token=token_arg,
                 torch_dtype=torch.float32 if self.device == "cpu" else torch.bfloat16,
             )
             if self.device == "cuda":
-                self._model = self._model.to("cuda")
+                model = model.to("cuda")
 
+            with _SHARED_CACHE_LOCK:
+                _SHARED_MODEL_CACHE[self.model_id] = {"processor": processor, "model": model}
+
+            self._processor = processor
+            self._model = model
             self.is_loaded = True
             return True
         except Exception as e:
@@ -203,7 +240,7 @@ class PaliGemmaVQARuntime(BaseModelRuntime):
         if self.device == "cuda":
             inputs = {k: v.to("cuda") for k, v in inputs.items()}
 
-        with torch.no_grad():
+        with torch.inference_mode():
             output = self._model.generate(
                 **inputs,
                 max_new_tokens=20,
@@ -244,12 +281,26 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
         super().__init__(model_id=mid, task_name="Captioning")
 
     def _do_load(self) -> bool:
+        with _SHARED_CACHE_LOCK:
+            if self.model_id in _SHARED_MODEL_CACHE:
+                cached = _SHARED_MODEL_CACHE[self.model_id]
+                self._processor = cached["processor"]
+                self._model = cached["model"]
+                self.is_loaded = True
+                return True
+
         try:
             from transformers import BlipProcessor, BlipForConditionalGeneration
-            self._processor = BlipProcessor.from_pretrained(self.model_id)
-            self._model = BlipForConditionalGeneration.from_pretrained(self.model_id)
+            processor = BlipProcessor.from_pretrained(self.model_id)
+            model = BlipForConditionalGeneration.from_pretrained(self.model_id)
             if self.device == "cuda":
-                self._model = self._model.to("cuda")
+                model = model.to("cuda")
+
+            with _SHARED_CACHE_LOCK:
+                _SHARED_MODEL_CACHE[self.model_id] = {"processor": processor, "model": model}
+
+            self._processor = processor
+            self._model = model
             self.is_loaded = True
             return True
         except Exception as e:
@@ -261,6 +312,7 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
         if not self.is_available():
             raise RuntimeError(f"BLIP model runtime is unavailable: {self.load_error}")
 
+        import torch
         from caption_validator import validate_caption_quality
 
         t0 = time.perf_counter()
@@ -277,27 +329,45 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
             new_h = max(1, int(round(h * scale)))
             inf_image = rgb_image.resize((new_w, new_h), Image.Resampling.BICUBIC)
 
-        # 3. Deterministic Beam Search + N-gram Loop Prohibition
+        # 3. Fast generation with inference_mode & quality safety check
         inputs = self._processor(inf_image, return_tensors="pt")
         if self.device == "cuda":
             inputs = {k: v.to("cuda") for k, v in inputs.items()}
 
-        out = self._model.generate(
-            **inputs,
-            num_beams=3,
-            max_new_tokens=40,
-            min_new_tokens=4,
-            repetition_penalty=1.25,
-            no_repeat_ngram_size=3,
-            early_stopping=True,
-            do_sample=False,
-        )
-        token_ids_list = out[0].tolist() if hasattr(out[0], "tolist") else list(out[0])
-        raw_caption = self._processor.decode(out[0], skip_special_tokens=True).strip()
-        dur = (time.perf_counter() - t0) * 1000.0
+        with torch.inference_mode():
+            # Pass 1: Fast greedy generation with repetition penalty
+            out = self._model.generate(
+                **inputs,
+                num_beams=1,
+                max_new_tokens=35,
+                min_new_tokens=4,
+                repetition_penalty=1.20,
+                no_repeat_ngram_size=3,
+                do_sample=False,
+            )
+            token_ids_list = out[0].tolist() if hasattr(out[0], "tolist") else list(out[0])
+            raw_caption = self._processor.decode(out[0], skip_special_tokens=True).strip()
 
-        # 4. Rigorous Output Validation Filter
-        val_result = validate_caption_quality(raw_caption, token_ids=token_ids_list)
+            # Validate quality
+            val_result = validate_caption_quality(raw_caption, token_ids=token_ids_list)
+
+            # Pass 2: Fallback to beam search only if greedy output failed validation
+            if not val_result.is_valid:
+                out = self._model.generate(
+                    **inputs,
+                    num_beams=2,
+                    max_new_tokens=35,
+                    min_new_tokens=4,
+                    repetition_penalty=1.25,
+                    no_repeat_ngram_size=3,
+                    early_stopping=True,
+                    do_sample=False,
+                )
+                token_ids_list = out[0].tolist() if hasattr(out[0], "tolist") else list(out[0])
+                raw_caption = self._processor.decode(out[0], skip_special_tokens=True).strip()
+                val_result = validate_caption_quality(raw_caption, token_ids=token_ids_list)
+
+        dur = (time.perf_counter() - t0) * 1000.0
 
         if val_result.is_valid:
             if modality == "sar":
@@ -344,6 +414,14 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
 # 3. Grounding DINO Runtime Adapter
 # ---------------------------------------------------------------------------
 
+import hashlib
+import collections
+
+_GROUNDING_INFERENCE_CACHE: collections.OrderedDict = collections.OrderedDict()
+_GROUNDING_CACHE_LOCK = threading.Lock()
+_MAX_GROUNDING_CACHE_SIZE = 128
+
+
 class GroundingDINORuntime(BaseModelRuntime):
     """Runtime adapter for Grounding DINO open-vocabulary object detection."""
 
@@ -354,14 +432,28 @@ class GroundingDINORuntime(BaseModelRuntime):
         super().__init__(model_id=mid, task_name="Grounding")
 
     def _do_load(self) -> bool:
+        with _SHARED_CACHE_LOCK:
+            if self.model_id in _SHARED_MODEL_CACHE:
+                cached = _SHARED_MODEL_CACHE[self.model_id]
+                self._processor = cached["processor"]
+                self._model = cached["model"]
+                self.is_loaded = True
+                return True
+
         try:
             import torch
             from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
 
-            self._processor = AutoProcessor.from_pretrained(self.model_id)
-            self._model = AutoModelForZeroShotObjectDetection.from_pretrained(self.model_id)
+            processor = AutoProcessor.from_pretrained(self.model_id)
+            model = AutoModelForZeroShotObjectDetection.from_pretrained(self.model_id)
             if self.device == "cuda":
-                self._model = self._model.to("cuda")
+                model = model.to("cuda")
+
+            with _SHARED_CACHE_LOCK:
+                _SHARED_MODEL_CACHE[self.model_id] = {"processor": processor, "model": model}
+
+            self._processor = processor
+            self._model = model
             self.is_loaded = True
             return True
         except Exception as e:
@@ -397,11 +489,34 @@ class GroundingDINORuntime(BaseModelRuntime):
         if not clean_phrase.endswith("."):
             clean_phrase += "."
 
+        # Deterministic cache key based on image identity, clean prompt, and thresholds
+        img_bytes = image.tobytes()
+        img_hash = hashlib.sha256(img_bytes).hexdigest()
+        cache_key = (self.model_id, img_hash, clean_phrase, round(box_threshold, 3), round(text_threshold, 3))
+
+        with _GROUNDING_CACHE_LOCK:
+            if cache_key in _GROUNDING_INFERENCE_CACHE:
+                cached = _GROUNDING_INFERENCE_CACHE[cache_key]
+                _GROUNDING_INFERENCE_CACHE.move_to_end(cache_key)
+                import copy
+                return {
+                    "detections": copy.deepcopy(cached["detections"]),
+                    "target_phrase": target_phrase,
+                    "prompt": clean_phrase,
+                    "image_width": w,
+                    "image_height": h,
+                    "count": len(cached["detections"]),
+                    "inference_time_ms": 0.05,
+                    "cached": True,
+                    "cache_hit": True,
+                    "model_metadata": self.get_metadata(),
+                }
+
         inputs = self._processor(images=inf_image, text=clean_phrase, return_tensors="pt")
         if self.device == "cuda":
             inputs = {k: v.to("cuda") for k, v in inputs.items()}
 
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = self._model(**inputs)
 
         # Post-process outputs scaled directly to original pixel dimensions [x1, y1, x2, y2]
@@ -448,14 +563,14 @@ class GroundingDINORuntime(BaseModelRuntime):
 
                 detections.append({
                     "label": label_str,
-                    "box": [round(x1, 2), round(y1, 2), round(x2, 2), round(y2, 2)],
+                    "box": [xmin_1000, ymin_1000, xmax_1000, ymax_1000],
                     "bbox_pixel": [round(x1, 2), round(y1, 2), round(x2, 2), round(y2, 2)],
                     "box_2d": [xmin_1000, ymin_1000, xmax_1000, ymax_1000],
                     "bbox_normalized": [xmin_1000, ymin_1000, xmax_1000, ymax_1000],
                     "score": round(float(score), 4),
                 })
 
-        return {
+        result = {
             "detections": detections,
             "target_phrase": target_phrase,
             "prompt": clean_phrase,
@@ -463,8 +578,17 @@ class GroundingDINORuntime(BaseModelRuntime):
             "image_height": h,
             "count": len(detections),
             "inference_time_ms": round(dur, 2),
+            "cached": False,
+            "cache_hit": False,
             "model_metadata": self.get_metadata(),
         }
+
+        with _GROUNDING_CACHE_LOCK:
+            _GROUNDING_INFERENCE_CACHE[cache_key] = result
+            if len(_GROUNDING_INFERENCE_CACHE) > _MAX_GROUNDING_CACHE_SIZE:
+                _GROUNDING_INFERENCE_CACHE.popitem(last=False)
+
+        return result
 
 
 # ---------------------------------------------------------------------------
@@ -487,14 +611,28 @@ class OpticalSARFusionRuntime(BaseModelRuntime):
         self.is_trained_fusion_model = False
 
     def _do_load(self) -> bool:
+        with _SHARED_CACHE_LOCK:
+            if self.model_id in _SHARED_MODEL_CACHE:
+                cached = _SHARED_MODEL_CACHE[self.model_id]
+                self._processor = cached["processor"]
+                self._model = cached["model"]
+                self.is_loaded = True
+                return True
+
         try:
             import torch
             from transformers import BlipProcessor, BlipForConditionalGeneration
 
-            self._processor = BlipProcessor.from_pretrained(self.model_id)
-            self._model = BlipForConditionalGeneration.from_pretrained(self.model_id)
+            processor = BlipProcessor.from_pretrained(self.model_id)
+            model = BlipForConditionalGeneration.from_pretrained(self.model_id)
             if self.device == "cuda":
-                self._model = self._model.to("cuda")
+                model = model.to("cuda")
+
+            with _SHARED_CACHE_LOCK:
+                _SHARED_MODEL_CACHE[self.model_id] = {"processor": processor, "model": model}
+
+            self._processor = processor
+            self._model = model
             self.is_loaded = True
             return True
         except Exception as e:
@@ -565,7 +703,7 @@ class OpticalSARFusionRuntime(BaseModelRuntime):
         if self.device == "cuda":
             sar_inputs = {k: v.to("cuda") for k, v in sar_inputs.items()}
 
-        with torch.no_grad():
+        with torch.inference_mode():
             opt_vision = self._model.vision_model(**opt_inputs)
             f_opt = opt_vision.last_hidden_state[:, 0, :]  # [1, 768]
 

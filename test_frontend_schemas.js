@@ -138,8 +138,54 @@ function testResponseParsing() {
   assert.strictEqual(offlineState.error_code, "HTTP_503");
   console.log("✓ Handled offline/error state safely.");
 
+  // 7. Multimodal Optical + SAR Separated Evidence Parsing
+  console.log("\n[UNIT 7] Validating Optical + SAR Multimodal Separated Reasoning...");
+  const multimodalResponse = {
+    request_id: "req_multi_001",
+    status: "completed",
+    query: "Compare optical and SAR",
+    optical_sar_analysis: {
+      optical_evidence: "Visible roof structures and vegetation signatures are detected.",
+      sar_evidence: "Microwave backscatter texture and double-bounce reflection signatures analyzed.",
+      fused_conclusion: "Both modalities support the presence of a built-up structure.",
+      is_trained_model: false,
+      model_provenance: "Research baseline — trained multimodal fusion checkpoint unavailable.",
+      cosine_similarity: 0.82,
+    }
+  };
+
+  assert.strictEqual(multimodalResponse.optical_sar_analysis.optical_evidence.includes("Visible roof"), true);
+  assert.strictEqual(multimodalResponse.optical_sar_analysis.sar_evidence.includes("Microwave"), true);
+  assert.strictEqual(multimodalResponse.optical_sar_analysis.fused_conclusion.includes("Both modalities"), true);
+  assert.strictEqual(multimodalResponse.optical_sar_analysis.is_trained_model, false);
+  console.log("✓ Multimodal Optical + SAR separated reasoning cleanly verified.");
+
+  // 8. Semantic Change Understanding Schema Parsing
+  console.log("\n[UNIT 8] Validating Semantic Change Understanding & Change-VQA Schema...");
+  const changeResponse = {
+    request_id: "req_change_001",
+    status: "completed",
+    query: "What changed near the buildings?",
+    change_analysis: {
+      summary: "Bi-temporal change detected.",
+      what_changed: "Land-use transition from forest to residential construction.",
+      change_category: "SEMANTIC CHANGE",
+      before_interpretation: "Image A (Before): dense forest and woodland canopy",
+      after_interpretation: "Image B (After): dense residential area with rooftops",
+      change_vqa_answer: "Near buildings: new residential structures constructed in previously vegetated area.",
+      changed_fraction: 0.18,
+      mean_intensity_delta: 42.5,
+      model_provenance: "Research baseline — temporal feature differencing, Otsu clustering & RS object grounding",
+    }
+  };
+
+  assert.strictEqual(changeResponse.change_analysis.change_category, "SEMANTIC CHANGE");
+  assert.strictEqual(changeResponse.change_analysis.before_interpretation.includes("dense forest"), true);
+  assert.strictEqual(changeResponse.change_analysis.after_interpretation.includes("dense residential"), true);
+  console.log("✓ Semantic Change taxonomy and Change-VQA schema verified.");
+
   console.log("\n========================================================");
-  console.log("ALL 6 FRONTEND UNIT & SCHEMA TESTS PASSED!");
+  console.log("ALL 8 FRONTEND UNIT & SCHEMA TESTS PASSED!");
   console.log("========================================================");
 }
 

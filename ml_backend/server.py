@@ -198,10 +198,12 @@ def encode_image_b64(img: Image.Image) -> str:
 class QueryRequest(BaseModel):
     query: str = Field(default="", max_length=1000)
     optical_image: Optional[str] = None
+    image: Optional[str] = None
     sar_image: Optional[str] = None
     change_image_a: Optional[str] = None
     change_image_b: Optional[str] = None
     probe_features: Optional[List[str]] = None
+    execution_profile: Optional[str] = Field(default="auto", description="Execution profile: auto | fast | accurate")
 
 
 class ChangeRequest(BaseModel):
@@ -259,8 +261,10 @@ def process_query(req: QueryRequest, request: Request):
             detail=f"Query exceeds maximum character limit of {settings.MAX_QUERY_LENGTH}.",
         )
 
-    # Safe decoding with format and size checking
-    optical_img = decode_b64_image(req.optical_image, field_name="optical_image")
+    # Safe decoding with format and size checking (supports optical_image or image alias)
+    raw_optical = req.optical_image if req.optical_image is not None else req.image
+    field_name_opt = "optical_image" if req.optical_image is not None else "image"
+    optical_img = decode_b64_image(raw_optical, field_name=field_name_opt)
     sar_img = decode_b64_image(req.sar_image, field_name="sar_image")
     change_a_img = decode_b64_image(req.change_image_a, field_name="change_image_a")
     change_b_img = decode_b64_image(req.change_image_b, field_name="change_image_b")
@@ -273,6 +277,7 @@ def process_query(req: QueryRequest, request: Request):
         change_image_b=change_b_img,
         probe_features=req.probe_features,
         request_id=req_id,
+        execution_profile=req.execution_profile,
     )
 
     # Geospatial Metadata & GeoJSON Export

@@ -217,6 +217,25 @@ def validate_caption_quality(
                 diagnostics={"token_repeats": token_repeats},
             )
 
+    # 8. Out-of-Domain Generic Artifact Filter (rejects 'a map of', 'screenshot', 'computer screen')
+    lower_text = text.lower()
+    generic_artifact_triggers = [
+        "a map showing", "a map of", "a close up of a map", "screenshot",
+        "computer screen", "diagram showing", "a drawing of", "a white background",
+        "stock photo", "clip art"
+    ]
+    for trig in generic_artifact_triggers:
+        if trig in lower_text:
+            return CaptionValidationResult(
+                is_valid=False,
+                status="generic_artifact",
+                reason=f"Out-of-domain generic artifact detected: '{trig}'",
+                clean_caption=text,
+                lexical_diversity=round(ttr, 3),
+                repetition_score=0.75,
+                diagnostics={"trigger": trig},
+            )
+
     # Clean sentence capitalization
     clean_text = text[0].upper() + text[1:] if len(text) > 1 else text.upper()
 

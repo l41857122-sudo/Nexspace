@@ -642,18 +642,83 @@ function ScanResultsPanel({
             </div>
           )}
 
-          {/* Cross-Modal SAR Findings */}
-          {result.optical_sar_analysis && (
-            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-1.5 md:col-span-2">
-              <div className="text-xs font-semibold text-white flex items-center gap-2">
-                <Leaf size={15} className="text-purple-400" />
-                <span>Cross-Image Comparison (Optical &amp; SAR)</span>
+          {/* Bi-Temporal Semantic Change Findings */}
+          {result.change_analysis && (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-2 md:col-span-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-white flex items-center gap-2">
+                  <RotateCcw size={15} className="text-amber-400" />
+                  <span>Bi-Temporal Change Assessment</span>
+                </span>
+                {result.change_analysis.change_category && (
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                    result.change_analysis.change_category === "SEMANTIC CHANGE"
+                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                      : result.change_analysis.change_category === "OBJECT CHANGE"
+                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                      : "bg-slate-800 text-slate-300 border border-slate-700"
+                  }`}>
+                    {result.change_analysis.change_category}
+                  </span>
+                )}
               </div>
-              <p className="text-xs text-slate-300 font-sans">
-                {result.optical_sar_analysis.correlation_summary || "Optical and SAR imagery exhibit consistent structural patterns across the scene."}
+              <p className="text-xs text-slate-200 font-sans leading-relaxed">
+                {result.change_analysis.what_changed || result.change_analysis.summary}
               </p>
-              <div className="text-[10px] font-mono text-slate-400 pt-1">
-                Analysis type: Preliminary feature comparison baseline
+              {result.change_analysis.before_interpretation && result.change_analysis.after_interpretation && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  <div className="bg-slate-950/70 border border-slate-800/80 rounded p-2 text-xs font-sans text-slate-300">
+                    <span className="text-[10px] font-mono text-cyan-400 block mb-0.5">BEFORE SCENE:</span>
+                    {result.change_analysis.before_interpretation}
+                  </div>
+                  <div className="bg-slate-950/70 border border-slate-800/80 rounded p-2 text-xs font-sans text-slate-300">
+                    <span className="text-[10px] font-mono text-amber-400 block mb-0.5">AFTER SCENE:</span>
+                    {result.change_analysis.after_interpretation}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Cross-Modal Optical + SAR Findings */}
+          {result.optical_sar_analysis && (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-2 md:col-span-2">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold text-white flex items-center gap-2">
+                  <Leaf size={15} className="text-purple-400" />
+                  <span>Multimodal Optical + SAR Reasoning</span>
+                </div>
+                <span className="text-[10px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+                  Dual-Modality
+                </span>
+              </div>
+
+              {/* Separated Optical & SAR Physical Signals */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                <div className="bg-slate-950/70 border border-cyan-500/20 rounded p-2.5 text-xs font-sans space-y-1">
+                  <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold block">OPTICAL EVIDENCE</span>
+                  <p className="text-slate-300 leading-relaxed">
+                    {result.optical_sar_analysis.optical_evidence || "Visible roof structures and vegetation signatures are detected."}
+                  </p>
+                </div>
+                <div className="bg-slate-950/70 border border-purple-500/20 rounded p-2.5 text-xs font-sans space-y-1">
+                  <span className="text-[10px] font-mono text-purple-400 uppercase font-bold block">SAR EVIDENCE</span>
+                  <p className="text-slate-300 leading-relaxed">
+                    {result.optical_sar_analysis.sar_evidence || "Microwave backscatter texture and double-bounce reflection signatures analyzed."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Fused Multimodal Conclusion */}
+              <div className="bg-cyan-950/30 border border-cyan-500/30 rounded p-2.5 text-xs font-sans space-y-1">
+                <span className="text-[10px] font-mono text-emerald-400 uppercase font-bold block">FUSED MULTIMODAL CONCLUSION</span>
+                <p className="text-slate-200 font-medium leading-relaxed">
+                  {result.optical_sar_analysis.fused_conclusion || result.optical_sar_analysis.correlation_summary || "Multi-sensor analysis cross-validates surface features across modalities."}
+                </p>
+              </div>
+
+              <div className="text-[10px] font-mono text-slate-500 pt-0.5">
+                {result.optical_sar_analysis.model_provenance || "Research baseline — trained multimodal fusion checkpoint unavailable."}
               </div>
             </div>
           )}
@@ -706,16 +771,22 @@ function ScanResultsPanel({
         >
           <span className="flex items-center gap-1.5">
             <Terminal size={13} />
-            <span>Advanced Technical Details &amp; Execution Telemetry</span>
+            <span>Advanced Technical Details &amp; Model Provenance</span>
           </span>
           {showTechnical ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
 
         {showTechnical && (
           <div className="mt-3 space-y-3 bg-[#060e18] border border-slate-800 rounded-xl p-4 text-xs font-mono">
-            <div>
-              <span className="text-slate-400 uppercase text-[10px]">Active Routing Tools: </span>
-              <span className="text-cyan-300">{result.selected_tools?.join(", ") || "None"}</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <span className="text-slate-400 uppercase text-[10px] block">Active Routing Tools:</span>
+                <span className="text-cyan-300">{result.selected_tools?.join(", ") || "None"}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 uppercase text-[10px] block">Confidence Provenance:</span>
+                <span className="text-slate-300">{result.confidence_source || "Deterministic rule synthesis"}</span>
+              </div>
             </div>
 
             {trace.length > 0 && (

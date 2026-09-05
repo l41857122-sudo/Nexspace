@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import Sidebar from "./Sidebar";
 
+import { validateAndProcessImageFile, ACCEPT_FILE_ATTR } from "../utils/imageValidation";
+import { setActiveSourceImage, clearCurrentInvestigation } from "../utils/investigationStorage";
+
 export default function UploadPage() {
   const [fileName, setFileName] = useState("S2A_MSIL2A_20240315T105341.zip");
   const [fileSize, setFileSize] = useState("4.8 GB");
@@ -69,10 +72,18 @@ export default function UploadPage() {
     }
   };
 
-  const handleFileSelect = (files: FileList | null) => {
+  const handleFileSelect = async (files: FileList | null) => {
     if (files && files.length > 0) {
       const file = files[0];
-      const sizeStr = (file.size / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+      const sizeStr = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+      
+      // If it is a raster image, register as canonical source image
+      const proc = await validateAndProcessImageFile(file);
+      if (proc.valid && proc.source) {
+        setActiveSourceImage(proc.source);
+        clearCurrentInvestigation(true);
+      }
+      
       startUploadSimulation(file.name, sizeStr);
     }
   };

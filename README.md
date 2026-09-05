@@ -1,6 +1,6 @@
 # 🌌 NexSpace — Multi-Modal Geospatial Intelligence Platform
 
-NexSpace is a production-grade Agentic Multi-Modal Remote Sensing Intelligence Platform integrating Vision-Language Models (VLM), Zero-Shot Grounding, Bi-Temporal Change Detection, Optical+SAR Multimodal Fusion, and Geospatial Intelligence into an auditable investigation terminal.
+NexSpace is an auditable Agentic Multi-Modal Remote Sensing Intelligence Platform integrating Remote-Sensing Vision-Language Models (VLM), Zero-Shot Grounding, Bi-Temporal Semantic Change Reasoning, Physical Optical+SAR Microwave Fusion, Multi-Scale High-Resolution Tiling, and Geospatial Intelligence into an interactive investigation terminal.
 
 ---
 
@@ -26,14 +26,12 @@ The `setup.bat` script automatically:
 2. Creates an isolated local Python virtual environment (`.venv`) if one does not already exist.
 3. Upgrades `pip` and installs all backend machine learning dependencies from `requirements.txt`.
 4. Installs all Node.js and Next.js frontend dependencies via `npm install`.
-5. Initializes `.env.local` from `.env.example` if not already present (strictly preserving existing `.env.local`).
+5. Initializes `.env.local` from `.env.example` if not already present.
 6. Verifies system integrity, required file trees, and Python backend module imports.
 
 ---
 
 ### Option B: Manual Cross-Platform Setup (Windows / macOS / Linux)
-
-If you prefer manual configuration or are on Linux/macOS:
 
 ```bash
 # 1. Clone repository and navigate to root
@@ -54,7 +52,7 @@ pip install -r requirements.txt
 # 4. Install Node.js frontend dependencies
 npm install
 
-# 5. Initialize environment variables (only if .env.local does not exist)
+# 5. Initialize environment variables
 cp .env.example .env.local
 ```
 
@@ -90,40 +88,50 @@ npm run dev:ml
 
 ---
 
-## 🛰️ Predefined Live Investigation Scenarios
+## 🛰️ Remote-Sensing ML Capabilities Matrix
 
-Inside the NexSpace NLP Terminal (`/query`), click any scenario button for real-time model execution:
-
-| Scenario | Objective | Specialist Model / Tool | Expected Route |
+| Capability | Model / Engine | Real vs Baseline vs Fallback | Status |
 | :--- | :--- | :--- | :--- |
-| **1. Satellite Scene Analysis** | Overview of nadir scene infrastructure | Salesforce BLIP Base | `Optical_Caption` |
-| **2. Building Detection** | Zero-shot visual bounding box localization | IDEA Grounding DINO Tiny | `Grounding` |
-| **3. Remote Sensing VQA** | Natural language land-cover question | PaliGemma / RSVQA Adapter | `VQA` |
-| **4. Combined Investigation** | Composite captioning + building detection | BLIP + Grounding DINO | `Optical_Caption` + `Grounding` |
-| **5. Temporal Change Analysis** | Bi-temporal change detection & Otsu anomalies | Classical OpenCV Difference | `Change_Analysis` + `Anomaly_Extraction` |
-| **6. Optical + SAR Fusion** | Cross-modal 1536-dim joint feature fusion | Dual-Backbone Feature Baseline | `Optical_SAR_Analysis` |
-| **7. Geospatial Intelligence** | Real CRS world bounds & ground surface area | GeoTIFF / Affine Coordinate Engine | `Geospatial Engine` |
+| **Domain-Adapted Vision Core** | `flax-community/clip-rsicd` | **REAL RS-ADAPTED MODEL** | `LOADED` |
+| **Adaptation Pipeline (PEFT/LoRA)** | PyTorch Contrastive Adaptation | **TRAINING PIPELINE READY** | `REPRODUCIBLE` |
+| **Remote-Sensing VQA** | `rs_vqa_engine.py` (RSICD + DINO + ExG) | **REAL / DOMAIN REASONING** | `LOADED` |
+| **Zero-Shot Grounding** | `IDEA-Research/grounding-dino-tiny` | **REAL ZERO-SHOT MODEL** | `LOADED` |
+| **Optical Scene Captioning** | `Salesforce/blip-image-captioning-base` | **GENERIC PRETRAINED MODEL** | `LOADED` |
+| **Semantic Change Understanding** | `semantic_change.py` | **RESEARCH BASELINE** | `LOADED` |
+| **Optical + SAR Physical Fusion** | `optical_sar_fusion.py` (ExG + Microwave) | **RESEARCH BASELINE** | `LOADED` |
+| **Rigorous Co-Registration** | `coregistration.py` (CRS/Affine/Overlap) | **REAL GEOSPATIAL VALIDATION** | `LOADED` |
+| **High-Res Sliding Tiling + NMS** | `tiling.py` (Normalized [0, 1000] Boxes) | **REAL TILING ENGINE** | `LOADED` |
+| **Honest Confidence Scoring** | `confidence_system.py` | **UNCALIBRATED / CALIBRATED** | `ACTIVE` |
+| **Benchmark Framework** | `benchmarks/evaluator.py` (RSVQA, VRSBench, etc.) | **EVALUATION READY** | `ACTIVE` |
+| **ISRO/SAC Adapter** | `isro_evaluation.py` (Cartosat-2S + RISAT) | **READY FOR EVALUATION** | `ACTIVE` |
 
 ---
 
 ## 🧪 Testing & Verification Suites
 
 ```bash
-# TypeScript compiler type check
-npx tsc --noEmit
+# Run all backend regression unit and integration tests
+python ml_backend/run_all_backend_tests.py
 
-# Core ML Controller & Hardening unit tests
-python ml_backend/test_step10_hardening.py
-python ml_backend/test_step14_caption_safety.py
-
-# End-to-end live API proxy & route integration tests
-node test_e2e_live_integration.js
+# Run frontend schema & API contract validation tests
 node test_frontend_schemas.js
-node test_backend.js
+
+# Run Next.js production build verification
+npm run build
+
+# TypeScript validation
+npx tsc --noEmit
 ```
 
 ---
 
-## 🔬 Scientific Honesty & Methodology Disclosures
+## 📚 Technical Documentation
 
-Detailed model audits, empirical benchmark metrics, and domain-shift disclosures are documented in [`ml_backend/MODEL_QUALITY.md`](ml_backend/MODEL_QUALITY.md) and [`ml_backend/PRD_COMPLIANCE.md`](ml_backend/PRD_COMPLIANCE.md).
+Detailed architectural and scientific disclosures are available in the [`docs/`](docs/) directory:
+- [Model Architecture & Provenance](docs/model-architecture.md)
+- [PEFT / Adaptation Pipeline](docs/training.md)
+- [Benchmark Evaluation Framework](docs/evaluation.md)
+- [Supported Datasets Reference](docs/datasets.md)
+- [Semantic Change & Change-VQA](docs/change-vqa.md)
+- [Multimodal Optical + SAR Fusion](docs/optical-sar.md)
+- [Model Quality & Scientific Honesty](ml_backend/MODEL_QUALITY.md)

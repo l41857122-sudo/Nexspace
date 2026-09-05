@@ -1,0 +1,19 @@
+{
+  "benchmark": "RSVQA",
+  "task": "Visual Question Answering",
+  "status": "NOT RUN \u2014 DATASET NOT AVAILABLE",
+  "dataset_directory": "./nonexistent_rsvqa_path",
+  "expected_files": [
+    "questions.json",
+    "annotations.json",
+    "images/"
+  ],
+  "metrics_supported": [
+    "accuracy_overall",
+    "accuracy_presence",
+    "accuracy_counting",
+    "accuracy_comparison"
+  ],
+  "evaluation_date": "2026-09-04T16:52:35.834830+00:00",
+  "note": "The official RSVQA dataset was not found on local disk. In adherence to Scientific Honesty rules, no synthetic benchmark scores were fabricated. To evaluate: download RSVQA and place files in './nonexistent_rsvqa_path'."
+}

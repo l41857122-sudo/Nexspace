@@ -114,9 +114,27 @@ SYNONYM_MAP = {
 
 
 def normalize_target_phrase(phrase: str) -> str:
-    """Normalize domain synonyms and remove noise words."""
+    """Normalize domain synonyms and format compound multi-targets for joint grounding."""
     clean = phrase.strip().lower()
-    clean = re.sub(r"\b(this|the|a|an|image|scene|photo|picture|area|region|satellite|imagery)\b", "", clean).strip()
+
+    # Check for compound multi-targets (e.g. "boats, bridges and buildings", "ships & vehicles")
+    if "," in clean or " and " in clean or " & " in clean:
+        parts = re.split(r"[,&]|\band\b", clean)
+        sub_targets = []
+        for p in parts:
+            sub_clean = re.sub(r"\b(this|the|a|an|image|scene|photo|picture|area|region|satellite|imagery|visible|present|here|there|detected|seen|are|is|all|any)\b", "", p).strip()
+            if sub_clean:
+                words = sub_clean.split()
+                norm_words = [SYNONYM_MAP.get(w, w) for w in words]
+                item_str = " ".join(norm_words).strip()
+                if item_str and item_str not in sub_targets:
+                    sub_targets.append(item_str)
+        if len(sub_targets) > 1:
+            return " . ".join(sub_targets)
+        elif len(sub_targets) == 1:
+            return sub_targets[0]
+
+    clean = re.sub(r"\b(this|the|a|an|image|scene|photo|picture|area|region|satellite|imagery|visible|present|here|there|detected|seen|are|is)\b", "", clean).strip()
     words = clean.split()
     normalized = [SYNONYM_MAP.get(w, w) for w in words]
     res = " ".join(normalized).strip()
@@ -131,22 +149,22 @@ def extract_grounding_target(query: str) -> str:
     q_lower = re.sub(r"^(?:can you|could you|please|i want to|tell me|show me)\s+", "", q_lower).strip()
 
     # Pattern 1: Counting ("how many X", "count the X", "number of X")
-    count_m = re.search(r"(?:how many|count the|count|number of|quantity of|total of)\s+([a-zA-Z\s]+?)(?:\s+(?:are there|can you see|exist|in|on|located)|\?|$)", q_lower)
+    count_m = re.search(r"(?:how many|count the|count|number of|quantity of|total of)\s+([a-zA-Z\s,\&]+?)(?:\s+(?:are there|are visible|are present|can you see|exist|in|on|located|visible|present)|\?|$)", q_lower)
     if count_m:
         return normalize_target_phrase(count_m.group(1))
 
     # Pattern 2: Localization ("where are the X", "find the X", "locate the X")
-    loc_m = re.search(r"(?:where is|where are|locate|find|detect|pinpoint|segment|box|highlight|identify)\s+(?:the\s+|all\s+|any\s+)?([a-zA-Z\s]+?)(?:\s+(?:in|on|across|within|located)|\?|$)", q_lower)
+    loc_m = re.search(r"(?:where is|where are|locate|find|detect|pinpoint|segment|box|highlight|identify)\s+(?:the\s+|all\s+|any\s+)?([a-zA-Z\s,\&]+?)(?:\s+(?:in|on|across|within|located|visible|present)|\?|$)", q_lower)
     if loc_m:
         return normalize_target_phrase(loc_m.group(1))
 
     # Pattern 3: Presence ("are there X", "is there X")
-    pres_m = re.search(r"(?:are there|is there|can you see|do you see)\s+(?:any\s+|a\s+|an\s+)?([a-zA-Z\s]+?)(?:\s+(?:in|on|present|visible)|\?|$)", q_lower)
+    pres_m = re.search(r"(?:are there|is there|can you see|do you see)\s+(?:any\s+|a\s+|an\s+)?([a-zA-Z\s,\&]+?)(?:\s+(?:in|on|present|visible)|\?|$)", q_lower)
     if pres_m:
         return normalize_target_phrase(pres_m.group(1))
 
     # Common remote-sensing target fallback search
-    for kw in ["building", "buildings", "ship", "ships", "vessel", "vessels", "road", "roads", "water", "vehicle", "vehicles", "pier", "vegetation", "structure", "structures"]:
+    for kw in ["building", "buildings", "ship", "ships", "boat", "boats", "vessel", "vessels", "road", "roads", "water", "vehicle", "vehicles", "pier", "vegetation", "structure", "structures", "bridge", "bridges"]:
         if re.search(rf"\b{kw}\b", q_lower):
             return normalize_target_phrase(kw)
 
@@ -346,13 +364,41 @@ class IntentClassifier:
             )
 
         # ---------------------------------------------------------
-        # 8. Counting Queries ("How many X", "Count the X")
+        # 8. Multi-Intent Combined Queries (e.g. "Describe image and locate buildings")
+        # ---------------------------------------------------------
+        has_caption_intent = bool(re.search(r"\b(describe|overview|summarize|what is in this image|what do you see|what is happening)\b", q_lower))
+        has_grounding_intent = bool(re.search(r"\b(locate|find|detect|pinpoint|show me|where is|where are|bounding box)\b", q_lower))
+        has_vqa_intent = bool(re.search(r"\b(is there|are there|is it|does it|can you tell|tell me if|what color|what type of area|what is the dominant|is .* present|are .* present|is .* visible|are .* visible)\b", q_lower))
+
+        if sum([has_caption_intent, has_grounding_intent, has_vqa_intent]) >= 2:
+            tools = []
+            if has_caption_intent:
+                tools.append("Optical_Caption")
+            if has_grounding_intent:
+                tools.append("Grounding")
+            if has_vqa_intent:
+                tools.append("VQA")
+            target_phrase = extract_grounding_target(q_raw)
+            return ClassificationResult(
+                task_type=TaskType.MULTI_TASK,
+                confidence=0.90,
+                confidence_type="heuristic",
+                confidence_source="semantic_intent_router",
+                parameters={"query": q_raw, "target_phrase": target_phrase},
+                target_tools=tools,
+                restructured_vqa_queries=[q_raw] if "VQA" in tools else [],
+                query_family="MULTI_TASK",
+                reasoning=f"Multi-intent query combining {tools} -> scheduled multi-specialist execution.",
+                is_supported=True,
+            )
+
+        # ---------------------------------------------------------
+        # 9. Counting Queries ("How many X", "Count the X")
         # ---------------------------------------------------------
         is_counting = bool(re.search(r"\b(how many|count the|count|number of|quantity of|total count)\b", q_lower))
         if is_counting:
             target_phrase = extract_grounding_target(q_raw)
             tools = ["Grounding"]
-            # Add VQA query for fallback PaliGemma verification
             vqa_q = f"How many {target_phrase} are present?"
             return ClassificationResult(
                 task_type=TaskType.MULTI_TASK,
@@ -369,77 +415,91 @@ class IntentClassifier:
             )
 
         # ---------------------------------------------------------
-        # 9. Spatial / Location Queries ("Where are...", "Which side...")
+        # 10. Spatial / Location Queries ("Where are...", "Where is...", "Which side...")
         # ---------------------------------------------------------
-        is_spatial = bool(re.search(r"\b(where is|where are|which side|which region|locate the|largest structure|pinpoint|spatial distribution)\b", q_lower))
+        is_spatial = bool(re.search(r"\b(where is|where are|which side|which region|locate the|pinpoint|spatial distribution)\b", q_lower))
         if is_spatial:
             target_phrase = extract_grounding_target(q_raw)
-            tools = ["Grounding", "Optical_Caption"]
+            tools = ["Grounding"]
             return ClassificationResult(
-                task_type=TaskType.MULTI_TASK,
+                task_type=TaskType.GROUNDING,
                 confidence=0.89,
                 confidence_type="heuristic",
                 confidence_source="semantic_intent_router",
                 parameters={"query": q_raw, "target_phrase": target_phrase, "spatial_inquiry": True},
                 target_tools=tools,
                 query_family="SPATIAL_LOCALIZATION",
-                reasoning=f"Spatial location inquiry for '{target_phrase}' -> routed to Grounding DINO and scene context.",
+                reasoning=f"Spatial location inquiry for '{target_phrase}' -> routed to Grounding DINO spatial localization.",
                 is_supported=True,
             )
 
         # ---------------------------------------------------------
-        # 10. Object Identification & Detection ("Can you find...", "Are there...")
+        # 11. Explicit Object Localization & Grounding ("Locate...", "Find...", "Detect...", "Show me...")
         # ---------------------------------------------------------
-        is_object_query = bool(re.search(
-            r"\b(locate|find|detect|identify|structures present|objects visible|see any|are there|is there|show me)\b",
+        is_grounding_explicit = bool(re.search(
+            r"\b(locate|find|detect|show me|bounding box|box for|highlight)\b",
             q_lower,
         ))
-        if is_object_query:
+        if is_grounding_explicit:
             target_phrase = extract_grounding_target(q_raw)
-            tools = ["Grounding", "Optical_Caption"]
-            if any(re.search(rf"\b{w}\b", q_lower) for w in ["is there", "are there", "does", "can you tell", "tell me"]):
-                tools.append("VQA")
             return ClassificationResult(
-                task_type=TaskType.GROUNDING if "locate" in q_lower or "detect" in q_lower else TaskType.MULTI_TASK,
+                task_type=TaskType.GROUNDING,
                 confidence=0.88,
                 confidence_type="heuristic",
                 confidence_source="semantic_intent_router",
                 parameters={"query": q_raw, "target_phrase": target_phrase},
-                target_tools=tools,
-                restructured_vqa_queries=[q_raw] if "VQA" in tools else [],
+                target_tools=["Grounding"],
                 query_family="OBJECT_IDENTIFICATION",
-                reasoning=f"Object identification intent for '{target_phrase}' -> routed to Grounding DINO proposal extractor and visual verification.",
+                reasoning=f"Object localization intent for '{target_phrase}' -> routed to Grounding DINO bounding box proposal extractor.",
                 is_supported=True,
             )
 
         # ---------------------------------------------------------
-        # 11. General Scene Understanding / Captioning
+        # 12. General Scene Understanding / Captioning
         # ---------------------------------------------------------
         is_scene_query = bool(re.search(
-            r"\b(what is in this image|what do you see|describe the scene|describe this image|describe|what is happening|what type of area|tell me about this area|what can you tell me|overview|summarize)\b",
+            r"\b(what is in this image|what is in the image|what is in this scene|what is in the scene|what is visible in|what do you see|describe the scene|describe this image|describe|what is happening|what type of area|tell me about this area|what can you tell me|overview|summarize)\b",
             q_lower,
         )) or not q_raw
         if is_scene_query:
-            tools = ["Optical_Caption"]
-            # If structures or objects also mentioned, add grounding
-            if any(w in q_lower for w in ["building", "buildings", "structures", "road", "ships", "water"]):
-                tools.append("Grounding")
-            target_phrase = extract_grounding_target(q_raw) if len(tools) > 1 else "objects"
-
+            target_phrase = extract_grounding_target(q_raw)
             return ClassificationResult(
-                task_type=TaskType.CAPTIONING if len(tools) == 1 else TaskType.MULTI_TASK,
+                task_type=TaskType.CAPTIONING,
                 confidence=0.90 if q_raw else 0.70,
                 confidence_type="heuristic",
                 confidence_source="semantic_intent_router",
                 parameters={"query": q_raw, "target_phrase": target_phrase},
-                target_tools=tools,
+                target_tools=["Optical_Caption"],
                 query_family="SCENE_UNDERSTANDING",
                 reasoning="General scene understanding request -> routed to BLIP optical scene captioner.",
                 is_supported=True,
             )
 
         # ---------------------------------------------------------
-        # 12. Default Open-Ended Fallback (Safe & Cooperative)
+        # 13. Direct Yes/No, Presence & Attribute VQA Queries
+        # ---------------------------------------------------------
+        is_vqa_query = bool(re.search(
+            r"\b(is there|are there|is .* present|are .* present|is .* visible|are .* visible|does this contain|do you see|can you see|what type of|what is the dominant|what kind of|what color|tell me if|any .* present|any .* visible)\b",
+            q_lower,
+        )) or (q_raw.endswith("?") and not has_caption_intent)
+        if is_vqa_query:
+            target_phrase = extract_grounding_target(q_raw)
+            norm_vqa = q_raw if q_raw.endswith("?") else f"{q_raw}?"
+            return ClassificationResult(
+                task_type=TaskType.VQA,
+                confidence=0.91,
+                confidence_type="heuristic",
+                confidence_source="semantic_intent_router",
+                parameters={"query": q_raw, "target_phrase": target_phrase, "question": norm_vqa},
+                target_tools=["VQA"],
+                restructured_vqa_queries=[norm_vqa],
+                query_family="VQA",
+                reasoning=f"Direct visual question answering for '{q_raw}' -> routed directly to VQA specialist.",
+                is_supported=True,
+            )
+
+        # ---------------------------------------------------------
+        # 14. Default Open-Ended Fallback (Safe & Cooperative)
         # ---------------------------------------------------------
         target_phrase = extract_grounding_target(q_raw)
         tools = ["Optical_Caption", "Grounding"]

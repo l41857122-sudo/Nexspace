@@ -1,0 +1,106 @@
+{
+  "A": {
+    "query": "Is there a body of water?",
+    "tools": [
+      "VQA"
+    ],
+    "latency_ms": 2054.25,
+    "detections": 0,
+    "evidence_count": 1,
+    "confidence": 0.67,
+    "confidence_type": "estimated",
+    "confidence_source": "ensemble_controller",
+    "answer_preview": "**Answer:** Yes, a water body is visible occupying approximately 1.5% of the image frame."
+  },
+  "B": {
+    "query": "Are there bridges?",
+    "tools": [
+      "VQA"
+    ],
+    "latency_ms": 353.07,
+    "detections": 0,
+    "evidence_count": 1,
+    "confidence": 0.89,
+    "confidence_type": "estimated",
+    "confidence_source": "ensemble_controller",
+    "answer_preview": "**Answer:** Yes, a prominent highway bridge spans across the river, connecting the western and eastern banks."
+  },
+  "C": {
+    "query": "Is vegetation present?",
+    "tools": [
+      "VQA"
+    ],
+    "latency_ms": 300.59,
+    "detections": 0,
+    "evidence_count": 1,
+    "confidence": 0.9,
+    "confidence_type": "estimated",
+    "confidence_source": "ensemble_controller",
+    "answer_preview": "**Answer:** Yes, substantial vegetation coverage (60.7% area) is detected across the landscape."
+  },
+  "D": {
+    "query": "How many boats are visible?",
+    "tools": [
+      "Grounding"
+    ],
+    "latency_ms": 19446.66,
+    "detections": 8,
+    "evidence_count": 8,
+    "confidence": 0.46,
+    "confidence_type": "model",
+    "confidence_source": "IDEA-Research/grounding-dino-tiny",
+    "answer_preview": "**Count:** We identified **8** candidate ships in this image.  *(Note: Grounding DINO identified candidate regions match"
+  },
+  "E": {
+    "query": "Where is the bridge?",
+    "tools": [
+      "Grounding"
+    ],
+    "latency_ms": 19896.47,
+    "detections": 1,
+    "evidence_count": 1,
+    "confidence": 0.33,
+    "confidence_type": "model",
+    "confidence_source": "IDEA-Research/grounding-dino-tiny",
+    "answer_preview": "**Location:** Found 1 candidate bridges, concentrated primarily in the **northern-eastern** region of the image."
+  },
+  "F": {
+    "query": "Describe the scene.",
+    "tools": [
+      "Optical_Caption"
+    ],
+    "latency_ms": 5427.23,
+    "detections": 0,
+    "evidence_count": 1,
+    "confidence": 0.78,
+    "confidence_type": "model",
+    "confidence_source": "clip_rsicd_domain_synthesis",
+    "answer_preview": "**Scene Description:** High-resolution remote-sensing satellite capture displaying flanked by river and freshwater water"
+  },
+  "G": {
+    "query": "What is near the bridge?",
+    "tools": [
+      "VQA"
+    ],
+    "latency_ms": 321.02,
+    "detections": 0,
+    "evidence_count": 1,
+    "confidence": 0.85,
+    "confidence_type": "estimated",
+    "confidence_source": "ensemble_controller",
+    "answer_preview": "**Answer:** Near the bridge, major highway transport corridors connect both banks of the river, linking the western indu"
+  },
+  "H": {
+    "query": "What objects are visible?",
+    "tools": [
+      "VQA"
+    ],
+    "latency_ms": 340.03,
+    "detections": 0,
+    "evidence_count": 1,
+    "confidence": 0.75,
+    "confidence_type": "estimated",
+    "confidence_source": "ensemble_controller",
+    "answer_preview": "**Answer:** The scene contains: man-made buildings and structures, trees and vegetated plots, roads / transport pathways"
+  }
+}

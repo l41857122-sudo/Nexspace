@@ -222,12 +222,18 @@ export interface AnomalySummary {
 
 export interface ChangeAnalysisResult {
   summary: string;
+  what_changed?: string;
+  change_category?: "PIXEL CHANGE" | "OBJECT CHANGE" | "SEMANTIC CHANGE" | string;
+  before_interpretation?: string;
+  after_interpretation?: string;
+  change_vqa_answer?: string;
   changed_fraction: number;
   mean_intensity_delta: number;
   overlay_image?: string | null;
   heatmap_image?: string | null;
   anomalies?: AnomalyRegion[];
   anomaly_summary?: AnomalySummary;
+  model_provenance?: string;
 }
 
 export interface OpticalSARAnalysisResult {
@@ -236,9 +242,14 @@ export interface OpticalSARAnalysisResult {
   joint_representation_dim?: number;
   cosine_similarity?: number;
   fusion_type?: string;
+  optical_evidence?: string;
+  sar_evidence?: string;
+  fused_conclusion?: string;
   cross_modal_summary?: string;
   correlation_summary?: string;
   alignment_status?: string;
+  is_trained_model?: boolean;
+  model_provenance?: string;
   limitations?: string[];
 }
 
@@ -269,6 +280,8 @@ export interface NexSpaceQueryResponse {
   confidence?: number | null;
   confidence_type?: "model" | "heuristic" | "unavailable";
   confidence_source?: string;
+  model_provenance?: string;
+  registration_quality?: string;
   fallback_count?: number;
   limitations?: string[];
   geojson?: GeoJSONFeatureCollection;
@@ -280,6 +293,7 @@ export interface NexSpaceQueryResponse {
   vqa_results?: VQAFinding[];
   change_analysis?: ChangeAnalysisResult | null;
   optical_sar_analysis?: OpticalSARAnalysisResult | null;
+  semantic_change?: Record<string, unknown> | null;
   response_text?: string;
   backend_status?: "live_backend" | "offline_fallback";
 }

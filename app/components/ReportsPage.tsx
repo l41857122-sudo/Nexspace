@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   FileText,
@@ -51,9 +51,26 @@ function Section({
 }
 
 export default function ReportsPage() {
-  const [investigationState] = useState<CanonicalInvestigationState | null>(() => {
-    return getCurrentInvestigation();
-  });
+  const [investigationState, setInvestigationState] = useState<CanonicalInvestigationState | null>(null);
+
+  useEffect(() => {
+    // Initial mount sync
+    setInvestigationState(getCurrentInvestigation());
+
+    const syncHandler = () => {
+      setInvestigationState(getCurrentInvestigation());
+    };
+
+    window.addEventListener("nexspace-investigation-changed", syncHandler);
+    window.addEventListener("nexspace-source-changed", syncHandler);
+    window.addEventListener("storage", syncHandler);
+
+    return () => {
+      window.removeEventListener("nexspace-investigation-changed", syncHandler);
+      window.removeEventListener("nexspace-source-changed", syncHandler);
+      window.removeEventListener("storage", syncHandler);
+    };
+  }, []);
 
   const sourceImage = useMemo<CanonicalSourceImage>(() => {
     if (investigationState?.source_image?.dataUrl) {
@@ -65,20 +82,52 @@ export default function ReportsPage() {
   }, [investigationState]);
 
   const normalizedDetections = useMemo(() => {
-    const raw = investigationState?.response?.grounding?.detections || [];
-    return raw
-      .map((det, idx) => {
-        const d = det as unknown as Record<string, unknown>;
-        const nBox = normalizeBox(d);
-        if (!nBox) return null;
-        return {
-          id: `target-${idx + 1}`,
-          label: (d.label as string) || `Target #${idx + 1}`,
-          score: typeof d.score === "number" ? d.score : null,
-          box: nBox,
-        };
-      })
-      .filter((d): d is NonNullable<typeof d> => d !== null);
+    if (!investigationState?.response) return [];
+
+    const list: Array<{ id: string; label: string; score: number | null; box: [number, number, number, number] }> = [];
+    const seen = new Set<string>();
+
+    // 1. Check grounding.detections
+    const rawGrounding = investigationState.response.grounding?.detections || [];
+    rawGrounding.forEach((det, idx) => {
+      const d = det as unknown as Record<string, unknown>;
+      const nBox = normalizeBox(d);
+      if (nBox) {
+        const key = `${nBox.join(",")}-${d.label || ""}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          list.push({
+            id: `target-${list.length + 1}`,
+            label: (d.label as string) || `Target #${list.length + 1}`,
+            score: typeof d.score === "number" ? d.score : null,
+            box: nBox,
+          });
+        }
+      }
+    });
+
+    // 2. Check evidence bounding boxes
+    const rawEvidence = investigationState.response.evidence || [];
+    rawEvidence.forEach((ev) => {
+      const e = ev as unknown as Record<string, unknown>;
+      if (e.type === "bounding_box" || e.box || e.box_2d || e.bbox_normalized || e.bbox_pixel) {
+        const nBox = normalizeBox(e);
+        if (nBox) {
+          const key = `${nBox.join(",")}-${e.label || ""}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            list.push({
+              id: `target-${list.length + 1}`,
+              label: (e.label as string) || `Target #${list.length + 1}`,
+              score: typeof e.score === "number" ? e.score : null,
+              box: nBox,
+            });
+          }
+        }
+      }
+    });
+
+    return list;
   }, [investigationState]);
 
   const caption = typeof investigationState?.response?.optical_caption === "string"
@@ -157,6 +206,16 @@ export default function ReportsPage() {
               {/* 1.0 Executive Summary */}
               <Section number="1.0" title="Executive Summary">
                 <div className="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  <div className="bg-cyan-950/30 border border-cyan-500/20 rounded-lg p-3">
+                    <p className="text-[10px] text-cyan-400 uppercase font-mono tracking-wider font-semibold mb-1">
+                      Primary Finding / Answer
+                    </p>
+                    <p className="text-sm font-medium text-white">
+                      {investigationState.response?.response_text ||
+                       investigationState.response?.investigation_report?.summary ||
+                       "Analysis completed."}
+                    </p>
+                  </div>
                   <p>
                     Automated remote sensing analysis was executed for query:{" "}
                     <strong className="text-cyan-300 font-mono">&ldquo;{investigationState.query}&rdquo;</strong> over source imagery{" "}

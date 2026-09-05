@@ -54,6 +54,50 @@ class InvestigationReport:
         }
 
 
+def _pluralize_single_noun(word: str) -> str:
+    """Pluralizes a single noun with standard English irregular morphology rules."""
+    w_lower = word.lower()
+    if w_lower.endswith("y") and len(word) > 1 and word[-2].lower() not in "aeiou":
+        return word[:-1] + "ies"
+    elif w_lower.endswith(("s", "sh", "ch", "x", "z")):
+        return word + "es"
+    elif w_lower.endswith("f") and not w_lower.endswith(("cliff", "roof")):
+        return word[:-1] + "ves"
+    elif w_lower.endswith("fe"):
+        return word[:-2] + "ves"
+    else:
+        return word + "s"
+
+
+def _pluralize_phrase(phrase: str) -> str:
+    """
+    Properly pluralizes noun phrases, including prepositional phrases ('body of water' -> 'bodies of water')
+    and preserves uncountable domain terms.
+    """
+    if not phrase:
+        return "objects"
+    phrase = phrase.strip()
+    p_lower = phrase.lower()
+
+    # Prepositional compound phrase: e.g. "body of water" -> "bodies of water"
+    compound_match = re.match(r"^([a-zA-Z]+)\s+(of\s+.+)$", phrase, re.IGNORECASE)
+    if compound_match:
+        head, tail = compound_match.groups()
+        head_plural = _pluralize_single_noun(head)
+        return f"{head_plural} {tail}"
+
+    # Uncountable remote sensing terms
+    uncountable = {"vegetation", "water", "farmland", "infrastructure", "aircraft", "debris", "foliage", "traffic", "radar backscatter"}
+    if p_lower in uncountable:
+        return phrase
+
+    # Already pluralized
+    if p_lower.endswith(("ies", "ses", "xes", "ches", "shes")) or (p_lower.endswith("s") and not p_lower.endswith(("us", "is", "ss"))):
+        return phrase
+
+    return _pluralize_single_noun(phrase)
+
+
 class InvestigationSynthesizer:
     """Synthesizes structured investigation reports and direct natural language responses."""
 
@@ -137,7 +181,11 @@ class InvestigationSynthesizer:
                 )
 
             elif t_name == "VQA":
-                ans = data.get("answer", "")
+                ans = data.get("primary_answer") or data.get("answer") or ""
+                if not ans and data.get("vqa_results"):
+                    v_items = data.get("vqa_results", [])
+                    ans_list = [v.get("answer", "") for v in v_items if isinstance(v, dict) and v.get("answer")]
+                    ans = " | ".join(ans_list)
                 if ans:
                     vqa_answers.append(ans)
                     observations.append(f"Visual Q&A inferred: \"{ans}\".")
@@ -279,7 +327,7 @@ class InvestigationSynthesizer:
         # Case 3: Counting Queries
         if bool(re.search(r"\b(how many|count the|count|number of|quantity of)\b", q_lower)):
             target_name = grounding_target or "object"
-            plural = f"{target_name}s" if not target_name.endswith("s") else target_name
+            plural = _pluralize_phrase(target_name)
             count = len(grounding_detections)
             sections.append(f"**Count:** We identified **{count}** candidate {plural} in this image.")
             if count > 0:
@@ -293,7 +341,7 @@ class InvestigationSynthesizer:
         # Case 4: Spatial / Location Queries ("Where are...", "Which side...")
         if bool(re.search(r"\b(where is|where are|which side|which region|locate the|pinpoint)\b", q_lower)):
             target_name = grounding_target or "object"
-            plural = f"{target_name}s" if not target_name.endswith("s") else target_name
+            plural = _pluralize_phrase(target_name)
             count = len(grounding_detections)
             if count > 0:
                 # Compute spatial distribution
@@ -355,18 +403,19 @@ class InvestigationSynthesizer:
             sections.append(f"**Scene Description:** {caption_text}")
             if grounding_detections:
                 target_display = grounding_target or "structure"
-                plural_name = f"{target_display}s" if not target_display.endswith("s") else target_display
+                plural_name = _pluralize_phrase(target_display)
                 sections.append(
                     f"**Objects Located:** We found {len(grounding_detections)} possible {plural_name} in this image."
                 )
         elif grounding_detections:
             target_display = grounding_target or "structure"
-            plural_name = f"{target_display}s" if not target_display.endswith("s") else target_display
+            plural_name = _pluralize_phrase(target_display)
             sections.append(
                 f"Scene description could not be generated reliably for this image. However, the vision grounding model identified **{len(grounding_detections)}** candidate region(s) matching '{target_display}'."
             )
         elif not sections:
-            sections.append("Scene description could not be generated reliably for this image. The visual content could not be interpreted with sufficient confidence from the available model weights.")
+            if not vqa_answers:
+                sections.append("Scene description could not be generated reliably for this image. The visual content could not be interpreted with sufficient confidence from the available model weights.")
 
         if vqa_answers:
             sections.append(f"**Answer:** {' | '.join(vqa_answers)}")

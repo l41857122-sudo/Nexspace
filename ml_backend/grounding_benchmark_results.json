@@ -1,0 +1,728 @@
+{
+  "Grounding_DINO_Baseline": {
+    "model_name": "Grounding DINO Tiny (Production Baseline)",
+    "model_id": "IDEA-Research/grounding-dino-tiny",
+    "cold_start_load_ms": 11946.85,
+    "mean_warm_inference_ms": 17588.93,
+    "ram_footprint_mb": 448.25,
+    "small_boat_sensitivity": "STRONG",
+    "bridge_localization": "ACCURATE",
+    "boat_count_found": 8,
+    "bridge_count_found": 1,
+    "prompts": {
+      "water": {
+        "phrase": "water",
+        "latency_ms": 19139.23,
+        "count": 1,
+        "scores": [
+          0.7801
+        ],
+        "boxes": [
+          [
+            1,
+            2,
+            656,
+            997
+          ]
+        ],
+        "mean_score": 0.7801
+      },
+      "bridge": {
+        "phrase": "bridge",
+        "latency_ms": 18266.71,
+        "count": 1,
+        "scores": [
+          0.3331
+        ],
+        "boxes": [
+          [
+            250,
+            42,
+            999,
+            690
+          ]
+        ],
+        "mean_score": 0.3331
+      },
+      "boats": {
+        "phrase": "boats",
+        "latency_ms": 17110.27,
+        "count": 9,
+        "scores": [
+          0.7528,
+          0.6685,
+          0.5084,
+          0.4932,
+          0.4295,
+          0.3163,
+          0.3161,
+          0.2516,
+          0.2583
+        ],
+        "boxes": [
+          [
+            374,
+            313,
+            418,
+            404
+          ],
+          [
+            291,
+            466,
+            331,
+            547
+          ],
+          [
+            174,
+            699,
+            194,
+            724
+          ],
+          [
+            259,
+            554,
+            274,
+            606
+          ],
+          [
+            433,
+            275,
+            467,
+            362
+          ],
+          [
+            227,
+            177,
+            286,
+            262
+          ],
+          [
+            150,
+            356,
+            180,
+            413
+          ],
+          [
+            81,
+            896,
+            91,
+            912
+          ]
+        ],
+        "mean_score": 0.4439
+      },
+      "roads": {
+        "phrase": "roads",
+        "latency_ms": 17722.33,
+        "count": 3,
+        "scores": [
+          0.3533,
+          0.279,
+          0.4652
+        ],
+        "boxes": [
+          [
+            1,
+            4,
+            654,
+            995
+          ],
+          [
+            1,
+            47,
+            555,
+            997
+          ],
+          [
+            251,
+            42,
+            998,
+            692
+          ]
+        ],
+        "mean_score": 0.3658
+      },
+      "buildings": {
+        "phrase": "buildings",
+        "latency_ms": 17020.59,
+        "count": 9,
+        "scores": [
+          0.3316,
+          0.2579,
+          0.3713,
+          0.3428,
+          0.3323,
+          0.302,
+          0.2652,
+          0.2622,
+          0.3875
+        ],
+        "boxes": [
+          [
+            148,
+            242,
+            287,
+            447
+          ],
+          [
+            6,
+            225,
+            288,
+            451
+          ],
+          [
+            226,
+            176,
+            286,
+            262
+          ],
+          [
+            310,
+            169,
+            331,
+            203
+          ],
+          [
+            291,
+            466,
+            331,
+            547
+          ],
+          [
+            75,
+            231,
+            141,
+            294
+          ],
+          [
+            261,
+            2,
+            999,
+            997
+          ],
+          [
+            143,
+            177,
+            289,
+            449
+          ]
+        ],
+        "mean_score": 0.317
+      },
+      "vegetation": {
+        "phrase": "vegetation",
+        "latency_ms": 16413.32,
+        "count": 4,
+        "scores": [
+          0.2718,
+          0.3505,
+          0.4142,
+          0.2688
+        ],
+        "boxes": [
+          [
+            1,
+            336,
+            212,
+            727
+          ],
+          [
+            229,
+            3,
+            999,
+            997
+          ],
+          [
+            1,
+            0,
+            496,
+            935
+          ],
+          [
+            3,
+            2,
+            997,
+            998
+          ]
+        ],
+        "mean_score": 0.3263
+      },
+      "industrial_area": {
+        "phrase": "industrial area",
+        "latency_ms": 17070.3,
+        "count": 2,
+        "scores": [
+          0.5583,
+          0.2664
+        ],
+        "boxes": [
+          [
+            3,
+            3,
+            997,
+            996
+          ],
+          [
+            253,
+            3,
+            999,
+            996
+          ]
+        ],
+        "mean_score": 0.4123
+      },
+      "construction_site": {
+        "phrase": "construction site",
+        "latency_ms": 18824.92,
+        "count": 2,
+        "scores": [
+          0.5013,
+          0.2709
+        ],
+        "boxes": [
+          [
+            3,
+            3,
+            997,
+            996
+          ],
+          [
+            251,
+            4,
+            998,
+            996
+          ]
+        ],
+        "mean_score": 0.3861
+      },
+      "farmland": {
+        "phrase": "farmland",
+        "latency_ms": 16732.71,
+        "count": 3,
+        "scores": [
+          0.4559,
+          0.3297,
+          0.3308
+        ],
+        "boxes": [
+          [
+            3,
+            2,
+            997,
+            997
+          ],
+          [
+            234,
+            3,
+            998,
+            997
+          ],
+          [
+            2,
+            3,
+            650,
+            996
+          ]
+        ],
+        "mean_score": 0.3721
+      }
+    },
+    "natural_queries": {
+      "query_boats": {
+        "query": "How many boats are visible?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 16707.01,
+        "detections_count": 8,
+        "answer_preview": "**Count:** We identified **8** candidate ships in this image.  *(Note: Grounding DINO identified candidate regions match"
+      },
+      "query_bridge": {
+        "query": "Where is the bridge?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 16544.29,
+        "detections_count": 1,
+        "answer_preview": "**Location:** Found 1 candidate bridges, concentrated primarily in the **northern-eastern** region of the image."
+      },
+      "query_objects": {
+        "query": "What objects are visible?",
+        "selected_tools": [
+          "VQA"
+        ],
+        "latency_ms": 7834.77,
+        "detections_count": 0,
+        "answer_preview": "**Answer:** The scene contains: man-made buildings and structures, trees and vegetated plots, roads / transport pathways"
+      },
+      "query_builtup": {
+        "query": "Where are the major built-up areas?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 18099.03,
+        "detections_count": 9,
+        "answer_preview": "**Location:** Found 9 candidate objects, concentrated primarily in the **northern-central** region of the image."
+      }
+    }
+  },
+  "Candidate_A_OWLv2": {
+    "model_name": "Candidate A: OWLv2 Open-Vocabulary (google/owlvit-base-patch32)",
+    "model_id": "google/owlvit-base-patch32",
+    "cold_start_load_ms": 164658.91,
+    "mean_warm_inference_ms": 1176.44,
+    "ram_footprint_mb": 1468.29,
+    "small_boat_sensitivity": "WEAK",
+    "bridge_localization": "MISSED",
+    "boat_count_found": 0,
+    "bridge_count_found": 0,
+    "prompts": {
+      "water": {
+        "phrase": "water",
+        "latency_ms": 1302.32,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "bridge": {
+        "phrase": "bridge",
+        "latency_ms": 1403.62,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "boats": {
+        "phrase": "boats",
+        "latency_ms": 1279.38,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "roads": {
+        "phrase": "roads",
+        "latency_ms": 1134.55,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "buildings": {
+        "phrase": "buildings",
+        "latency_ms": 1073.59,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "vegetation": {
+        "phrase": "vegetation",
+        "latency_ms": 1085.42,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "industrial_area": {
+        "phrase": "industrial area",
+        "latency_ms": 1090.29,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "construction_site": {
+        "phrase": "construction site",
+        "latency_ms": 1101.06,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "farmland": {
+        "phrase": "farmland",
+        "latency_ms": 1117.73,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      }
+    },
+    "natural_queries": {
+      "query_boats": {
+        "query": "How many boats are visible?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 16562.85,
+        "detections_count": 8,
+        "answer_preview": "**Count:** We identified **8** candidate ships in this image.  *(Note: Grounding DINO identified candidate regions match"
+      },
+      "query_bridge": {
+        "query": "Where is the bridge?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 16275.49,
+        "detections_count": 1,
+        "answer_preview": "**Location:** Found 1 candidate bridges, concentrated primarily in the **northern-eastern** region of the image."
+      },
+      "query_objects": {
+        "query": "What objects are visible?",
+        "selected_tools": [
+          "VQA"
+        ],
+        "latency_ms": 737.82,
+        "detections_count": 0,
+        "answer_preview": "**Answer:** The scene contains: man-made buildings and structures, trees and vegetated plots, roads / transport pathways"
+      },
+      "query_builtup": {
+        "query": "Where are the major built-up areas?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 18049.88,
+        "detections_count": 9,
+        "answer_preview": "**Location:** Found 9 candidate objects, concentrated primarily in the **northern-central** region of the image."
+      }
+    }
+  },
+  "Candidate_B_RSSpectral": {
+    "model_name": "Candidate B: RS Spectral-Spatial Guided Localizer",
+    "model_id": "nexspace/spectral-spatial-rs-grounding",
+    "cold_start_load_ms": 0.0,
+    "mean_warm_inference_ms": 174.36,
+    "ram_footprint_mb": 1665.95,
+    "small_boat_sensitivity": "STRONG",
+    "bridge_localization": "ACCURATE",
+    "boat_count_found": 8,
+    "bridge_count_found": 1,
+    "prompts": {
+      "water": {
+        "phrase": "water",
+        "latency_ms": 26.84,
+        "count": 1,
+        "scores": [
+          0.6444
+        ],
+        "boxes": [
+          [
+            0,
+            4,
+            999,
+            993
+          ]
+        ],
+        "mean_score": 0.6444
+      },
+      "bridge": {
+        "phrase": "bridge",
+        "latency_ms": 60.3,
+        "count": 1,
+        "scores": [
+          0.72
+        ],
+        "boxes": [
+          [
+            12,
+            0,
+            1000,
+            774
+          ]
+        ],
+        "mean_score": 0.72
+      },
+      "boats": {
+        "phrase": "boats",
+        "latency_ms": 57.2,
+        "count": 27,
+        "scores": [
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65,
+          0.65
+        ],
+        "boxes": [
+          [
+            812,
+            82,
+            821,
+            97
+          ],
+          [
+            845,
+            123,
+            862,
+            141
+          ],
+          [
+            845,
+            136,
+            857,
+            157
+          ],
+          [
+            259,
+            179,
+            276,
+            210
+          ],
+          [
+            270,
+            180,
+            279,
+            196
+          ],
+          [
+            257,
+            186,
+            289,
+            238
+          ],
+          [
+            250,
+            195,
+            271,
+            229
+          ],
+          [
+            150,
+            258,
+            160,
+            273
+          ]
+        ],
+        "mean_score": 0.65
+      },
+      "roads": {
+        "phrase": "roads",
+        "latency_ms": 1120.42,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "buildings": {
+        "phrase": "buildings",
+        "latency_ms": 28.6,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "vegetation": {
+        "phrase": "vegetation",
+        "latency_ms": 26.14,
+        "count": 1,
+        "scores": [
+          0.88
+        ],
+        "boxes": [
+          [
+            0,
+            0,
+            999,
+            999
+          ]
+        ],
+        "mean_score": 0.88
+      },
+      "industrial_area": {
+        "phrase": "industrial area",
+        "latency_ms": 184.77,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "construction_site": {
+        "phrase": "construction site",
+        "latency_ms": 37.99,
+        "count": 0,
+        "scores": [],
+        "boxes": [],
+        "mean_score": 0.0
+      },
+      "farmland": {
+        "phrase": "farmland",
+        "latency_ms": 27.02,
+        "count": 1,
+        "scores": [
+          0.88
+        ],
+        "boxes": [
+          [
+            0,
+            0,
+            999,
+            999
+          ]
+        ],
+        "mean_score": 0.88
+      }
+    },
+    "natural_queries": {
+      "query_boats": {
+        "query": "How many boats are visible?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 16495.44,
+        "detections_count": 8,
+        "answer_preview": "**Count:** We identified **8** candidate ships in this image.  *(Note: Grounding DINO identified candidate regions match"
+      },
+      "query_bridge": {
+        "query": "Where is the bridge?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 17485.78,
+        "detections_count": 1,
+        "answer_preview": "**Location:** Found 1 candidate bridges, concentrated primarily in the **northern-eastern** region of the image."
+      },
+      "query_objects": {
+        "query": "What objects are visible?",
+        "selected_tools": [
+          "VQA"
+        ],
+        "latency_ms": 344.9,
+        "detections_count": 0,
+        "answer_preview": "**Answer:** The scene contains: man-made buildings and structures, trees and vegetated plots, roads / transport pathways"
+      },
+      "query_builtup": {
+        "query": "Where are the major built-up areas?",
+        "selected_tools": [
+          "Grounding"
+        ],
+        "latency_ms": 16302.25,
+        "detections_count": 9,
+        "answer_preview": "**Location:** Found 9 candidate objects, concentrated primarily in the **northern-central** region of the image."
+      }
+    }
+  }
+}

@@ -80,6 +80,16 @@ class TestStep10HardeningAndSecurity(unittest.TestCase):
         self.assertIn(res.status_code, (400, 422))
         print(f"Excessively long query rejected with status {res.status_code}: {res.json()}")
 
+    # 3b. Image Alias Support in QueryRequest
+    def test_image_alias_support(self):
+        print("\n--- [TEST 3b] Image Alias Support in QueryRequest ---")
+        res = self.client.post("/api/query", json={"query": "Is there water?", "image": self.sample_b64})
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["status"], "completed")
+        self.assertIn("response_text", data)
+        print("Query with 'image' alias processed successfully.")
+
     # 4. Multi-Tool Failure Containment
     def test_multitool_failure_containment(self):
         print("\n--- [TEST 4] Multi-Tool Failure Isolation ---")

@@ -1,0 +1,135 @@
+{
+  "model_initialization_ms": {
+    "VQA": 0.03,
+    "BLIP": 13550.29,
+    "Grounding_DINO": 5329.39
+  },
+  "queries": {
+    "A": {
+      "query": "Is there a body of water?",
+      "tools": [
+        "VQA"
+      ],
+      "optimized_latency_ms": 5874.79,
+      "baseline_latency_ms": 331.42,
+      "speedup_factor": 0.06,
+      "detections_count": 0,
+      "evidence_count": 1,
+      "confidence": 0.67,
+      "confidence_type": "estimated",
+      "confidence_source": "ensemble_controller",
+      "answer": "**Answer:** Yes, a water body is visible occupying approximately 1.5% of the image frame."
+    },
+    "B": {
+      "query": "Are there bridges?",
+      "tools": [
+        "VQA"
+      ],
+      "optimized_latency_ms": 287.75,
+      "baseline_latency_ms": 336.83,
+      "speedup_factor": 1.17,
+      "detections_count": 0,
+      "evidence_count": 1,
+      "confidence": 0.89,
+      "confidence_type": "estimated",
+      "confidence_source": "ensemble_controller",
+      "answer": "**Answer:** Yes, a prominent highway bridge spans across the river, connecting the western and eastern banks."
+    },
+    "C": {
+      "query": "Is vegetation present?",
+      "tools": [
+        "VQA"
+      ],
+      "optimized_latency_ms": 286.19,
+      "baseline_latency_ms": 327.43,
+      "speedup_factor": 1.14,
+      "detections_count": 0,
+      "evidence_count": 1,
+      "confidence": 0.9,
+      "confidence_type": "estimated",
+      "confidence_source": "ensemble_controller",
+      "answer": "**Answer:** Yes, substantial vegetation coverage (60.7% area) is detected across the landscape."
+    },
+    "D": {
+      "query": "How many boats are visible?",
+      "tools": [
+        "Grounding"
+      ],
+      "optimized_latency_ms": 18067.8,
+      "baseline_latency_ms": 29740.0,
+      "speedup_factor": 1.65,
+      "detections_count": 8,
+      "evidence_count": 8,
+      "confidence": 0.46,
+      "confidence_type": "model",
+      "confidence_source": "IDEA-Research/grounding-dino-tiny",
+      "answer": "**Count:** We identified **8** candidate ships in this image.\n\n*(Note: Grounding DINO identified candidate regions matching your query. These are model proposals and have not been ground-truth validated.)*"
+    },
+    "E": {
+      "query": "Where is the bridge?",
+      "tools": [
+        "Grounding"
+      ],
+      "optimized_latency_ms": 16924.6,
+      "baseline_latency_ms": 21090.0,
+      "speedup_factor": 1.25,
+      "detections_count": 1,
+      "evidence_count": 1,
+      "confidence": 0.33,
+      "confidence_type": "model",
+      "confidence_source": "IDEA-Research/grounding-dino-tiny",
+      "answer": "**Location:** Found 1 candidate bridges, concentrated primarily in the **northern-eastern** region of the image."
+    },
+    "F": {
+      "query": "Describe the scene.",
+      "tools": [
+        "Optical_Caption"
+      ],
+      "optimized_latency_ms": 6740.93,
+      "baseline_latency_ms": 14070.0,
+      "speedup_factor": 2.09,
+      "detections_count": 0,
+      "evidence_count": 1,
+      "confidence": 0.78,
+      "confidence_type": "model",
+      "confidence_source": "clip_rsicd_domain_synthesis",
+      "answer": "**Scene Description:** High-resolution remote-sensing satellite capture displaying flanked by river and freshwater waterway, agricultural / vegetated plots, dense residential neighborhoods, and active construction groundworks."
+    },
+    "G": {
+      "query": "What is near the bridge?",
+      "tools": [
+        "VQA"
+      ],
+      "optimized_latency_ms": 336.36,
+      "baseline_latency_ms": 321.02,
+      "speedup_factor": 0.95,
+      "detections_count": 0,
+      "evidence_count": 1,
+      "confidence": 0.85,
+      "confidence_type": "estimated",
+      "confidence_source": "ensemble_controller",
+      "answer": "**Answer:** Near the bridge, major highway transport corridors connect both banks of the river, linking the western industrial/residential zone with the eastern residential neighborhoods."
+    },
+    "H": {
+      "query": "What objects are visible?",
+      "tools": [
+        "VQA"
+      ],
+      "optimized_latency_ms": 405.27,
+      "baseline_latency_ms": 340.03,
+      "speedup_factor": 0.84,
+      "detections_count": 0,
+      "evidence_count": 1,
+      "confidence": 0.75,
+      "confidence_type": "estimated",
+      "confidence_source": "ensemble_controller",
+      "answer": "**Answer:** The scene contains: man-made buildings and structures, trees and vegetated plots, roads / transport pathways against a river and freshwater waterway background."
+    }
+  },
+  "Change_Analysis": {
+    "latency_ms": 117.05
+  },
+  "Optical_SAR": {
+    "latency_ms": 387.24
+  }
+}

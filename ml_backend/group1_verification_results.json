@@ -1,0 +1,110 @@
+[
+  {
+    "case_id": "A",
+    "query": "Is there a body of water?",
+    "selected_tools": [
+      "VQA"
+    ],
+    "expected_tools": [
+      "VQA"
+    ],
+    "models_used": [
+      "VQA: google/paligemma-3b-ft-rsvqa-lr-224"
+    ],
+    "latency_ms": 28967.631899984553,
+    "confidence": 0.67,
+    "confidence_type": "estimated",
+    "confidence_source": "ensemble_controller",
+    "answer": "**Answer:** Yes, a water body is visible occupying approximately 1.5% of the image frame."
+  },
+  {
+    "case_id": "B",
+    "query": "Are there bridges?",
+    "selected_tools": [
+      "VQA"
+    ],
+    "expected_tools": [
+      "VQA"
+    ],
+    "models_used": [
+      "VQA: google/paligemma-3b-ft-rsvqa-lr-224"
+    ],
+    "latency_ms": 649.6435001026839,
+    "confidence": 0.89,
+    "confidence_type": "estimated",
+    "confidence_source": "ensemble_controller",
+    "answer": "**Answer:** Yes, a prominent highway bridge spans across the river, connecting the western and eastern banks."
+  },
+  {
+    "case_id": "C",
+    "query": "Is vegetation present?",
+    "selected_tools": [
+      "VQA"
+    ],
+    "expected_tools": [
+      "VQA"
+    ],
+    "models_used": [
+      "VQA: google/paligemma-3b-ft-rsvqa-lr-224"
+    ],
+    "latency_ms": 643.7443000031635,
+    "confidence": 0.9,
+    "confidence_type": "estimated",
+    "confidence_source": "ensemble_controller",
+    "answer": "**Answer:** Yes, substantial vegetation coverage (60.7% area) is detected across the landscape."
+  },
+  {
+    "case_id": "D",
+    "query": "How many boats are visible?",
+    "selected_tools": [
+      "Grounding"
+    ],
+    "expected_tools": [
+      "Grounding"
+    ],
+    "models_used": [
+      "Grounding: IDEA-Research/grounding-dino-tiny"
+    ],
+    "latency_ms": 44959.00010003243,
+    "confidence": 0.46,
+    "confidence_type": "model",
+    "confidence_source": "IDEA-Research/grounding-dino-tiny",
+    "answer": "**Count:** We identified **8** candidate ships in this image.\n\n*(Note: Grounding DINO identified candidate regions matching your query. These are model proposals and have not been ground-truth validated.)*"
+  },
+  {
+    "case_id": "E",
+    "query": "Where is the bridge?",
+    "selected_tools": [
+      "Grounding"
+    ],
+    "expected_tools": [
+      "Grounding"
+    ],
+    "models_used": [
+      "Grounding: IDEA-Research/grounding-dino-tiny"
+    ],
+    "latency_ms": 33778.587999986485,
+    "confidence": 0.33,
+    "confidence_type": "model",
+    "confidence_source": "IDEA-Research/grounding-dino-tiny",
+    "answer": "**Location:** Found 1 candidate bridges, concentrated primarily in the **northern-eastern** region of the image."
+  },
+  {
+    "case_id": "F",
+    "query": "Describe the scene.",
+    "selected_tools": [
+      "Optical_Caption"
+    ],
+    "expected_tools": [
+      "Optical_Caption"
+    ],
+    "models_used": [
+      "Optical_Caption: Salesforce/blip-image-captioning-base"
+    ],
+    "latency_ms": 18619.96999999974,
+    "confidence": 0.78,
+    "confidence_type": "model",
+    "confidence_source": "clip_rsicd_domain_synthesis",
+    "answer": "**Scene Description:** High-resolution remote-sensing satellite capture displaying flanked by river and freshwater waterway, agricultural / vegetated plots, dense residential neighborhoods, and active construction groundworks."
+  }
+]

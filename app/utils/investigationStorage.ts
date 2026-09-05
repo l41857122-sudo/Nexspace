@@ -11,6 +11,7 @@ import { SAMPLE_OPTICAL_PORT } from "./sampleImages";
 
 const STORAGE_KEY_INVESTIGATION = "nexspace_current_investigation";
 const STORAGE_KEY_ACTIVE_SOURCE = "nexspace_active_source_image";
+const STORAGE_KEY_HISTORY = "nexspace_investigation_history";
 
 export const DEFAULT_DEMO_SOURCE: CanonicalSourceImage = {
   id: "src-demo-port",
@@ -20,12 +21,48 @@ export const DEFAULT_DEMO_SOURCE: CanonicalSourceImage = {
   source: "demo",
 };
 
-export function getActiveSourceImage(fallbackToDemo = true): CanonicalSourceImage | null {
-  if (typeof window === "undefined") {
-    return fallbackToDemo ? DEFAULT_DEMO_SOURCE : null;
-  }
+/**
+ * Safe storage helper with memory fallback in case quota is exceeded or storage unavailable
+ */
+const memoryStore: Record<string, string> = {};
+
+function safeSetItem(key: string, value: string): void {
+  memoryStore[key] = value;
+  if (typeof window === "undefined") return;
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY_ACTIVE_SOURCE);
+    sessionStorage.setItem(key, value);
+  } catch {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Memory store is already populated
+    }
+  }
+}
+
+function safeGetItem(key: string): string | null {
+  if (typeof window === "undefined") return memoryStore[key] || null;
+  try {
+    const sVal = sessionStorage.getItem(key);
+    if (sVal) return sVal;
+  } catch {}
+  try {
+    const lVal = localStorage.getItem(key);
+    if (lVal) return lVal;
+  } catch {}
+  return memoryStore[key] || null;
+}
+
+function safeRemoveItem(key: string): void {
+  delete memoryStore[key];
+  if (typeof window === "undefined") return;
+  try { sessionStorage.removeItem(key); } catch {}
+  try { localStorage.removeItem(key); } catch {}
+}
+
+export function getActiveSourceImage(fallbackToDemo = true): CanonicalSourceImage | null {
+  try {
+    const raw = safeGetItem(STORAGE_KEY_ACTIVE_SOURCE);
     if (raw) {
       const parsed = JSON.parse(raw) as CanonicalSourceImage;
       if (parsed && parsed.dataUrl && parsed.filename) {
@@ -39,22 +76,29 @@ export function getActiveSourceImage(fallbackToDemo = true): CanonicalSourceImag
 }
 
 export function setActiveSourceImage(source: CanonicalSourceImage): void {
-  if (typeof window === "undefined") return;
   try {
-    sessionStorage.setItem(STORAGE_KEY_ACTIVE_SOURCE, JSON.stringify(source));
-    window.dispatchEvent(new CustomEvent("nexspace-source-changed", { detail: source }));
+    safeSetItem(STORAGE_KEY_ACTIVE_SOURCE, JSON.stringify(source));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("nexspace-source-changed", { detail: source }));
+    }
   } catch (err) {
     console.error("[investigationStorage] Error saving active source image:", err);
   }
 }
 
 export function getCurrentInvestigation(): CanonicalInvestigationState | null {
-  if (typeof window === "undefined") return null;
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY_INVESTIGATION);
+    const raw = safeGetItem(STORAGE_KEY_INVESTIGATION);
     if (raw) {
       const parsed = JSON.parse(raw) as CanonicalInvestigationState;
-      if (parsed && parsed.investigation_id) {
+      if (parsed && (parsed.investigation_id || parsed.query)) {
+        // Ensure source_image has dataUrl from active source if missing
+        if (!parsed.source_image?.dataUrl) {
+          const activeSrc = getActiveSourceImage(false);
+          if (activeSrc) {
+            parsed.source_image = activeSrc;
+          }
+        }
         return parsed;
       }
     }
@@ -64,27 +108,76 @@ export function getCurrentInvestigation(): CanonicalInvestigationState | null {
   return null;
 }
 
-export function setCurrentInvestigation(inv: CanonicalInvestigationState): void {
-  if (typeof window === "undefined") return;
+export function getInvestigationHistory(): CanonicalInvestigationState[] {
   try {
-    sessionStorage.setItem(STORAGE_KEY_INVESTIGATION, JSON.stringify(inv));
-    if (inv.source_image) {
-      sessionStorage.setItem(STORAGE_KEY_ACTIVE_SOURCE, JSON.stringify(inv.source_image));
+    const raw = safeGetItem(STORAGE_KEY_HISTORY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
     }
-    window.dispatchEvent(new CustomEvent("nexspace-investigation-changed", { detail: inv }));
+  } catch (err) {
+    console.warn("[investigationStorage] Error reading investigation history:", err);
+  }
+  return [];
+}
+
+export function setCurrentInvestigation(inv: CanonicalInvestigationState): void {
+  try {
+    // 1. Persist current investigation
+    safeSetItem(STORAGE_KEY_INVESTIGATION, JSON.stringify(inv));
+
+    // 2. Persist active source image
+    if (inv.source_image && inv.source_image.dataUrl) {
+      setActiveSourceImage(inv.source_image);
+    }
+
+    // 3. Compact history item (omit duplicate heavy base64 dataUrl in history entries to prevent quota overflow)
+    const compactInv: CanonicalInvestigationState = {
+      ...inv,
+      source_image: inv.source_image ? {
+        id: inv.source_image.id,
+        filename: inv.source_image.filename,
+        mediaType: inv.source_image.mediaType,
+        source: inv.source_image.source,
+        dataUrl: "", // Omit large base64 dataUrl in history items to conserve quota
+        sha256: inv.source_image.sha256,
+        uploadedAt: inv.source_image.uploadedAt,
+        width: inv.source_image.width,
+        height: inv.source_image.height,
+      } : inv.source_image
+    };
+
+    const history = getInvestigationHistory();
+    const existingIndex = history.findIndex((h) => h.investigation_id === inv.investigation_id);
+    if (existingIndex >= 0) {
+      history[existingIndex] = compactInv;
+    } else {
+      history.unshift(compactInv);
+      if (history.length > 25) {
+        history.pop();
+      }
+    }
+    safeSetItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("nexspace-investigation-changed", { detail: inv }));
+    }
   } catch (err) {
     console.error("[investigationStorage] Error saving current investigation:", err);
   }
 }
 
 export function updateSelectedTarget(targetId: string | null): void {
-  if (typeof window === "undefined") return;
   try {
     const current = getCurrentInvestigation();
     if (current) {
       current.selectedTargetId = targetId;
-      sessionStorage.setItem(STORAGE_KEY_INVESTIGATION, JSON.stringify(current));
-      window.dispatchEvent(new CustomEvent("nexspace-target-changed", { detail: { targetId } }));
+      safeSetItem(STORAGE_KEY_INVESTIGATION, JSON.stringify(current));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("nexspace-target-changed", { detail: { targetId } }));
+      }
     }
   } catch (err) {
     console.error("[investigationStorage] Error updating selected target:", err);
@@ -92,13 +185,14 @@ export function updateSelectedTarget(targetId: string | null): void {
 }
 
 export function clearCurrentInvestigation(retainSourceImage = true): void {
-  if (typeof window === "undefined") return;
   try {
-    sessionStorage.removeItem(STORAGE_KEY_INVESTIGATION);
+    safeRemoveItem(STORAGE_KEY_INVESTIGATION);
     if (!retainSourceImage) {
-      sessionStorage.removeItem(STORAGE_KEY_ACTIVE_SOURCE);
+      safeRemoveItem(STORAGE_KEY_ACTIVE_SOURCE);
     }
-    window.dispatchEvent(new CustomEvent("nexspace-investigation-cleared"));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("nexspace-investigation-cleared"));
+    }
   } catch (err) {
     console.error("[investigationStorage] Error clearing investigation:", err);
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Download,
@@ -21,6 +21,7 @@ import {
   HelpCircle,
   Focus,
   RotateCcw,
+  Search,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
 import type { CanonicalSourceImage, CanonicalInvestigationState } from "../types/nexspace";
@@ -97,6 +98,7 @@ function TopBar({
 function EvidenceImage({
   investigation,
   sourceImage,
+  normalizedDetections,
   selectedTargetId,
   onSelectTarget,
   isFocused,
@@ -104,30 +106,13 @@ function EvidenceImage({
 }: {
   investigation: CanonicalInvestigationState | null;
   sourceImage: CanonicalSourceImage;
+  normalizedDetections: Array<{ id: string; evidenceId: string; label: string; score: number | null; box: [number, number, number, number] }>;
   selectedTargetId: string | null;
   onSelectTarget: (id: string | null) => void;
   isFocused: boolean;
   onToggleFocus: () => void;
 }) {
   const [zoom, setZoom] = useState(1);
-
-  const normalizedDetections = useMemo(() => {
-    const raw = investigation?.response?.grounding?.detections || [];
-    return raw
-      .map((det, idx) => {
-        const d = det as unknown as Record<string, unknown>;
-        const nBox = normalizeBox(d);
-        if (!nBox) return null;
-        return {
-          id: `TARGET-${String(idx + 1).padStart(2, "0")}`,
-          evidenceId: `EVD-${String(idx + 1).padStart(3, "0")}`,
-          label: (d.label as string) || `Target #${idx + 1}`,
-          score: typeof d.score === "number" ? d.score : null,
-          box: nBox,
-        };
-      })
-      .filter((d): d is NonNullable<typeof d> => d !== null);
-  }, [investigation]);
 
   const selectedTarget = useMemo(() => {
     return normalizedDetections.find((d) => d.id === selectedTargetId) || null;
@@ -309,6 +294,7 @@ function EvidenceImage({
 function EvidencePanel({
   investigation,
   sourceImage,
+  normalizedDetections,
   selectedTargetId,
   onSelectTarget,
   isFocused,
@@ -316,6 +302,7 @@ function EvidencePanel({
 }: {
   investigation: CanonicalInvestigationState | null;
   sourceImage: CanonicalSourceImage;
+  normalizedDetections: Array<{ id: string; evidenceId: string; label: string; score: number | null; box: [number, number, number, number] }>;
   selectedTargetId: string | null;
   onSelectTarget: (id: string | null) => void;
   isFocused: boolean;
@@ -324,66 +311,68 @@ function EvidencePanel({
   const [status, setStatus] = useState<string>("CONFIRMED");
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const normalizedDetections = useMemo(() => {
-    const raw = investigation?.response?.grounding?.detections || [];
-    return raw
-      .map((det, idx) => {
-        const d = det as unknown as Record<string, unknown>;
-        const nBox = normalizeBox(d);
-        if (!nBox) return null;
-        return {
-          id: `TARGET-${String(idx + 1).padStart(2, "0")}`,
-          evidenceId: `EVD-${String(idx + 1).padStart(3, "0")}`,
-          label: (d.label as string) || `Target #${idx + 1}`,
-          score: typeof d.score === "number" ? d.score : null,
-          box: nBox,
-        };
-      })
-      .filter((d): d is NonNullable<typeof d> => d !== null);
-  }, [investigation]);
-
   const selectedTarget = useMemo(() => {
     return normalizedDetections.find((d) => d.id === selectedTargetId) || null;
   }, [normalizedDetections, selectedTargetId]);
 
   const caption = typeof investigation?.response?.optical_caption === "string"
     ? investigation.response.optical_caption
-    : (investigation?.response?.optical_caption as unknown as { caption?: string })?.caption || "Scene analysis completed.";
+    : (investigation?.response?.optical_caption as unknown as { caption?: string })?.caption || null;
   const vqa = investigation?.response?.vqa_results || [];
+  const primaryAnswer = investigation?.response?.response_text ||
+    (investigation?.response?.investigation_report?.observations && investigation.response.investigation_report.observations[0]) ||
+    null;
 
   return (
     <div className="w-full border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.3)] min-h-[480px] space-y-4">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-white tracking-tight flex items-center gap-1.5">
-            <Sparkles size={14} className="text-cyan-400" />
-            <span>What We Found</span>
+        {/* Investigation Query Banner */}
+        <div className="bg-slate-900/90 border border-cyan-500/30 rounded-xl p-3.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-bold flex items-center gap-1.5">
+              <Search size={12} />
+              <span>Target User Query</span>
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+              {status}
+            </span>
+          </div>
+          <p className="text-xs font-semibold text-white italic">
+            &ldquo;{investigation?.query || "No query recorded"}&rdquo;
           </p>
-          <span className="text-[10px] font-mono px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-            {status}
-          </span>
+          {primaryAnswer && (
+            <div className="text-xs text-slate-200 pt-1.5 border-t border-slate-800/80 leading-relaxed font-sans">
+              <strong className="text-cyan-300">Answer:</strong> {primaryAnswer}
+            </div>
+          )}
         </div>
 
-        {/* Selected Target Specific Evidence Inspector */}
+        {/* Selected Target Inspector */}
         {selectedTarget ? (
-          <div className="bg-cyan-950/30 border border-cyan-500/40 rounded-xl p-3.5 space-y-2.5 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-            <div className="flex items-center justify-between">
+          <div className="bg-cyan-950/30 border border-cyan-500/40 rounded-xl p-4 space-y-3 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-2">
               <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
                 <Crosshair size={14} className="text-cyan-400 animate-pulse" />
-                <span>Selected Target: {selectedTarget.id}</span>
+                <span>Target: {selectedTarget.id}</span>
               </span>
               <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
                 {selectedTarget.score !== null ? `${Math.round(selectedTarget.score * 100)}% Confidence` : "Candidate"}
               </span>
             </div>
 
-            <div className="text-xs text-slate-200">
-              <strong>Structure Identification:</strong> <span className="text-white capitalize">{selectedTarget.label}</span>
+            <div className="space-y-1 text-xs">
+              <div className="text-slate-300">
+                <strong className="text-white">Classification:</strong> <span className="capitalize">{selectedTarget.label}</span>
+              </div>
+              <div className="text-slate-300">
+                <strong className="text-white">Model:</strong> Grounding DINO (Swin-T Open-Vocabulary)
+              </div>
             </div>
 
-            <div className="text-[11px] font-mono text-slate-400 bg-slate-950/70 p-2 rounded border border-slate-800/80 space-y-0.5">
-              <div>Evidence Node: <strong className="text-cyan-300">{selectedTarget.evidenceId}</strong></div>
-              <div>Bounding Box (0-1000): [{selectedTarget.box.join(", ")}]</div>
+            <div className="text-[11px] font-mono text-slate-400 bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 space-y-1">
+              <div>Box [xmin, ymin, xmax, ymax]: [{selectedTarget.box.join(", ")}]</div>
+              <div>Source Ingestion: {sourceImage.filename} ({sourceImage.source === "upload" ? "Uploaded by user" : "Demo raster"})</div>
+              <div>Linked Evidence Node: <strong className="text-cyan-300">{selectedTarget.evidenceId}</strong></div>
             </div>
 
             <div className="flex gap-2 pt-1">
@@ -396,7 +385,7 @@ function EvidencePanel({
                 }`}
               >
                 <Focus size={12} />
-                <span>{isFocused ? "Reset Zoom" : "Focus on Map"}</span>
+                <span>{isFocused ? "Reset Zoom" : "Focus on Viewport"}</span>
               </button>
               <button
                 onClick={() => onSelectTarget(null)}
@@ -406,117 +395,145 @@ function EvidencePanel({
               </button>
             </div>
           </div>
-        ) : (
-          /* General findings overview */
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2.5 text-xs">
-            <div className="flex items-start gap-2 text-slate-200">
-              <Building2 size={15} className="text-cyan-400 shrink-0 mt-0.5" />
-              <div>
-                <strong>Target Structures:</strong>{" "}
-                {normalizedDetections.length > 0
-                  ? `${normalizedDetections.length} candidate structure(s) localized in imagery`
-                  : "No target structures detected"}
-              </div>
-            </div>
+        ) : null}
 
-            <div className="flex items-start gap-2 text-slate-200">
-              <FileText size={15} className="text-cyan-400 shrink-0 mt-0.5" />
-              <div>
-                <strong>Image Summary:</strong> {caption}
-              </div>
-            </div>
+        {/* Evidence Findings & Entity Catalog */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between pb-1 border-b border-slate-800/80">
+            <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+              <ShieldCheck size={13} className="text-cyan-400" />
+              <span>Evidence Nodes ({normalizedDetections.length})</span>
+            </span>
+            <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+              Provenance Synced
+            </span>
+          </div>
 
-            {vqa.length > 0 && (
-              <div className="flex items-start gap-2 text-slate-200">
-                <HelpCircle size={15} className="text-cyan-400 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Visual Q&amp;A:</strong> {vqa.map(v => `${v.question} → ${v.answer}`).join("; ")}
+          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            {normalizedDetections.map((d) => {
+              const isSelected = selectedTargetId === d.id;
+              const [xmin, ymin, xmax, ymax] = d.box;
+              return (
+                <div
+                  key={d.id}
+                  onClick={() => onSelectTarget(isSelected ? null : d.id)}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer text-xs font-mono ${
+                    isSelected
+                      ? "bg-cyan-500/20 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)] ring-1 ring-cyan-500/50"
+                      : "bg-slate-900/50 border-slate-800/80 hover:border-cyan-500/40 hover:bg-slate-900/80"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-white flex items-center gap-1.5">
+                      <Building2 size={13} className={isSelected ? "text-cyan-300" : "text-cyan-400"} />
+                      <span>{d.id}: {d.label}</span>
+                    </span>
+                    {d.score !== null && (
+                      <span className="text-[10px] text-emerald-300 bg-emerald-500/20 px-1.5 py-0.5 rounded font-bold">
+                        {Math.round(d.score * 100)}%
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-slate-400 flex items-center justify-between">
+                    <span>[{xmin}, {ymin}, {xmax}, {ymax}]</span>
+                    <span className="text-cyan-400 text-[10px]">Inspect →</span>
+                  </div>
                 </div>
+              );
+            })}
+
+            {normalizedDetections.length === 0 && (
+              <div className="p-4 rounded-xl border border-slate-800/80 bg-slate-900/30 text-center text-xs text-slate-400 font-mono space-y-1">
+                <p>No spatial bounding boxes recorded.</p>
+                <p className="text-[10px] text-slate-500">Non-spatial queries provide multimodal reasoning.</p>
               </div>
             )}
           </div>
-        )}
+        </div>
 
-        {/* List of Selectable Targets */}
-        {normalizedDetections.length > 0 && (
-          <div className="space-y-1.5">
-            <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wide">
-              Selectable Evidence Nodes ({normalizedDetections.length}):
-            </div>
-            <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
-              {normalizedDetections.map((d) => {
-                const isSelected = selectedTargetId === d.id;
-                return (
-                  <div
-                    key={d.id}
-                    onClick={() => onSelectTarget(isSelected ? null : d.id)}
-                    className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-mono cursor-pointer transition-all flex items-center justify-between ${
-                      isSelected
-                        ? "bg-cyan-500/25 border-cyan-400 text-cyan-200 ring-1 ring-cyan-500/50"
-                        : "bg-slate-900/60 border-slate-800 text-slate-300 hover:border-cyan-500/30"
-                    }`}
-                  >
-                    <span>{d.id}: {d.label}</span>
-                    <span className="text-[10px] text-emerald-400">{d.evidenceId}</span>
-                  </div>
-                );
-              })}
-            </div>
+        {/* Scene Context & VQA Insights */}
+        {(caption || vqa.length > 0) && (
+          <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2 text-xs">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
+              Multimodal Context
+            </span>
+            {caption && (
+              <p className="text-slate-300 leading-relaxed font-sans">
+                <strong className="text-white">Scene:</strong> {caption}
+              </p>
+            )}
+            {vqa.map((v, i) => (
+              <div key={i} className="text-slate-300 font-mono text-[11px] pt-1 border-t border-slate-800/60">
+                • {v.question} → <strong className="text-cyan-300">{v.answer}</strong>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Advanced details accordion */}
-        <div className="border-t border-slate-800/60 pt-2">
+        {/* Verification Status Selector */}
+        <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
+          <label className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+            Analyst Verification Flag
+          </label>
+          <div className="flex gap-2">
+            {[
+              { id: "CONFIRMED", label: "Confirmed", icon: CheckCircle2, color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
+              { id: "FLAGGED", label: "Flagged", icon: Flag, color: "text-amber-400 border-amber-500/30 bg-amber-500/10" },
+              { id: "DISMISSED", label: "Dismissed", icon: XCircle, color: "text-rose-400 border-rose-500/30 bg-rose-500/10" },
+            ].map((btn) => {
+              const active = status === btn.id;
+              const Icon = btn.icon;
+              return (
+                <button
+                  key={btn.id}
+                  onClick={() => setStatus(btn.id)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                    active ? `${btn.color} ring-1 ring-cyan-500/40 font-bold` : "bg-slate-900/50 border-slate-800 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <Icon size={12} />
+                  <span>{btn.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Advanced Provenance Toggle */}
+        <div className="pt-1">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between text-xs font-mono text-slate-400 hover:text-cyan-300 transition-colors py-1 cursor-pointer"
+            className="flex items-center justify-between w-full text-xs text-slate-400 hover:text-slate-200 font-mono py-1"
           >
-            <span>Advanced Execution Details</span>
+            <span>Advanced Provenance Metadata</span>
             {showAdvanced ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
           </button>
-
           {showAdvanced && (
-            <div className="mt-2 space-y-2 bg-slate-950/80 border border-slate-800/80 rounded-lg p-3 text-[11px] font-mono text-slate-300">
-              <div>Query: {investigation?.query || "N/A"}</div>
-              <div>Investigation ID: {investigation?.investigation_id || "N/A"}</div>
-              <div>Source ID: {sourceImage.id}</div>
-              <div>SHA-256 Hash: {sourceImage.sha256 ? `${sourceImage.sha256.slice(0, 16)}...` : "Calculated"}</div>
-              <div>Media Type: {sourceImage.mediaType}</div>
+            <div className="mt-2 p-3 bg-slate-950/80 rounded-lg border border-slate-800/80 text-[10px] font-mono text-slate-400 space-y-1">
+              <div>Investigation ID: {investigation?.investigation_id || "INV-STANDBY"}</div>
+              <div>Grounding Specialist: IDEA-Research/grounding-dino-tiny</div>
+              <div>Captioning Specialist: Salesforce/blip-image-captioning-base</div>
+              <div>CRS / Projection: {investigation?.response?.geospatial_metadata?.crs || "Pixel frame reference"}</div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Analyst Sign-off Buttons */}
-      <div className="pt-2 border-t border-slate-800/60">
-        <p className="text-[10px] font-semibold text-slate-400 mb-2 uppercase tracking-widest font-mono">
-          Analyst Verification Action
-        </p>
-
-        <button
-          onClick={() => setStatus("CONFIRMED")}
-          className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition-all text-[#0a1420] text-xs font-bold rounded-lg py-2.5 mb-2 cursor-pointer shadow-[0_0_12px_rgba(52,211,153,0.3)]"
+      {/* Navigation Footer */}
+      <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2">
+        <Link
+          href="/reports"
+          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-sky-400 hover:from-cyan-400 hover:to-sky-300 text-[#071320] text-xs font-bold rounded-lg py-2.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)]"
         >
-          <CheckCircle2 size={14} />
-          <span>Confirm Verification</span>
-        </button>
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => setStatus("FLAGGED")}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-amber-500/40 transition-all text-xs text-slate-300 hover:text-amber-300 rounded-lg py-2 cursor-pointer font-mono"
-          >
-            <Flag size={12} className="text-amber-400" />
-            <span>Flag</span>
-          </button>
-          <button
-            onClick={() => setStatus("REJECTED")}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-red-500/40 transition-all text-xs text-slate-300 hover:text-red-300 rounded-lg py-2 cursor-pointer font-mono"
-          >
-            <XCircle size={12} className="text-red-400" />
-            <span>Reject</span>
-          </button>
-        </div>
+          <FileText size={13} />
+          <span>Export Full Assessment Report</span>
+        </Link>
+        <Link
+          href="/results"
+          className="text-center py-2 rounded-lg bg-slate-900/60 hover:bg-slate-800 text-[11px] font-mono text-slate-400 hover:text-white border border-slate-800/60 transition-all"
+        >
+          <span>← Back to Scan Results</span>
+        </Link>
       </div>
     </div>
   );
@@ -530,10 +547,81 @@ export default function EvidenceViewerPage() {
     return getCurrentInvestigation();
   });
 
+  useEffect(() => {
+    setInvestigationState(getCurrentInvestigation());
+
+    const syncHandler = () => {
+      setInvestigationState(getCurrentInvestigation());
+    };
+
+    window.addEventListener("nexspace-investigation-changed", syncHandler);
+    window.addEventListener("nexspace-source-changed", syncHandler);
+    window.addEventListener("storage", syncHandler);
+
+    return () => {
+      window.removeEventListener("nexspace-investigation-changed", syncHandler);
+      window.removeEventListener("nexspace-source-changed", syncHandler);
+      window.removeEventListener("storage", syncHandler);
+    };
+  }, []);
+
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(
     () => investigationState?.selectedTargetId || null
   );
   const [isFocused, setIsFocused] = useState(false);
+
+  // Synchronized normalized detections extraction across all response channels
+  const normalizedDetections = useMemo(() => {
+    if (!investigationState?.response) return [];
+
+    const list: Array<{ id: string; evidenceId: string; label: string; score: number | null; box: [number, number, number, number] }> = [];
+    const seen = new Set<string>();
+
+    // 1. Check grounding.detections
+    const rawGrounding = investigationState.response.grounding?.detections || [];
+    rawGrounding.forEach((det) => {
+      const d = det as unknown as Record<string, unknown>;
+      const nBox = normalizeBox(d);
+      if (nBox) {
+        const key = `${nBox.join(",")}-${d.label || ""}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          list.push({
+            id: `TARGET-${String(list.length + 1).padStart(2, "0")}`,
+            evidenceId: `EVD-${String(list.length + 1).padStart(3, "0")}`,
+            label: (d.label as string) || `Target #${list.length + 1}`,
+            score: typeof d.score === "number" ? d.score : null,
+            box: nBox,
+          });
+        }
+      }
+    });
+
+    // 2. Check evidence bounding boxes
+    const rawEvidence = investigationState.response.evidence || [];
+    rawEvidence.forEach((ev) => {
+      const e = ev as unknown as Record<string, unknown>;
+      const p = (e.payload as Record<string, unknown>) || e;
+      if (e.type === "bounding_box" || p.box || p.box_2d || p.bbox_normalized || p.bbox_pixel) {
+        const nBox = normalizeBox(p);
+        if (nBox) {
+          const key = `${nBox.join(",")}-${p.label || e.label || ""}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            list.push({
+              id: `TARGET-${String(list.length + 1).padStart(2, "0")}`,
+              evidenceId: `EVD-${String(list.length + 1).padStart(3, "0")}`,
+              label: (p.label as string) || (e.label as string) || `Target #${list.length + 1}`,
+              score: typeof p.score === "number" ? p.score : (typeof e.confidence === "number" ? e.confidence : null),
+              box: nBox,
+            });
+          }
+        }
+      }
+    });
+
+    return list;
+  }, [investigationState]);
 
   const handleSelectTarget = (id: string | null) => {
     setSelectedTargetId(id);
@@ -568,6 +656,7 @@ export default function EvidenceViewerPage() {
             <EvidenceImage
               investigation={investigationState}
               sourceImage={sourceImage}
+              normalizedDetections={normalizedDetections}
               selectedTargetId={selectedTargetId}
               onSelectTarget={handleSelectTarget}
               isFocused={isFocused}
@@ -578,6 +667,7 @@ export default function EvidenceViewerPage() {
             <EvidencePanel
               investigation={investigationState}
               sourceImage={sourceImage}
+              normalizedDetections={normalizedDetections}
               selectedTargetId={selectedTargetId}
               onSelectTarget={handleSelectTarget}
               isFocused={isFocused}

@@ -154,10 +154,22 @@ class GeoVLMController:
         change_image_b: Optional[Image.Image] = None,
         probe_features: Optional[List[str]] = None,
         request_id: Optional[str] = None,
+        execution_profile: Optional[str] = "auto",
     ) -> Dict[str, Any]:
         req_id = request_id or f"req_{uuid.uuid4().hex[:12]}"
+        exec_profile = (execution_profile or "auto").lower()
         tracer = ExecutionTrace(query_id=req_id)
         t_global_start = time.perf_counter()
+
+        # Normalize images to clean RGB once per request lifecycle
+        if optical_image is not None and optical_image.mode != "RGB":
+            optical_image = optical_image.convert("RGB")
+        if sar_image is not None and sar_image.mode != "RGB":
+            sar_image = sar_image.convert("RGB")
+        if change_image_a is not None and change_image_a.mode != "RGB":
+            change_image_a = change_image_a.convert("RGB")
+        if change_image_b is not None and change_image_b.mode != "RGB":
+            change_image_b = change_image_b.convert("RGB")
 
         # Stage 1: Request / Query Received
         tracer.record(
@@ -166,6 +178,7 @@ class GeoVLMController:
             metadata={
                 "request_id": req_id,
                 "query_length": len(query),
+                "execution_profile": exec_profile,
                 "has_optical": optical_image is not None,
                 "has_sar": sar_image is not None,
                 "has_change_pair": change_image_a is not None and change_image_b is not None,
@@ -177,6 +190,7 @@ class GeoVLMController:
             metadata={
                 "request_id": req_id,
                 "query_length": len(query),
+                "execution_profile": exec_profile,
                 "has_optical": optical_image is not None,
                 "has_sar": sar_image is not None,
                 "has_change_pair": change_image_a is not None and change_image_b is not None,
@@ -228,9 +242,14 @@ class GeoVLMController:
         dur_sel = (time.perf_counter() - t_sel_start) * 1000.0
 
         grounding_t = classification.parameters.get("target_phrase") or _extract_grounding_target(query or "")
+        img_dims = list(optical_image.size) if optical_image is not None else ([0, 0])
+        tiling_policy = "direct_single_pass" if max(img_dims) <= 1024 else "adaptive_high_res"
+
         plan = {
             "task_type": classification.task_type.value,
             "selected_tools": selected_tools,
+            "execution_profile": exec_profile,
+            "tiling_strategy": tiling_policy,
             "reasoning_basis": "intent_rules",
             "parameters": {
                 "query": query,

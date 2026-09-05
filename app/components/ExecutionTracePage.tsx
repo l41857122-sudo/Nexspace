@@ -158,6 +158,25 @@ function LiveKernelOutput({ investigation, sourceImage }: { investigation: Canon
       ];
     }
 
+    const trace = investigation.response?.execution_trace;
+    if (Array.isArray(trace) && trace.length > 0) {
+      return trace.map((st: any, idx: number) => {
+        const stageNum = (idx + 1).toString().padStart(2, "0");
+        const stageName = st.stage || st.name || `Stage ${idx + 1}`;
+        const status = st.status || "SUCCESS";
+        const duration = typeof st.duration_ms === "number" ? `${st.duration_ms.toFixed(1)}ms` : "";
+        const details = st.details || st.message || "";
+        const color = status === "SUCCESS" ? "text-emerald-400" : status === "ERROR" ? "text-rose-400" : "text-cyan-300";
+
+        return {
+          time: `00:0${stageNum}.00`,
+          tag: status,
+          text: `[${stageName}] ${details} ${duration ? `(${duration})` : ""}`.trim(),
+          color,
+        };
+      });
+    }
+
     const detections = investigation.response?.grounding?.detections || [];
     const caption = typeof investigation.response?.optical_caption === "string"
       ? investigation.response.optical_caption
@@ -312,6 +331,20 @@ export default function ExecutionTracePage() {
 
   useEffect(() => {
     setInvestigationState(getCurrentInvestigation());
+
+    const syncHandler = () => {
+      setInvestigationState(getCurrentInvestigation());
+    };
+
+    window.addEventListener("nexspace-investigation-changed", syncHandler);
+    window.addEventListener("nexspace-source-changed", syncHandler);
+    window.addEventListener("storage", syncHandler);
+
+    return () => {
+      window.removeEventListener("nexspace-investigation-changed", syncHandler);
+      window.removeEventListener("nexspace-source-changed", syncHandler);
+      window.removeEventListener("storage", syncHandler);
+    };
   }, []);
 
   const sourceImage = useMemo<CanonicalSourceImage>(() => {

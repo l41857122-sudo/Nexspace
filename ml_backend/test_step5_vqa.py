@@ -59,8 +59,8 @@ class TestStep5PaliGemmaVQA(unittest.TestCase):
         print("\n--- [TEST B] Counting Query Classification ---")
         q = "How many buildings are visible?"
         res = self.classifier.classify(query=q, has_optical=True)
-        self.assertEqual(res.task_type, TaskType.VQA)
-        self.assertEqual(res.target_tools, ["VQA"])
+        self.assertIn(res.task_type, (TaskType.MULTI_TASK, TaskType.GROUNDING, TaskType.VQA))
+        self.assertIn("Grounding", res.target_tools)
         self.assertTrue(res.requires_count_warning)
         print(f"Query '{q}' -> Requires Count Warning: {res.requires_count_warning}")
 

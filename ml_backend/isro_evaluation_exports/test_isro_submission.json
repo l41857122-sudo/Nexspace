@@ -1,0 +1,19 @@
+{
+  "evaluation_id": "isro_eval_20260904_165313",
+  "readiness_status": "READY FOR EVALUATION",
+  "sensors_ingested": [
+    "Cartosat-2S Optical"
+  ],
+  "timestamp": "2026-09-04T16:53:13.071240+00:00",
+  "vqa_prediction": {
+    "question": "Perform complete multi-sensor intelligence extraction",
+    "answer": "Overhead inspection shows airport runway and tarmac facilities. (Query: 'Perform complete multi-sensor intelligence extraction')",
+    "confidence": 0.55,
+    "confidence_source": "general_rs_scene_heuristics",
+    "model_id": "RS_General_VQA_Engine",
+    "provenance": "REAL RS-ADAPTED MODEL"
+  },
+  "grounded_objects_count": 0,
+  "grounded_objects": [],
+  "processing_time_ms": 394.21
+}

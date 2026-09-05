@@ -1,0 +1,10 @@
+{
+  "base_model_id": "flax-community/clip-rsicd",
+  "adaptation_method": "LoRA / Linear Residual Adapter",
+  "lora_rank": 8,
+  "epochs": 3,
+  "learning_rate": 0.0001,
+  "batch_size": 8,
+  "status": "ADAPTATION PIPELINE READY",
+  "created_at": "2026-09-04T16:49:21.087920+00:00"
+}

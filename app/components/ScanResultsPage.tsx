@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -16,6 +16,8 @@ import {
   ShieldCheck,
   Search,
   Focus,
+  Layers,
+  FileText,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
 import type { CanonicalSourceImage, CanonicalInvestigationState } from "../types/nexspace";
@@ -82,6 +84,7 @@ function TopBar({
 function MapArea({
   investigation,
   sourceImage,
+  normalizedDetections,
   selectedTargetId,
   onSelectTarget,
   isFocused,
@@ -89,29 +92,13 @@ function MapArea({
 }: {
   investigation: CanonicalInvestigationState | null;
   sourceImage: CanonicalSourceImage;
+  normalizedDetections: Array<{ id: string; evidenceId: string; label: string; score: number | null; box: [number, number, number, number] }>;
   selectedTargetId: string | null;
   onSelectTarget: (id: string | null) => void;
   isFocused: boolean;
   onToggleFocus: () => void;
 }) {
   const [zoom, setZoom] = useState(1);
-
-  const normalizedDetections = useMemo(() => {
-    const raw = investigation?.response?.grounding?.detections || [];
-    return raw
-      .map((det, idx) => {
-        const d = det as unknown as Record<string, unknown>;
-        const nBox = normalizeBox(d);
-        if (!nBox) return null;
-        return {
-          id: `TARGET-${String(idx + 1).padStart(2, "0")}`,
-          label: (d.label as string) || `Target #${idx + 1}`,
-          score: typeof d.score === "number" ? d.score : null,
-          box: nBox,
-        };
-      })
-      .filter((d): d is NonNullable<typeof d> => d !== null);
-  }, [investigation]);
 
   const selectedTarget = useMemo(() => {
     return normalizedDetections.find((d) => d.id === selectedTargetId) || null;
@@ -297,6 +284,7 @@ function MapArea({
 function TargetsSidebar({
   investigation,
   sourceImage,
+  normalizedDetections,
   selectedTargetId,
   onSelectTarget,
   isFocused,
@@ -304,44 +292,59 @@ function TargetsSidebar({
 }: {
   investigation: CanonicalInvestigationState | null;
   sourceImage: CanonicalSourceImage;
+  normalizedDetections: Array<{ id: string; evidenceId: string; label: string; score: number | null; box: [number, number, number, number] }>;
   selectedTargetId: string | null;
   onSelectTarget: (id: string | null) => void;
   isFocused: boolean;
   onToggleFocus: () => void;
 }) {
-  const normalizedDetections = useMemo(() => {
-    const raw = investigation?.response?.grounding?.detections || [];
-    return raw
-      .map((det, idx) => {
-        const d = det as unknown as Record<string, unknown>;
-        const nBox = normalizeBox(d);
-        if (!nBox) return null;
-        return {
-          id: `TARGET-${String(idx + 1).padStart(2, "0")}`,
-          evidenceId: `EVD-${String(idx + 1).padStart(3, "0")}`,
-          label: (d.label as string) || `Target #${idx + 1}`,
-          score: typeof d.score === "number" ? d.score : null,
-          box: nBox,
-        };
-      })
-      .filter((d): d is NonNullable<typeof d> => d !== null);
-  }, [investigation]);
-
   const selectedTarget = useMemo(() => {
     return normalizedDetections.find((d) => d.id === selectedTargetId) || null;
   }, [normalizedDetections, selectedTargetId]);
 
   const caption = typeof investigation?.response?.optical_caption === "string"
     ? investigation.response.optical_caption
-    : (investigation?.response?.optical_caption as unknown as { caption?: string })?.caption || "Scene analysis completed.";
+    : (investigation?.response?.optical_caption as unknown as { caption?: string })?.caption || null;
+
+  const primaryAnswer = investigation?.response?.response_text ||
+    (investigation?.response?.investigation_report?.observations && investigation.response.investigation_report.observations[0]) ||
+    caption ||
+    "Scan complete.";
 
   return (
     <div className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l border-slate-800/80 bg-[#0c1624]/60 backdrop-blur-md p-4 sm:p-5 flex flex-col justify-between overflow-y-auto space-y-4">
       <div className="space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+        {/* User Query Banner */}
+        <div className="bg-slate-900/90 border border-cyan-500/30 rounded-xl p-3 space-y-1.5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <Search size={12} />
+              <span>User Query</span>
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+              {investigation?.investigation_id || "ACTIVE"}
+            </span>
+          </div>
+          <p className="text-xs font-semibold text-white font-mono leading-snug">
+            &ldquo;{investigation?.query || "No query recorded"}&rdquo;
+          </p>
+        </div>
+
+        {/* Primary Answer Box */}
+        <div className="bg-cyan-950/40 border border-cyan-500/40 rounded-xl p-3 space-y-1 shadow-sm">
+          <span className="text-[10px] font-mono text-cyan-300 uppercase tracking-wider font-bold">
+            Primary Findings / Response
+          </span>
+          <p className="text-xs text-slate-100 leading-relaxed font-sans font-medium">
+            {primaryAnswer}
+          </p>
+        </div>
+
+        {/* Header & Target Count */}
+        <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
           <div>
-            <h2 className="text-sm font-semibold text-white tracking-tight flex items-center gap-1.5">
-              <Sparkles size={14} className="text-cyan-400" />
+            <h2 className="text-sm font-semibold text-white flex items-center gap-1.5 tracking-tight">
+              <Layers size={14} className="text-cyan-400" />
               <span>Target Entities ({normalizedDetections.length})</span>
             </h2>
             <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate max-w-[200px]">
@@ -349,7 +352,7 @@ function TargetsSidebar({
             </p>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">
-            {normalizedDetections.length} Detected
+            {normalizedDetections.length} Flagged
           </span>
         </div>
 
@@ -395,13 +398,7 @@ function TargetsSidebar({
               </button>
             </div>
           </div>
-        ) : (
-          /* Scene Summary when no target is specifically selected */
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 text-xs space-y-1">
-            <div className="font-semibold text-slate-200">🛰️ Scene Summary:</div>
-            <div className="text-slate-300 text-[11px] leading-relaxed">{caption}</div>
-          </div>
-        )}
+        ) : null}
 
         {/* List of Selectable Target Cards */}
         <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
@@ -429,35 +426,49 @@ function TargetsSidebar({
                     </span>
                   )}
                 </div>
-                <div className="text-[10px] text-slate-400">
-                  Box: [{xmin}, {ymin}, {xmax}, {ymax}]
+                <div className="text-[11px] text-slate-400 flex items-center justify-between">
+                  <span>[{xmin}, {ymin}, {xmax}, {ymax}]</span>
+                  <span className="text-cyan-400 text-[10px]">Inspect →</span>
                 </div>
               </div>
             );
           })}
 
           {normalizedDetections.length === 0 && (
-            <div className="text-xs text-slate-500 font-mono italic p-3 text-center bg-slate-950/40 rounded-xl border border-slate-800/50">
-              No target entities detected in the scene.
+            <div className="p-4 rounded-xl border border-slate-800/80 bg-slate-900/30 text-center text-xs text-slate-400 font-mono space-y-1">
+              <p>No target entities flagged.</p>
+              <p className="text-[10px] text-slate-500">Spatial bounding proposals are query-specific.</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="pt-3 border-t border-slate-800/80 space-y-2">
+      {/* Navigation Quick Links */}
+      <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2">
         <Link
           href="/evidence"
-          className="w-full flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 active:scale-95 transition-all text-[#0a1420] text-xs font-bold rounded-lg py-2.5 cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+          className="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800 hover:border-cyan-500/40 text-xs font-mono text-cyan-300 transition-all cursor-pointer"
         >
-          <span>Open in Evidence Viewer</span>
+          <span className="flex items-center gap-1.5">
+            <Layers size={13} />
+            <span>Open in Evidence Viewer</span>
+          </span>
+          <ArrowRight size={13} />
+        </Link>
+        <Link
+          href="/reports"
+          className="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800 hover:border-cyan-500/40 text-xs font-mono text-cyan-300 transition-all cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5">
+            <FileText size={13} />
+            <span>Generate Intelligence Report</span>
+          </span>
           <ArrowRight size={13} />
         </Link>
         <Link
           href="/query"
-          className="w-full flex items-center justify-center gap-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-mono rounded-lg py-2 transition-all cursor-pointer"
+          className="text-center py-2 rounded-lg bg-slate-900/40 hover:bg-slate-800/80 text-[11px] font-mono text-slate-400 hover:text-white border border-slate-800/60 transition-all"
         >
-          <Search size={13} />
           <span>New Query / Upload</span>
         </Link>
       </div>
@@ -473,10 +484,81 @@ export default function ScanResultsPage() {
     return getCurrentInvestigation();
   });
 
+  useEffect(() => {
+    setInvestigationState(getCurrentInvestigation());
+
+    const syncHandler = () => {
+      setInvestigationState(getCurrentInvestigation());
+    };
+
+    window.addEventListener("nexspace-investigation-changed", syncHandler);
+    window.addEventListener("nexspace-source-changed", syncHandler);
+    window.addEventListener("storage", syncHandler);
+
+    return () => {
+      window.removeEventListener("nexspace-investigation-changed", syncHandler);
+      window.removeEventListener("nexspace-source-changed", syncHandler);
+      window.removeEventListener("storage", syncHandler);
+    };
+  }, []);
+
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(
     () => investigationState?.selectedTargetId || null
   );
   const [isFocused, setIsFocused] = useState(false);
+
+  // Synchronized normalized detections extraction across all response channels
+  const normalizedDetections = useMemo(() => {
+    if (!investigationState?.response) return [];
+
+    const list: Array<{ id: string; evidenceId: string; label: string; score: number | null; box: [number, number, number, number] }> = [];
+    const seen = new Set<string>();
+
+    // 1. Check grounding.detections
+    const rawGrounding = investigationState.response.grounding?.detections || [];
+    rawGrounding.forEach((det) => {
+      const d = det as unknown as Record<string, unknown>;
+      const nBox = normalizeBox(d);
+      if (nBox) {
+        const key = `${nBox.join(",")}-${d.label || ""}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          list.push({
+            id: `TARGET-${String(list.length + 1).padStart(2, "0")}`,
+            evidenceId: `EVD-${String(list.length + 1).padStart(3, "0")}`,
+            label: (d.label as string) || `Target #${list.length + 1}`,
+            score: typeof d.score === "number" ? d.score : null,
+            box: nBox,
+          });
+        }
+      }
+    });
+
+    // 2. Check evidence bounding boxes
+    const rawEvidence = investigationState.response.evidence || [];
+    rawEvidence.forEach((ev) => {
+      const e = ev as unknown as Record<string, unknown>;
+      const p = (e.payload as Record<string, unknown>) || e;
+      if (e.type === "bounding_box" || p.box || p.box_2d || p.bbox_normalized || p.bbox_pixel) {
+        const nBox = normalizeBox(p);
+        if (nBox) {
+          const key = `${nBox.join(",")}-${p.label || e.label || ""}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            list.push({
+              id: `TARGET-${String(list.length + 1).padStart(2, "0")}`,
+              evidenceId: `EVD-${String(list.length + 1).padStart(3, "0")}`,
+              label: (p.label as string) || (e.label as string) || `Target #${list.length + 1}`,
+              score: typeof p.score === "number" ? p.score : (typeof e.confidence === "number" ? e.confidence : null),
+              box: nBox,
+            });
+          }
+        }
+      }
+    });
+
+    return list;
+  }, [investigationState]);
 
   // Sync target selection back to canonical investigation in storage
   const handleSelectTarget = (id: string | null) => {
@@ -511,6 +593,7 @@ export default function ScanResultsPage() {
           <MapArea
             investigation={investigationState}
             sourceImage={sourceImage}
+            normalizedDetections={normalizedDetections}
             selectedTargetId={selectedTargetId}
             onSelectTarget={handleSelectTarget}
             isFocused={isFocused}
@@ -519,6 +602,7 @@ export default function ScanResultsPage() {
           <TargetsSidebar
             investigation={investigationState}
             sourceImage={sourceImage}
+            normalizedDetections={normalizedDetections}
             selectedTargetId={selectedTargetId}
             onSelectTarget={handleSelectTarget}
             isFocused={isFocused}
