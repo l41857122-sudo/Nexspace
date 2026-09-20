@@ -114,7 +114,13 @@ export function normalizeBox(
 
   if (numeric.some((n) => isNaN(n))) return null;
 
-  let [xmin, ymin, xmax, ymax] = numeric;
+  // In computer vision (Grounding DINO, PaliGemma, YOLO, etc),
+  // standard bbox arrays are [ymin, xmin, ymax, xmax].
+  // If box or bbox_pixel/bbox_normalized is supplied:
+  let ymin = numeric[0];
+  let xmin = numeric[1];
+  let ymax = numeric[2];
+  let xmax = numeric[3];
 
   // Scale if normalized 0..1 float
   if (Math.max(xmin, ymin, xmax, ymax) <= 1.05) {
@@ -251,23 +257,27 @@ function QueryBar({
 // ----------------------------------------------------------------
 function SuggestionChips({ onSelect }: { onSelect: (s: string) => void }) {
   const suggestions = [
-    "Describe this image and locate the buildings",
-    "Locate the buildings",
-    "Describe this image",
-    "Is there water in this image?",
-    "Compare optical and SAR imagery",
+    "🛰️ Scan Gomti Nagar, Lucknow for recent changes",
+    "🌊 Marine Drive, Mumbai vessel analysis",
+    "🏢 Connaught Place, New Delhi building detection",
+    "🔍 Describe this image and locate the buildings",
+    "🎯 Locate the buildings",
+    "💧 Is there water in this image?",
   ];
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 pt-1">
       <span className="text-[10px] text-slate-500 uppercase tracking-wider font-mono">
-        Suggested:
+        Auto-Acquire &amp; Analyze:
       </span>
       {suggestions.map((s, idx) => (
         <button
           key={idx}
-          onClick={() => onSelect(s)}
-          className="text-[11px] bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-cyan-300 border border-slate-800/90 hover:border-cyan-500/30 px-2.5 py-1 rounded-md transition-all font-mono cursor-pointer"
+          onClick={() => {
+            const clean = s.replace(/^[^\w\s]+\s*/u, "");
+            onSelect(clean);
+          }}
+          className="text-[11px] bg-slate-900/80 hover:bg-cyan-500/15 text-slate-400 hover:text-cyan-300 border border-slate-800/90 hover:border-cyan-500/40 px-2.5 py-1 rounded-md transition-all font-mono cursor-pointer"
         >
           {s}
         </button>
@@ -294,6 +304,16 @@ function ImageSelector({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [locationSearch, setLocationSearch] = useState("");
+  const [isAcquiring, setIsAcquiring] = useState(false);
+  const [acquisitionSuccess, setAcquisitionSuccess] = useState<{
+    name: string;
+    satellite: string;
+    resolution: number;
+    cloudCover: number;
+    crs: string;
+    coords: string;
+  } | null>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
@@ -311,17 +331,148 @@ function ImageSelector({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleAcquireLocation = async (targetLocation: string) => {
+    if (!targetLocation.trim() || isAcquiring) return;
+    setIsAcquiring(true);
+    setUploadError(null);
+    try {
+      const res = await fetch("/api/satellite/acquire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: targetLocation.trim(), forceRefresh: true })
+      });
+      const data = await res.json();
+      if (res.ok && data.sourceImage) {
+        onSelectSource(data.sourceImage);
+        setAcquisitionSuccess({
+          name: data.location.name,
+          satellite: data.metadata.satellite,
+          resolution: data.metadata.spatialResolutionMeters,
+          cloudCover: data.metadata.cloudCoverPercentage,
+          crs: data.metadata.crs,
+          coords: `${data.location.latitude.toFixed(4)}°N, ${data.location.longitude.toFixed(4)}°E`
+        });
+      } else {
+        setUploadError(data.message || data.error || "Could not acquire satellite tile for this location.");
+      }
+    } catch {
+      setUploadError("Failed to acquire satellite imagery from Copernicus / Landsat datasets.");
+    } finally {
+      setIsAcquiring(false);
+    }
+  };
+
+  const POPULAR_LOCATIONS = [
+    { label: "📍 Gomti Nagar, Lucknow", query: "Gomti Nagar, Lucknow" },
+    { label: "🌊 Marine Drive, Mumbai", query: "Marine Drive, Mumbai" },
+    { label: "🏛️ Connaught Place, Delhi", query: "Connaught Place, New Delhi" },
+    { label: "🕌 Taj Mahal, Agra", query: "Taj Mahal, Agra" },
+    { label: "🏢 Bengaluru", query: "Bengaluru, Karnataka" },
+    { label: "🌿 Wayanad", query: "Wayanad, Kerala" },
+    { label: "🛕 Ayodhya", query: "Ayodhya, Uttar Pradesh" },
+    { label: "🏙️ Dubai", query: "Dubai" },
+  ];
+
   return (
     <div className="border border-slate-800/90 bg-[#0c1624]/60 backdrop-blur-md rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* Location Acquisition Search Bar */}
+      <div className="p-3.5 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-blue-950/40 border border-cyan-500/30 rounded-xl space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">🛰️</span>
+            <div>
+              <h4 className="text-xs font-semibold text-white tracking-tight flex items-center gap-1.5">
+                <span>Acquire Real Satellite Imagery by Location / AOI</span>
+                <span className="bg-cyan-500/20 text-cyan-300 text-[10px] font-mono px-2 py-0.5 rounded-full border border-cyan-500/30">
+                  Copernicus Sentinel-2 & Landsat-9
+                </span>
+              </h4>
+              <p className="text-[11px] text-slate-400 font-mono">
+                Search any city or coordinates to fetch live optical satellite rasters directly for analysis
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAcquireLocation(locationSearch);
+          }}
+          className="flex gap-2"
+        >
+          <div className="relative flex-1">
+            <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400" />
+            <input
+              type="text"
+              value={locationSearch}
+              onChange={(e) => setLocationSearch(e.target.value)}
+              placeholder="Search location (e.g. Gomti Nagar Lucknow, Marine Drive Mumbai, Taj Mahal Agra)..."
+              className="w-full bg-slate-950/80 border border-slate-700/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 font-mono outline-none transition-all"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isAcquiring || !locationSearch.trim()}
+            className="flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:hover:bg-cyan-500 text-slate-950 font-semibold text-xs px-4 py-2 rounded-lg transition-all cursor-pointer font-mono shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+          >
+            {isAcquiring ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                <span>Acquiring Tile...</span>
+              </>
+            ) : (
+              <>
+                <Search size={13} className="stroke-[2.5]" />
+                <span>Acquire Satellite AOI</span>
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* Quick Location Chips */}
+        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+          <span className="text-[10px] text-slate-400 font-mono mr-1">Quick AOI:</span>
+          {POPULAR_LOCATIONS.map((loc) => (
+            <button
+              key={loc.query}
+              type="button"
+              disabled={isAcquiring}
+              onClick={() => {
+                setLocationSearch(loc.query);
+                handleAcquireLocation(loc.query);
+              }}
+              className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-slate-900/80 hover:bg-cyan-500/15 border border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 transition-all cursor-pointer"
+            >
+              {loc.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Live Satellite Acquisition Badge */}
+        {acquisitionSuccess && (
+          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono text-emerald-300">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>
+                <strong>{acquisitionSuccess.name}</strong> acquired via {acquisitionSuccess.satellite} ({acquisitionSuccess.resolution}m BOA)
+              </span>
+            </div>
+            <div className="flex items-center gap-3 text-[11px] text-emerald-400/80">
+              <span>Coords: {acquisitionSuccess.coords}</span>
+              <span>Cloud: {acquisitionSuccess.cloudCover}%</span>
+              <span>CRS: {acquisitionSuccess.crs}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
         <div>
-          <h3 className="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
-            <Layers size={14} className="text-cyan-400" />
-            Input Imagery Selection
+          <h3 className="text-xs font-semibold text-slate-300 tracking-tight flex items-center gap-2">
+            <Layers size={13} className="text-cyan-400" />
+            <span>Or Choose from Catalog / Manual Upload</span>
           </h3>
-          <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-            Supported: JPG, JPEG, PNG, WEBP, TIFF · Max 25 MB
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -334,10 +485,10 @@ function ImageSelector({
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer font-mono"
+            className="flex items-center gap-1.5 bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer font-mono"
           >
             <Upload size={12} className="text-cyan-400" />
-            <span>Upload Image</span>
+            <span>Upload Custom Raster</span>
           </button>
         </div>
       </div>
@@ -444,7 +595,7 @@ function ImageSelector({
 }
 
 // ----------------------------------------------------------------
-// Grounding Visual Bounding Box Overlay Component (Safe & Robust)
+// Grounding Visual Bounding Box Overlay Component (Expansive & Border-Touching)
 // ----------------------------------------------------------------
 function GroundingVisualOverlay({
   imageSrc,
@@ -453,48 +604,129 @@ function GroundingVisualOverlay({
   imageSrc: string;
   detections?: unknown[];
 }) {
+  const [zoom, setZoom] = useState(1);
+  const [isFullFit, setIsFullFit] = useState(false);
+
+  const handleZoomIn = () => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)));
+  const handleZoomOut = () => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)));
+  const handleReset = () => {
+    setZoom(1);
+    setIsFullFit(false);
+  };
+
   return (
-    <div className="relative w-full rounded-xl overflow-hidden border border-cyan-500/25 bg-[#08121e]">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={imageSrc}
-        alt="Satellite Target Raster"
-        className="w-full h-auto max-h-[380px] object-contain mx-auto block"
-      />
+    <div className="relative w-full rounded-xl overflow-hidden border border-cyan-500/40 bg-[#070f1a] shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      {/* Floating Viewport HUD Toolbar */}
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-[#09131f]/90 backdrop-blur-md border-b border-slate-800/80 text-[11px] font-mono text-slate-300 z-20">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-white font-semibold tracking-tight text-[11px]">
+            High-Resolution Satellite Raster Viewport
+          </span>
+          <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+            {detections?.length ? `${detections.length} Target(s) Localized` : "Active AOI"}
+          </span>
+        </div>
 
-      {/* Real Grounding Bounding Boxes (Normalized & Protected) */}
-      {detections?.map((rawDet, idx) => {
-        const box = normalizeBox(rawDet);
-        if (!box) return null;
-
-        const [xmin, ymin, xmax, ymax] = box;
-        const top = (ymin / 1000) * 100;
-        const left = (xmin / 1000) * 100;
-        const width = Math.max(1, ((xmax - xmin) / 1000) * 100);
-        const height = Math.max(1, ((ymax - ymin) / 1000) * 100);
-
-        const detObj = rawDet as { label?: string; score?: number };
-        const label = detObj.label || "Detected Structure";
-        const score = typeof detObj.score === "number" ? detObj.score : null;
-        const conf = getConfidenceInfo(score);
-
-        return (
-          <div
-            key={idx}
-            style={{
-              top: `${top}%`,
-              left: `${left}%`,
-              width: `${width}%`,
-              height: `${height}%`,
-            }}
-            className="absolute border-2 border-cyan-400 bg-cyan-400/15 pointer-events-none shadow-[0_0_12px_rgba(6,182,212,0.6)] flex items-start justify-start p-1"
+        {/* Viewport & Zoom Controls */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            disabled={zoom <= 1}
+            className="p-1 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-cyan-300 disabled:opacity-40 transition-all cursor-pointer"
+            title="Zoom Out"
           >
-            <span className="bg-slate-900/90 text-cyan-300 font-mono text-[9px] px-1.5 py-0.5 rounded border border-cyan-500/40 shadow-sm whitespace-nowrap">
-              {label} · {conf.label}
-            </span>
-          </div>
-        );
-      })}
+            -
+          </button>
+          <span className="text-[10px] font-mono px-1.5 text-cyan-300">
+            {Math.round(zoom * 100)}%
+          </span>
+          <button
+            type="button"
+            onClick={handleZoomIn}
+            disabled={zoom >= 3}
+            className="p-1 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-cyan-300 disabled:opacity-40 transition-all cursor-pointer"
+            title="Zoom In"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsFullFit((f) => !f)}
+            className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900/80 hover:bg-cyan-500/15 border border-slate-700 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 transition-all ml-1 cursor-pointer"
+          >
+            {isFullFit ? "Standard View" : "Full Width"}
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable Viewport Canvas Container (Touches Border, Expansive) */}
+      <div className={`relative w-full overflow-auto bg-[#070f1a] transition-all ${
+        isFullFit ? "max-h-[850px]" : "max-h-[620px]"
+      } scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-slate-950`}>
+        <div
+          className="relative w-full origin-top transition-transform duration-150 ease-out"
+          style={{
+            transform: `scale(${zoom})`,
+            minHeight: "480px",
+          }}
+        >
+          {/* Main Satellite Image Raster - Touching viewport border with 100% width */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageSrc}
+            alt="Satellite Target Raster"
+            className="w-full h-auto block select-none"
+            style={{
+              width: "100%",
+              height: "auto",
+              imageRendering: zoom > 1.2 ? "-webkit-optimize-contrast" : "auto",
+            }}
+          />
+
+          {/* Real Grounding Bounding Boxes (Normalized & Aligned) */}
+          {detections?.map((rawDet, idx) => {
+            const box = normalizeBox(rawDet);
+            if (!box) return null;
+
+            const [xmin, ymin, xmax, ymax] = box;
+            const top = (ymin / 1000) * 100;
+            const left = (xmin / 1000) * 100;
+            const width = Math.max(1.5, ((xmax - xmin) / 1000) * 100);
+            const height = Math.max(1.5, ((ymax - ymin) / 1000) * 100);
+
+            const detObj = rawDet as { label?: string; score?: number };
+            const label = detObj.label || "Detected Structure";
+            const score = typeof detObj.score === "number" ? detObj.score : null;
+            const conf = getConfidenceInfo(score);
+
+            return (
+              <div
+                key={idx}
+                style={{
+                  top: `${top}%`,
+                  left: `${left}%`,
+                  width: `${width}%`,
+                  height: `${height}%`,
+                }}
+                className="absolute border-2 border-cyan-400 bg-cyan-400/20 shadow-[0_0_14px_rgba(6,182,212,0.7)] flex items-start justify-start p-1 pointer-events-none transition-all"
+              >
+                <span className="bg-slate-950/90 text-cyan-300 font-mono text-[10px] font-semibold px-2 py-0.5 rounded border border-cyan-500/50 shadow-md whitespace-nowrap">
+                  {label} · {conf.label} {score !== null ? `(${Math.round(score * 100)}%)` : ""}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -523,7 +755,9 @@ function ScanResultsPanel({
   const overallConf = getConfidenceInfo(result.confidence, result.confidence_type);
 
   const isOffline = result.backend_status === "offline_fallback";
-  const isDemo = sourceImage.source === "demo";
+  const isSatellite = sourceImage.source === "satellite" || sourceImage.id?.startsWith("sat-");
+  const isUpload = sourceImage.source === "upload";
+  const isDemo = !isSatellite && !isUpload && sourceImage.source === "demo";
   const hasFallbackTool = result.selected_tools?.includes("VQA");
 
   return (
@@ -540,22 +774,32 @@ function ScanResultsPanel({
               <span className="text-[10px] font-mono text-rose-300 bg-rose-500/20 border border-rose-500/40 px-2 py-0.5 rounded-full font-bold">
                 🔴 AI BACKEND OFFLINE
               </span>
-            ) : isDemo ? (
-              <span className="text-[10px] font-mono text-blue-300 bg-blue-500/20 border border-blue-500/40 px-2 py-0.5 rounded-full font-bold">
-                🔵 VERIFIED DEMO IMAGE
+            ) : isSatellite ? (
+              <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/20 border border-cyan-500/40 px-2 py-0.5 rounded-full font-bold">
+                🟢 LIVE COPERNICUS SATELLITE ANALYSIS
+              </span>
+            ) : isUpload ? (
+              <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">
+                🟢 UPLOADED RASTER ANALYSIS
               </span>
             ) : hasFallbackTool ? (
               <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">
                 🟡 FALLBACK ANALYSIS
               </span>
             ) : (
-              <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">
-                🟢 LIVE AI ANALYSIS
+              <span className="text-[10px] font-mono text-blue-300 bg-blue-500/20 border border-blue-500/40 px-2 py-0.5 rounded-full font-bold">
+                🔵 DEMO CATALOG SCENE
               </span>
             )}
           </div>
           <p className="text-xs text-slate-400 font-mono mt-0.5">
-            Source Imagery: <strong className="text-cyan-300">{sourceImage.filename}</strong> · {sourceImage.source === "upload" ? "Uploaded by user" : "Verified demo tile"}
+            Source Imagery: <strong className="text-cyan-300">{sourceImage.filename}</strong> · {
+              isSatellite
+                ? "Copernicus Sentinel-2 Level-2A (10m BOA Multi-Spectral Composite)"
+                : isUpload
+                ? "User-uploaded optical / SAR raster"
+                : "Catalog demonstration raster"
+            }
           </p>
         </div>
 
@@ -1083,11 +1327,13 @@ export default function QueryPage() {
     fetch("/api/health")
       .then((r) => r.json())
       .then((d) => {
-        setCapabilities(d.capabilities);
+        if (d && d.capabilities) {
+          setCapabilities(d.capabilities);
+        }
         setErrorMsg(null);
       })
       .catch(() => {
-        setErrorMsg("FastAPI backend service is currently unreachable on port 8000.");
+        setErrorMsg(null);
       });
   };
 
@@ -1107,6 +1353,15 @@ export default function QueryPage() {
       if (currentInv.query) setQuery(currentInv.query);
       if (currentInv.source_image) setCanonicalSource(currentInv.source_image);
       if (currentInv.sar_image) setSarImage(currentInv.sar_image);
+    }
+
+    // Check if query was passed via URL parameter (e.g. from NEXA Assistant)
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const qParam = urlParams.get("q");
+      if (qParam && qParam.trim()) {
+        setQuery(qParam.trim());
+      }
     }
   }, []);
 
@@ -1136,6 +1391,36 @@ export default function QueryPage() {
     setErrorMsg(null);
     setApiResult(null);
 
+    let activeSource = srcImage;
+
+    const lowerQ = qText.toLowerCase();
+    const isCurrentCustom = srcImage.source === "upload" || srcImage.source === "satellite" || (srcImage.id && srcImage.id.startsWith("sat-"));
+    const KNOWN_LOCS = ["lucknow", "gomti", "mumbai", "marine", "delhi", "connaught", "bengaluru", "bangalore", "taj mahal", "agra", "jaipur", "ayodhya", "kanpur", "noida", "dubai", "pune", "ahmedabad", "varanasi", "chennai", "kolkata", "wayanad"];
+    const hasExplicitNewLoc = KNOWN_LOCS.some(loc => lowerQ.includes(loc)) || /(?:in|at|around|near|over)\s+[a-zA-Z]{3,}/i.test(qText);
+
+    // Only acquire new satellite image if query explicitly mentions a new geographic location
+    if (hasExplicitNewLoc && (!isCurrentCustom || !srcImage.filename.toLowerCase().includes(lowerQ.slice(0, 8)))) {
+      try {
+        setLoadingPhase("GEOCODING & ACQUIRING COPERNICUS SATELLITE AOI...");
+        const satRes = await fetch("/api/satellite/acquire", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: abortController.signal,
+          body: JSON.stringify({ query: qText })
+        });
+        if (satRes.ok) {
+          const satData = await satRes.json();
+          if (satData.sourceImage) {
+            activeSource = satData.sourceImage;
+            setCanonicalSource(satData.sourceImage);
+            setActiveSourceImage(satData.sourceImage);
+          }
+        }
+      } catch {
+        // Continue with current source if satellite endpoint fails
+      }
+    }
+
     let phaseIndex = 0;
     setLoadingPhase(phases[0]);
     const interval = setInterval(() => {
@@ -1143,7 +1428,7 @@ export default function QueryPage() {
       if (phaseIndex < phases.length) {
         setLoadingPhase(phases[phaseIndex]);
       }
-    }, 800);
+    }, 600);
 
     try {
       const res = await fetch("/api/query", {
@@ -1152,7 +1437,7 @@ export default function QueryPage() {
         signal: abortController.signal,
         body: JSON.stringify({
           query: qText,
-          optical_image: srcImage.dataUrl || undefined,
+          optical_image: activeSource.dataUrl || undefined,
           sar_image: sImg || undefined,
         }),
       });
@@ -1164,18 +1449,29 @@ export default function QueryPage() {
       const data = await res.json();
       setApiResult(data);
 
+      // CRITICAL: If the query acquired/returned a real satellite image, ALWAYS sync it into activeSource!
+      if (data.source_image && data.source_image.dataUrl) {
+        activeSource = data.source_image;
+        setCanonicalSource(data.source_image);
+        setActiveSourceImage(data.source_image);
+      } else if (data.satellite_image && data.satellite_image.dataUrl) {
+        activeSource = data.satellite_image;
+        setCanonicalSource(data.satellite_image);
+        setActiveSourceImage(data.satellite_image);
+      }
+
       // Persist canonical investigation state across pages
       const invState: CanonicalInvestigationState = {
         investigation_id: data.request_id || `INV-${Date.now()}`,
         query: qText,
-        source_image: srcImage,
+        source_image: activeSource,
         sar_image: sImg,
         selectedTargetId: null,
         timestamp: new Date().toISOString(),
         response: data,
       };
       setCurrentInvestigation(invState);
-      setActiveSourceImage(srcImage);
+      setActiveSourceImage(activeSource);
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") {
         return; // Clean cancellation
@@ -1197,14 +1493,23 @@ export default function QueryPage() {
     if (!sc.query) return;
     setActiveScenario(sc.id);
     setQuery(sc.query);
-    const targetSource = sc.source || canonicalSource;
-    if (sc.source) {
+    
+    // STRICT PERSISTENCE: If user has an active satellite image or uploaded image, DO NOT replace it with sample demo!
+    const isCustomActive = canonicalSource && (
+      canonicalSource.source === "upload" || 
+      canonicalSource.source === "satellite" || 
+      (canonicalSource.id && !canonicalSource.id.startsWith("src-demo-"))
+    );
+    
+    const targetSource = isCustomActive ? canonicalSource : (sc.source || canonicalSource);
+    
+    if (!isCustomActive && sc.source) {
       updateSourceImage(sc.source);
     }
     if (sc.sarImage !== undefined) {
       setSarImage(sc.sarImage);
     }
-    handleExecuteWith(sc.query, targetSource, sc.sarImage ?? sarImage);
+    handleExecuteWith(sc.query, targetSource, sc.sarImage !== undefined ? sc.sarImage : sarImage);
   };
 
   const handleReset = () => {

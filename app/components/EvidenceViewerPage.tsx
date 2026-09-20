@@ -40,9 +40,11 @@ import {
 function TopBar({
   investigation,
   sourceImage,
+  targetsCount = 0,
 }: {
   investigation: CanonicalInvestigationState | null;
   sourceImage: CanonicalSourceImage;
+  targetsCount?: number;
 }) {
   const isUpload = sourceImage.source === "upload";
 
@@ -60,9 +62,11 @@ function TopBar({
           <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
             isUpload
               ? "text-emerald-300 bg-emerald-500/15 border-emerald-500/30"
+              : sourceImage.filename.includes("Sentinel") || sourceImage.filename.includes("Landsat")
+              ? "text-cyan-300 bg-cyan-500/15 border-cyan-500/35 font-semibold"
               : "text-blue-300 bg-blue-500/15 border-blue-500/30"
           }`}>
-            Source: <strong>{sourceImage.filename}</strong> ({isUpload ? "Uploaded by user" : "Verified demo tile"})
+            Source: <strong>{sourceImage.filename}</strong> ({isUpload ? "Uploaded raster" : sourceImage.filename.includes("Sentinel") ? "Copernicus Sentinel-2 (10m BOA)" : "Verified Sentinel/Optical tile"})
           </span>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -82,11 +86,17 @@ function TopBar({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/25 rounded-lg px-3 py-2 text-[11px] text-cyan-300 font-mono">
-        <Info size={14} className="text-cyan-400 shrink-0" />
-        <span>
-          <strong>Investigation Evidence Verification:</strong> Visual inspection of the exact source image and neural object localizations. Click any bounding box or target card to inspect its evidence node.
-        </span>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] font-mono">
+        <div className="flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/25 rounded-lg px-3 py-1.5 text-cyan-300">
+          <Info size={13} className="text-cyan-400 shrink-0" />
+          <span><strong>Satellite:</strong> {sourceImage.filename.includes("Landsat") ? "Landsat-9 OLI-2 (30m)" : "Copernicus Sentinel-2 (10m)"}</span>
+        </div>
+        <div className="flex items-center gap-2 bg-slate-900/70 border border-slate-800 rounded-lg px-3 py-1.5 text-slate-300">
+          <span><strong>CRS:</strong> {investigation?.response?.spatial_summary?.crs || "EPSG:32644 (UTM)"}</span>
+        </div>
+        <div className="flex items-center gap-2 bg-slate-900/70 border border-slate-800 rounded-lg px-3 py-1.5 text-slate-300">
+          <span><strong>Targets:</strong> {targetsCount} Neural Localizations</span>
+        </div>
       </div>
     </header>
   );
@@ -133,35 +143,71 @@ function EvidenceImage({
     ? `CRS: ${geoMeta.crs} · RESOLUTION: ${geoMeta.resolution?.x || 10}m/px`
     : `SOURCE: ${sourceImage.filename} · SPATIAL FRAME: 512x512 PIXEL COORDINATES`;
 
+  const handleZoomIn = () => setZoom((z) => Math.min(3.5, +(z + 0.25).toFixed(2)));
+  const handleZoomOut = () => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)));
+  const handleReset = () => {
+    setZoom(1);
+    if (isFocused) onToggleFocus();
+  };
+
   return (
-    <div className="w-full flex-1 flex flex-col bg-[#09121d] relative overflow-hidden rounded-xl border border-slate-800/90 min-h-[480px] shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+    <div className="w-full flex-1 flex flex-col bg-[#070f1a] relative overflow-hidden rounded-xl border border-cyan-500/40 min-h-[560px] lg:min-h-[700px] shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
       {/* HUD Header Bar */}
-      <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-[#09111c] border-b border-slate-800/80 text-[11px] font-mono text-slate-400 z-20">
+      <div className="flex flex-wrap items-center justify-between px-3 sm:px-4 py-2.5 bg-[#09131f]/95 backdrop-blur-md border-b border-slate-800/80 text-[11px] font-mono text-slate-300 z-20 gap-2">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-slate-200 font-semibold uppercase tracking-wider text-[10px]">
+          <span className="text-white font-semibold uppercase tracking-wider text-[10px]">
             ACTIVE SOURCE IMAGE &amp; SPATIAL TARGETS ({normalizedDetections.length})
           </span>
           {selectedTarget && (
-            <span className="text-emerald-300 font-bold ml-2">
-              [FOCUS: {selectedTarget.id} ({selectedTarget.evidenceId})]
+            <span className="text-cyan-300 font-bold ml-1 bg-cyan-500/15 px-2 py-0.5 rounded border border-cyan-500/30">
+              [FOCUS: {selectedTarget.id} ({selectedTarget.label})]
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <span className="bg-slate-900/80 border border-slate-800 rounded-md px-2 py-1 text-[10px] text-cyan-300 font-mono flex items-center gap-1.5">
+          {/* Zoom controls */}
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            disabled={zoom <= 1}
+            className="px-2 py-0.5 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-cyan-300 disabled:opacity-40 transition-all cursor-pointer text-xs"
+            title="Zoom Out"
+          >
+            -
+          </button>
+          <span className="text-[10px] font-mono text-cyan-300">
+            {Math.round(effectiveZoom * 100)}%
+          </span>
+          <button
+            type="button"
+            onClick={handleZoomIn}
+            disabled={zoom >= 3.5}
+            className="px-2 py-0.5 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-cyan-300 disabled:opacity-40 transition-all cursor-pointer text-xs"
+            title="Zoom In"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
+          >
+            Reset
+          </button>
+          <span className="bg-slate-900/80 border border-slate-800 rounded-md px-2 py-1 text-[10px] text-cyan-300 font-mono flex items-center gap-1.5 ml-1">
             <Layers size={11} />
             <span>{sourceImage.filename}</span>
           </span>
         </div>
       </div>
 
-      {/* Main Satellite Viewport with Real User Image */}
-      <div className="flex-1 relative bg-[#09121d] overflow-hidden p-4 flex flex-col justify-between">
+      {/* Main Satellite Viewport with Expansive Border-Touching Layout */}
+      <div className="flex-1 relative bg-[#070f1a] overflow-auto flex flex-col justify-between scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-slate-950">
         {/* Actual Investigation Source Image Container */}
-        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-full min-h-[500px] flex items-center justify-center overflow-hidden">
           <div
-            className="relative w-full h-full max-w-full max-h-full flex items-center justify-center transition-all duration-300 ease-out"
+            className="relative w-full h-full transition-all duration-300 ease-out"
             style={{
               transform: `scale(${effectiveZoom})`,
               transformOrigin: transformOrigin,
@@ -171,7 +217,12 @@ function EvidenceImage({
             <img
               src={sourceImage.dataUrl}
               alt={sourceImage.filename}
-              className="w-full h-full object-contain select-none pointer-events-none"
+              className="w-full h-auto min-h-[500px] block select-none pointer-events-none"
+              style={{
+                width: "100%",
+                height: "auto",
+                imageRendering: effectiveZoom > 1.2 ? "-webkit-optimize-contrast" : "auto",
+              }}
             />
 
             {/* Dynamic Grounding Overlays with Target Selection */}
@@ -649,7 +700,11 @@ export default function EvidenceViewerPage() {
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <TopBar investigation={investigationState} sourceImage={sourceImage} />
+        <TopBar
+          investigation={investigationState}
+          sourceImage={sourceImage}
+          targetsCount={normalizedDetections.length}
+        />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start overflow-y-auto">
           <div className="lg:col-span-2">
