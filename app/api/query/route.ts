@@ -30,10 +30,6 @@ async function runLiveNeuralEngine(
   // Check for automatic satellite acquisition
   const satAcquisition = await satelliteOrchestrator.acquireFromNaturalLanguage(query);
 
-  const isCounting = /\bhow many\b/i.test(query);
-  const isGrounding = qLower.includes("locate") || qLower.includes("detect") || qLower.includes("find") || qLower.includes("building") || qLower.includes("vessel") || qLower.includes("ship") || qLower.includes("road") || qLower.includes("water") || qLower.includes("infrastructure") || qLower.includes("scan");
-  const isOpenEnded = qLower.includes("describe") || qLower.includes("what is visible") || qLower.includes("summarize") || qLower.includes("tell me about") || (!isCounting && !isGrounding && qLower.startsWith("what"));
-
   if (satAcquisition) {
     targetTools.push("Auto_Satellite_Acquisition");
     reasoningParts.push(`Geographic target "${satAcquisition.location.name}" extracted -> Auto-acquired ${satAcquisition.acquisition.metadata.satellite} AOI (Cloud cover: ${satAcquisition.acquisition.metadata.cloudCoverPercentage}%).`);
@@ -56,7 +52,7 @@ async function runLiveNeuralEngine(
     "what color", "what is the color of"
   ];
 
-  const qLower = query.toLowerCase();
+  
   const isOpenEnded = openEndedMarkers.some(m => qLower.includes(m)) ||
     (!isCounting && !closedStarters.some(s => qLower.startsWith(s)) && qLower.startsWith("what"));
 
@@ -124,7 +120,12 @@ async function runLiveNeuralEngine(
   ];
 
   const assignedTask = isDetection ? "GROUNDING" : (isCounting ? "COUNTING" : (isOpenEnded ? "Optical_Caption" : "VQA"));
+ const detections: GroundingDetection[] = [];
+const evidence: EvidenceNode[] = [];
 
+const opticalCaption = hasOptical
+  ? "Inference unavailable — Python ML backend is offline."
+  : null;
   return {
     request_id: "req_offline_fallback",
     status: "degraded",

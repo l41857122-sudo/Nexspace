@@ -889,6 +889,13 @@ const ScanResultsPanel = memo(function ScanResultsPanel({
 
   const isOffline = result.backend_status === "offline_fallback";
   const isDemo = sourceImage.source === "demo";
+  const isSatellite =
+  sourceImage.source === "upload" &&
+  /sentinel|copernicus|landsat|satellite/i.test(
+    `${sourceImage.filename} ${sourceImage.caption ?? ""}`
+  );
+
+const isUpload = sourceImage.source === "upload" && !isSatellite;
   const hasFallbackTool = isOffline || (result.confidence_type === "heuristic" && (!result.detections || result.detections.length === 0) && result.selected_tools?.length === 1 && result.selected_tools[0] === "VQA");
 
   const imgW = sourceImage.width || 1024;
