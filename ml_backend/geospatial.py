@@ -494,4 +494,79 @@ class GeospatialEngine:
                     enriched["ground_area"] = area_calc["ground_area"]
                     enriched["ground_area_unit"] = area_calc["ground_area_unit"]
 
+            # Genuine polygon world footprint from exact polygon_pixels
+            poly_pixels = item.get("polygon_pixels")
+            if poly_pixels and len(poly_pixels) >= 3 and "bbox_world" in enriched and isinstance(enriched["bbox_world"], dict):
+                try:
+                    poly_world = []
+                    for pt in poly_pixels:
+                        w_pt = geo_meta.transform.pixel_to_world(float(pt[0]), float(pt[1]))
+                        poly_world.append([round(float(w_pt[0]), 6), round(float(w_pt[1]), 6)])
+                    if poly_world and poly_world[0] != poly_world[-1]:
+                        poly_world.append(poly_world[0])
+                    enriched["bbox_world"]["polygon_world"] = poly_world
+                    enriched["polygon_world"] = poly_world
+                except Exception:
+                    pass
+
         return enriched
+
+
+@dataclass
+class BoundingBox:
+    """Canonical EPSG:4326 bounding box representation."""
+    min_lon: float
+    min_lat: float
+    max_lon: float
+    max_lat: float
+    crs: str = "EPSG:4326"
+
+    def to_list(self) -> List[float]:
+        return [self.min_lon, self.min_lat, self.max_lon, self.max_lat]
+
+    def to_google_maps(self) -> Dict[str, float]:
+        return {
+            "west": self.min_lon,
+            "south": self.min_lat,
+            "east": self.max_lon,
+            "north": self.max_lat
+        }
+
+
+def calculate_aoi_intersection_ratio(aoi_bbox: List[float], scene_bbox: List[float]) -> float:
+    """Computes area(AOI ∩ Scene) / area(AOI) in EPSG:4326."""
+    if not aoi_bbox or not scene_bbox or len(aoi_bbox) < 4 or len(scene_bbox) < 4:
+        return 0.0
+
+    aoi_w, aoi_s, aoi_e, aoi_n = aoi_bbox[:4]
+    sc_w, sc_s, sc_e, sc_n = scene_bbox[:4]
+
+    inter_w = max(aoi_w, sc_w)
+    inter_s = max(aoi_s, sc_s)
+    inter_e = min(aoi_e, sc_e)
+    inter_n = min(aoi_n, sc_n)
+
+    if inter_e <= inter_w or inter_n <= inter_s:
+        return 0.0
+
+    inter_area = (inter_e - inter_w) * (inter_n - inter_s)
+    aoi_area = (aoi_e - aoi_w) * (aoi_n - aoi_s)
+    if aoi_area <= 1e-12:
+        return 1.0
+
+    return min(1.0, max(0.0, inter_area / aoi_area))
+
+
+def reproject_bbox(bbox: List[float], from_crs: str, to_crs: str) -> List[float]:
+    """Reprojects a 4-element bounding box between coordinate systems."""
+    if from_crs.upper() == to_crs.upper() or not HAS_PYPROJ:
+        return bbox
+    try:
+        transformer = pyproj.Transformer.from_crs(from_crs, to_crs, always_xy=True)
+        w, s, e, n = bbox[:4]
+        min_x, min_y = transformer.transform(w, s)
+        max_x, max_y = transformer.transform(e, n)
+        return [min_x, min_y, max_x, max_y]
+    except Exception:
+        return bbox
+

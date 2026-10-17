@@ -51,7 +51,7 @@ COUNT_WARNING_TEXT = (
 )
 
 
-from telemetry import ExecutionTrace, TraceStage
+from telemetry import ExecutionTrace, TraceStage, ErrorCategory, ToolExecutionStatus
 from evidence_graph import EvidenceGraph, EvidenceNode
 from synthesis import InvestigationSynthesizer, InvestigationReport
 
@@ -241,7 +241,9 @@ class GeoVLMController:
         selected_tools = list(dict.fromkeys(selected_tools))
         dur_sel = (time.perf_counter() - t_sel_start) * 1000.0
 
-        grounding_t = classification.parameters.get("target_phrase") or _extract_grounding_target(query or "")
+        grounding_t = classification.parameters.get("target_phrase")
+        if not grounding_t and ("Grounding" in selected_tools or classification.task_type in (TaskType.GROUNDING, TaskType.MULTI_TASK)):
+            grounding_t = _extract_grounding_target(query or "")
         img_dims = list(optical_image.size) if optical_image is not None else ([0, 0])
         tiling_policy = "direct_single_pass" if max(img_dims) <= 1024 else "adaptive_high_res"
 
@@ -253,8 +255,9 @@ class GeoVLMController:
             "reasoning_basis": "intent_rules",
             "parameters": {
                 "query": query,
+                "target_phrase": grounding_t,
                 "change_threshold": 0.15,
-                "grounding_targets": [grounding_t] if "Grounding" in selected_tools else [],
+                "grounding_targets": [grounding_t] if ("Grounding" in selected_tools and grounding_t) else [],
                 "cross_modal": "Optical_SAR_Analysis" in selected_tools,
             },
         }
@@ -498,8 +501,49 @@ class GeoVLMController:
             if r.evidence:
                 all_evidence.extend(r.evidence)
 
+        # Extract grounding detections
+        grounding_data = next((r.data for r in tool_results if r.tool_name == "Grounding" and r.data), None)
+        grounding_dets = grounding_data.get("detections", []) if grounding_data else []
+
+
+        # Determine honest detection_status
+        grounding_result = next((r for r in tool_results if r.tool_name == "Grounding"), None)
+
+        if classification.task_type in (TaskType.CAPTIONING, TaskType.GEOSPATIAL_METADATA, TaskType.UNSUPPORTED):
+            det_status = "not_applicable"
+        elif grounding_result and grounding_result.status == "unavailable":
+            det_status = "model_unavailable"
+        elif grounding_result and grounding_result.status == "failed":
+            det_status = "localization_unavailable"
+        elif len(grounding_dets) > 0:
+            det_status = "detections_found"
+        elif classification.localization_required:
+            det_status = "genuine_zero"
+        else:
+            det_status = "not_applicable"
+
+        # Calculate validated count for counting tasks
+        target_phrase = classification.parameters.get("target_phrase")
+        count_summary = None
+        if classification.task_type == TaskType.COUNTING or classification.parameters.get("is_counting"):
+            count_val = len(grounding_dets)
+            count_summary = {
+                "count": count_val,
+                "target": target_phrase or "objects",
+                "reliability": "validated_detections" if grounding_result and grounding_result.status == "success" else "unreliable",
+                "message": f"Validated count: {count_val} {target_phrase or 'objects'}" if det_status != "model_unavailable" else f"Counting could not be reliably completed for {target_phrase or 'objects'}: detector unavailable."
+            }
+
         # Return Comprehensive Auditable Dual-Contract Response
         return {
+            # --- Universal Result Contract ---
+            "task": classification.task_type.value,
+            "target": target_phrase,
+            "detection_status": det_status,
+            "count": len(grounding_dets) if (classification.task_type == TaskType.COUNTING or classification.parameters.get("is_counting")) else None,
+            "count_summary": count_summary,
+            "semantic_plan": classification.semantic_plan.to_dict() if classification.semantic_plan and hasattr(classification.semantic_plan, "to_dict") else None,
+            "limitations": [r.error for r in tool_results if r.status in ("failed", "unavailable") and r.error],
             # --- New Investigation & Auditing Telemetry Schema ---
             "request_id": req_id,
             "status": final_status,
@@ -511,6 +555,10 @@ class GeoVLMController:
             "execution_summary": exec_summary,
             "parameters": {
                 "query": query,
+                "target_phrase": classification.parameters.get("target_phrase"),
+
+                "target_geometry": classification.parameters.get("target_geometry"),
+                "target_specs": classification.parameters.get("target_specs", []),
                 "change_threshold": 0.15,
                 "has_optical": optical_image is not None,
                 "has_sar": sar_image is not None,
@@ -522,6 +570,11 @@ class GeoVLMController:
             "confidence_source": overall_conf_source,
             "evidence": all_evidence,
             "execution_trace": tracer.to_list(),
+            "structured_trace": tracer.to_dict(),
+            "execution_logs": [l.to_dict() for l in tracer.logs],
+            # --- Universal Spatial Detection Root Schema ---
+            "detections": grounding_dets,
+            "num_detections": len(grounding_dets),
             # --- Backward Compatibility Schema ---
             "routing_decision": {
                 "target_tools": selected_tools,
@@ -532,7 +585,7 @@ class GeoVLMController:
             "vqa_results": legacy_vqa_results,
             "optical_caption": optical_cap,
             "sar_caption": sar_cap,
-            "grounding": next((r.data for r in tool_results if r.tool_name == "Grounding" and r.data), None),
+            "grounding": grounding_data,
             "change_analysis": change_res,
             "optical_sar_analysis": next((r.data for r in tool_results if r.tool_name == "Optical_SAR_Analysis" and r.data), None),
             "response_text": response_text,
@@ -576,6 +629,8 @@ class GeoVLMController:
         params["Grounding"] = {
             "image": optical_image if optical_image is not None else change_image_b,
             "target_phrase": target_phrase,
+            "spatial_relations": classification.parameters.get("spatial_relations", []),
+            "target_specs": classification.parameters.get("target_specs", []),
         }
 
         # Change Analysis Parameters
@@ -623,23 +678,83 @@ class GeoVLMController:
 
         def run_single_tool(tool_name: str) -> ToolExecutionResult:
             tool = self.registry.get(tool_name)
+            p = task_params.get(tool_name, {})
+            if tracer and hasattr(tracer, "record_tool_start"):
+                tracer.record_tool_start(tool_name, input_ref={"param_keys": list(p.keys())})
+
             if tool is None:
+                err_msg = f"Tool '{tool_name}' not registered in specialist registry."
+                if tracer and hasattr(tracer, "record_tool_completion"):
+                    tracer.record_tool_completion(
+                        tool_name=tool_name,
+                        status=ToolExecutionStatus.UNAVAILABLE.value,
+                        duration_ms=0.0,
+                        error=err_msg,
+                        error_category=ErrorCategory.RESOURCE_UNAVAILABLE.value,
+                        actionable_reason="Specialist tool is not registered in runtime registry.",
+                    )
+                return ToolExecutionResult(
+                    tool_name=tool_name,
+                    task_type="UNKNOWN",
+                    status="unavailable",
+                    confidence=None,
+                    confidence_type="heuristic",
+                    confidence_source="tool_registry",
+                    error=err_msg,
+                )
+
+            t0 = time.perf_counter()
+            try:
+                res = tool.execute(p)
+            except Exception as ex:
+                dur = (time.perf_counter() - t0) * 1000.0
+                err_str = f"Exception in tool {tool_name}: {str(ex)}"
+                if tracer and hasattr(tracer, "record_tool_completion"):
+                    tracer.record_tool_completion(
+                        tool_name=tool_name,
+                        status=ToolExecutionStatus.FAILED.value,
+                        duration_ms=dur,
+                        error=err_str,
+                        error_category=ErrorCategory.MODEL_EXECUTION_ERROR.value,
+                        actionable_reason="Check model dependencies and input raster formats.",
+                    )
                 return ToolExecutionResult(
                     tool_name=tool_name,
                     task_type="UNKNOWN",
                     status="failed",
                     confidence=None,
                     confidence_type="heuristic",
-                    confidence_source="tool_registry",
-                    error=f"Tool '{tool_name}' not registered in specialist registry.",
+                    confidence_source="exception_handler",
+                    error=err_str,
                 )
 
-            p = task_params.get(tool_name, {})
-            t0 = time.perf_counter()
-            res = tool.execute(p)
             dur = (time.perf_counter() - t0) * 1000.0
 
             if tracer:
+                # Map ToolExecutionResult status to ToolExecutionStatus
+                tool_status = (
+                    ToolExecutionStatus.SUCCEEDED.value if res.status in ("success", "completed")
+                    else (ToolExecutionStatus.FAILED.value if res.status == "failed"
+                    else (ToolExecutionStatus.UNAVAILABLE.value if res.status == "unavailable"
+                    else "degraded"))
+                )
+                out_summary = {}
+                if getattr(res, "data", None) and isinstance(res.data, dict):
+                    out_summary = {k: type(v).__name__ for k, v in res.data.items()}
+                if getattr(res, "evidence", None):
+                    out_summary["evidence_count"] = len(res.evidence)
+
+                if hasattr(tracer, "record_tool_completion"):
+                    tracer.record_tool_completion(
+                        tool_name=tool_name,
+                        status=tool_status,
+                        duration_ms=dur,
+                        output_summary=out_summary,
+                        provenance={"source": getattr(res, "confidence_source", "none")},
+                        error=getattr(res, "error", None),
+                        error_category=ErrorCategory.MODEL_EXECUTION_ERROR.value if res.status == "failed" else None,
+                    )
+
                 if res.status == "fallback":
                     tracer.record(
                         stage="fallback_triggered",
@@ -647,7 +762,7 @@ class GeoVLMController:
                         details={"tool": tool_name, "source": res.confidence_source},
                         duration_ms=dur,
                     )
-                elif res.status == "success":
+                elif res.status in ("success", "completed"):
                     tracer.record(
                         stage="inference_complete",
                         status="success",
@@ -814,6 +929,13 @@ class GeoVLMController:
         request_id: str = "req_unknown",
     ) -> Dict[str, Any]:
         return {
+            "task": classification.task_type.value if classification else task_type,
+            "target": classification.parameters.get("target_phrase") if classification else None,
+            "detection_status": "model_unavailable" if "model" in error.lower() else "localization_unavailable",
+            "count": None,
+            "count_summary": None,
+            "semantic_plan": classification.semantic_plan.to_dict() if classification and classification.semantic_plan and hasattr(classification.semantic_plan, "to_dict") else None,
+            "limitations": [error],
             "request_id": request_id,
             "status": "failed",
             "task_type": task_type,
@@ -826,6 +948,8 @@ class GeoVLMController:
             "confidence_source": "validation_gate",
             "evidence": [],
             "execution_trace": tracer.to_list(),
+            "structured_trace": tracer.to_dict(),
+            "execution_logs": [l.to_dict() for l in tracer.logs],
             "routing_decision": {
                 "target_tools": [],
                 "restructured_vqa_queries": [],
@@ -838,3 +962,4 @@ class GeoVLMController:
             "change_analysis": None,
             "response_text": f"Error: {error}",
         }
+

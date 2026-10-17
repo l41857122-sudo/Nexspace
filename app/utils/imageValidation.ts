@@ -39,6 +39,57 @@ export const ACCEPT_FILE_ATTR =
   "image/png,image/jpeg,image/jpg,image/pjpeg,image/webp,image/tiff,image/tif,image/x-tiff,.jpg,.jpeg,.png,.webp,.tif,.tiff";
 
 /**
+ * Downscales an image data URL on the client to maxDim (1024px) using an offscreen HTML5 canvas.
+ * Reduces memory usage and prevents UI lag when storing/re-rendering data URLs.
+ */
+export async function downscaleDataUrl(
+  dataUrl: string,
+  maxDim: number = 1024,
+  quality: number = 0.85
+): Promise<string> {
+  if (typeof window === "undefined" || !dataUrl.startsWith("data:image")) {
+    return dataUrl;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+      if (w <= maxDim && h <= maxDim) {
+        resolve(dataUrl);
+        return;
+      }
+      const scale = maxDim / Math.max(w, h);
+      const newW = Math.max(1, Math.round(w * scale));
+      const newH = Math.max(1, Math.round(h * scale));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = newW;
+      canvas.height = newH;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(dataUrl);
+        return;
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, newW, newH);
+
+      try {
+        // Encode as JPEG quality 0.85 for fast processing and compact size
+        const compressed = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressed);
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+/**
  * Validates a File object against size, extension, and MIME type rules.
  */
 export async function validateAndProcessImageFile(
@@ -85,7 +136,7 @@ export async function validateAndProcessImageFile(
     mediaType = "image/tiff";
   }
 
-  // 3. Read file as Data URL and compute SHA-256
+  // 3. Read file as Data URL, downscale to max 1024px, and compute SHA-256
   return new Promise((resolve) => {
     const reader = new FileReader();
 
@@ -111,11 +162,14 @@ export async function validateAndProcessImageFile(
         sha256Hex = `pseudo_${Math.abs(hash).toString(16)}`;
       }
 
+      // Downscale to max 1024px to prevent memory spikes & UI freeze
+      const optimizedDataUrl = await downscaleDataUrl(reader.result, 1024, 0.85);
+
       const canonicalSource: CanonicalSourceImage = {
         id: `src-upload-${Date.now()}`,
         filename: file.name,
         mediaType,
-        dataUrl: reader.result,
+        dataUrl: optimizedDataUrl,
         source: "upload",
         sha256: sha256Hex,
         uploadedAt: new Date().toISOString(),

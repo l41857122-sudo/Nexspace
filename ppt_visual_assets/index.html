@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexSpace — PPT-Ready Visual Asset Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --navy: #0F172A;
+      --blue: #2563EB;
+      --cyan: #0284C7;
+      --border: #E2E8F0;
+      --text: #1E293B;
+      --muted: #64748B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: #FFFFFF;
+      padding: 32px 40px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #F0F9FF;
+      color: var(--cyan);
+      border: 1px solid #BAE6FD;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+    }
+
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      margin-top: 4px;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 20px;
+    }
+
+    .stat-item {
+      background: #F8FAFC;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .stat-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--blue);
+    }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .asset-section {
+      background: #FFFFFF;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.04);
+      margin-bottom: 48px;
+      overflow: hidden;
+    }
+
+    .asset-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: #FAFAFC;
+    }
+
+    .asset-title-group h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .asset-title-group p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #FFF;
+      border: 1px solid var(--blue);
+    }
+
+    .btn-primary:hover {
+      background: #1D4ED8;
+    }
+
+    .btn-outline {
+      background: #FFF;
+      color: var(--navy);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: #F1F5F9;
+    }
+
+    .preview-canvas {
+      padding: 30px;
+      background: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .preview-canvas img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    .guide-card {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 12px;
+      padding: 24px 32px;
+      margin-top: 30px;
+    }
+
+    .guide-card h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #1E40AF;
+      margin-bottom: 10px;
+    }
+
+    .guide-card ul {
+      padding-left: 20px;
+      color: #1E3A8A;
+      font-size: 14px;
+    }
+
+    .guide-card li {
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="badge">AEROSPACE &amp; AI PRESENTATION SUITE</div>
+        <h1>NexSpace — PPT-Ready Visual Assets</h1>
+        <p class="lead">3 complete presentation diagrams: Pure #FFFFFF background, crisp vector geometry, 16:9
+          composition</p>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-val">3840 × 2160</div>
+          <div class="stat-lbl">Ultra HD 4K PNG</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">SVG Vector</div>
+          <div class="stat-lbl">Infinite Zoom</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">#FFFFFF</div>
+          <div class="stat-lbl">Pure White BG</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- VISUAL 1 -->
+    <div class="asset-section" id="visual-1">
+      <div class="asset-header">
+        <div class="asset-title-group">
+          <h2>Visual 1: NexSpace System Architecture &amp; Flowchart</h2>
+          <p>End-to-End flow: User Query → Reasoning → Specialist AI (VQA, Captioning, Grounding, Change) → Evidence →
+            Output</p>
+        </div>
+        <div class="btn-group">
+          <a href="./visual_1_system_architecture.svg" download class="btn btn-outline">Download SVG (Vector)</a>
+          <a href="./visual_1_system_architecture.png" download class="btn btn-primary">Download 4K PNG</a>
+        </div>
+      </div>
+      <div class="preview-canvas">
+        <img src="./visual_1_system_architecture.png" alt="Visual 1 System Flowchart" />
+      </div>
+    </div>
+
+    <!-- VISUAL 2 -->
+    <div class="asset-section" id="visual-2">
+      <div class="asset-header">
+        <div class="asset-title-group">
+          <h2>Visual 2: NexSpace UI / UX Mission Console Wireframe</h2>
+          <p>Clean desktop application wireframe: Satellite viewer, AI query bar, detection overlays, confidence gauge,
+            execution trace</p>
+        </div>
+        <div class="btn-group">
+          <a href="./visual_2_ui_wireframe.svg" download class="btn btn-outline">Download SVG (Vector)</a>
+          <a href="./visual_2_ui_wireframe.png" download class="btn btn-primary">Download 4K PNG</a>
+        </div>
+      </div>
+      <div class="preview-canvas">
+        <img src="./visual_2_ui_wireframe.png" alt="Visual 2 UI Wireframe" />
+      </div>
+    </div>
+
+    <!-- VISUAL 3 -->
+    <div class="asset-section" id="visual-3">
+      <div class="asset-header">
+        <div class="asset-title-group">
+          <h2>Visual 3: Compact Multimodal AI Pipeline</h2>
+          <p>Compact slide-ready pipeline: Raw satellite ingestion to explainable geospatial intelligence</p>
+        </div>
+        <div class="btn-group">
+          <a href="./visual_3_compact_pipeline.svg" download class="btn btn-outline">Download SVG (Vector)</a>
+          <a href="./visual_3_compact_pipeline.png" download class="btn btn-primary">Download 4K PNG</a>
+        </div>
+      </div>
+      <div class="preview-canvas">
+        <img src="./visual_3_compact_pipeline.png" alt="Visual 3 Compact Pipeline" />
+      </div>
+    </div>
+
+    <!-- PPT Usage Instructions -->
+    <div class="guide-card">
+      <h3>PowerPoint Presentation Insertion Tips</h3>
+      <ul>
+        <li><strong>Direct SVG Drag-and-Drop:</strong> Modern PowerPoint (2019 / Microsoft 365) natively supports SVG
+          files. Drag and drop any <code>.svg</code> file directly onto your slide for infinite scaling without losing
+          crispness!</li>
+        <li><strong>Convert to Shape (Optional):</strong> In PowerPoint, right-click the inserted SVG and select
+          <em>"Convert to Shape"</em> to recolor, animate, or edit individual nodes directly.</li>
+        <li><strong>Ultra HD PNG:</strong> For legacy PowerPoint versions or keynotes, insert the <code>3840×2160</code>
+          high-DPI PNGs for razor-sharp presentation visuals on 4K projectors and displays.</li>
+      </ul>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -26,7 +26,7 @@ import {
 import Sidebar from "./Sidebar";
 import type { CanonicalSourceImage, CanonicalInvestigationState } from "../types/nexspace";
 import { SAMPLE_OPTICAL_PORT } from "../utils/sampleImages";
-import { normalizeBox } from "./QueryPage";
+import { normalizeBox, formatCanonicalLabel } from "./QueryPage";
 import {
   getCurrentInvestigation,
   getActiveSourceImage,
@@ -213,68 +213,75 @@ function EvidenceImage({
               transformOrigin: transformOrigin,
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={sourceImage.dataUrl}
-              alt={sourceImage.filename}
-              className="w-full h-auto min-h-[500px] block select-none pointer-events-none"
-              style={{
-                width: "100%",
-                height: "auto",
-                imageRendering: effectiveZoom > 1.2 ? "-webkit-optimize-contrast" : "auto",
-              }}
+          {/* Dynamic Grounding Overlays with Target Selection & Exact SVG Coordinate Alignment */}
+          <svg
+            viewBox="0 0 1000 1000"
+            preserveAspectRatio="xMidYMid meet"
+            className="w-full h-full max-h-full"
+          >
+            {/* Source Image locked directly into 1000x1000 coordinate space */}
+            <image
+              href={sourceImage.dataUrl}
+              x="0"
+              y="0"
+              width="1000"
+              height="1000"
+              preserveAspectRatio="none"
             />
+              {normalizedDetections.map((d) => {
+                const [xmin, ymin, xmax, ymax] = d.box;
+                const width = Math.max(2, xmax - xmin);
+                const height = Math.max(2, ymax - ymin);
+                const isSelected = selectedTargetId === d.id;
+                const cleanLabel = formatCanonicalLabel(d.label, "Entity");
+                const scoreText = d.score !== null ? ` — ${d.score.toFixed(2)} (${Math.round(d.score * 100)}%)` : "";
+                const labelText = `${d.id} ${cleanLabel}${scoreText}`;
+                const labelWidth = Math.max(85, labelText.length * 7.5 + 14);
 
-            {/* Dynamic Grounding Overlays with Target Selection */}
-            {normalizedDetections.map((d) => {
-              const [xmin, ymin, xmax, ymax] = d.box;
-              const top = (ymin / 1000) * 100;
-              const left = (xmin / 1000) * 100;
-              const width = Math.max(2, ((xmax - xmin) / 1000) * 100);
-              const height = Math.max(2, ((ymax - ymin) / 1000) * 100);
-              const isSelected = selectedTargetId === d.id;
-
-              return (
-                <div
-                  key={d.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelectTarget(isSelected ? null : d.id);
-                  }}
-                  className={`absolute border-2 rounded flex flex-col justify-between p-1.5 transition-all cursor-pointer ${
-                    isSelected
-                      ? "border-cyan-300 ring-4 ring-cyan-500/50 bg-cyan-500/30 z-30 shadow-[0_0_24px_rgba(6,182,212,0.9)] scale-[1.03]"
-                      : selectedTargetId
-                      ? "border-cyan-500/40 bg-cyan-500/10 opacity-50 hover:opacity-100 hover:border-cyan-400 z-10"
-                      : "border-cyan-400 bg-cyan-500/15 hover:border-cyan-300 hover:bg-cyan-500/25 shadow-[0_0_15px_rgba(6,182,212,0.5)] z-15"
-                  }`}
-                  style={{
-                    top: `${top}%`,
-                    left: `${left}%`,
-                    width: `${width}%`,
-                    height: `${height}%`,
-                  }}
-                >
-                  <div className="flex justify-between items-center gap-1">
-                    <span className={`text-[8px] font-mono font-bold px-1 py-0.5 rounded border truncate ${
-                      isSelected
-                        ? "bg-cyan-500 text-slate-950 border-cyan-300"
-                        : "bg-slate-900/90 text-cyan-300 border-cyan-500/30"
-                    }`}>
-                      {d.id}: {d.label}
-                    </span>
-                    {d.score !== null && (
-                      <span className="text-[8px] font-mono text-emerald-300 bg-emerald-500/20 px-1 py-0.5 rounded font-semibold whitespace-nowrap">
-                        {Math.round(d.score * 100)}%
-                      </span>
-                    )}
-                  </div>
-                  <div className={`self-center ${isSelected ? "opacity-100 animate-pulse" : "opacity-50"}`}>
-                    <Crosshair size={isSelected ? 18 : 14} className={isSelected ? "text-cyan-300" : "text-cyan-400"} />
-                  </div>
-                </div>
-              );
-            })}
+                return (
+                  <g
+                    key={d.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectTarget(isSelected ? null : d.id);
+                    }}
+                    className="cursor-pointer pointer-events-auto transition-all"
+                  >
+                    <rect
+                      x={xmin}
+                      y={ymin}
+                      width={width}
+                      height={height}
+                      fill={isSelected ? "rgba(6, 182, 212, 0.35)" : "rgba(6, 182, 212, 0.15)"}
+                      stroke={isSelected ? "#67e8f9" : "#22d3ee"}
+                      strokeWidth={isSelected ? "3.5" : "2"}
+                      vectorEffect="non-scaling-stroke"
+                      className="transition-all"
+                    />
+                    <rect
+                      x={xmin}
+                      y={Math.max(0, ymin - 20)}
+                      width={labelWidth}
+                      height={18}
+                      fill={isSelected ? "rgba(6, 182, 212, 0.95)" : "rgba(15, 23, 42, 0.92)"}
+                      stroke={isSelected ? "#67e8f9" : "rgba(6, 182, 212, 0.4)"}
+                      strokeWidth="1"
+                      rx="3"
+                    />
+                    <text
+                      x={xmin + 5}
+                      y={Math.max(13, ymin - 6)}
+                      fill={isSelected ? "#020617" : "#67e8f9"}
+                      fontSize="11"
+                      fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+                      fontWeight="bold"
+                    >
+                      {labelText}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
           </div>
         </div>
 
@@ -562,8 +569,10 @@ function EvidencePanel({
           {showAdvanced && (
             <div className="mt-2 p-3 bg-slate-950/80 rounded-lg border border-slate-800/80 text-[10px] font-mono text-slate-400 space-y-1">
               <div>Investigation ID: {investigation?.investigation_id || "INV-STANDBY"}</div>
-              <div>Grounding Specialist: IDEA-Research/grounding-dino-tiny</div>
-              <div>Captioning Specialist: Salesforce/blip-image-captioning-base</div>
+              <div>Provenance: {investigation?.response?.provenance || (investigation?.response as any)?.provenance_contract?.overall?.provenance || "N/A"}</div>
+              <div>Grounding Specialist: {(investigation?.response as any)?.provenance_contract?.grounding?.model || (investigation?.response?.grounding as any)?.model || ((investigation?.response as any)?.model_loaded ? "IDEA-Research/grounding-dino-tiny" : (investigation?.response?.grounding ? "Deterministic / Heuristic Grounder" : "Not invoked / N/A"))}</div>
+              <div>Captioning Specialist: {(investigation?.response as any)?.provenance_contract?.optical_captioning?.model || (investigation?.response?.optical_caption as any)?.model || ((investigation?.response as any)?.model_loaded ? "Salesforce/blip-image-captioning-base" : (investigation?.response?.optical_caption ? "Spectral Scene Heuristic" : "Not invoked / N/A"))}</div>
+              <div>Fallback Active: {String(investigation?.response?.fallback_used ?? false)}</div>
               <div>CRS / Projection: {investigation?.response?.geospatial_metadata?.crs || "Pixel frame reference"}</div>
             </div>
           )}

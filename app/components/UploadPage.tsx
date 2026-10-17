@@ -21,12 +21,17 @@ import { validateAndProcessImageFile, ACCEPT_FILE_ATTR } from "../utils/imageVal
 import { setActiveSourceImage, clearCurrentInvestigation } from "../utils/investigationStorage";
 
 export default function UploadPage() {
-  const [fileName, setFileName] = useState("S2A_MSIL2A_20240315T105341.zip");
-  const [fileSize, setFileSize] = useState("4.8 GB");
-  const [progress, setProgress] = useState(44);
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "completed">("uploading");
-  const [statusMessage, setStatusMessage] = useState("Validating projection (EPSG:32651)...");
-  const [datasetId, setDatasetId] = useState("LB_08_2024_03_RegionAlpha");
+  const [fileName, setFileName] = useState("No file selected");
+  const [fileSize, setFileSize] = useState("0 MB");
+  const [progress, setProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "completed">("idle");
+  const [statusMessage, setStatusMessage] = useState("Ready for dataset upload");
+  const [datasetId, setDatasetId] = useState("");
+  const [validationChecklist, setValidationChecklist] = useState({
+    crs: "Awaiting upload",
+    resolution: "Awaiting upload",
+    cloudCover: "Awaiting upload"
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [bands, setBands] = useState([
     { label: "RGB (B4,B3,B2)", checked: true },
@@ -52,6 +57,9 @@ export default function UploadPage() {
       });
       const job = await res.json();
       const jobId = job.id;
+      if (job.validationChecklist) {
+        setValidationChecklist(job.validationChecklist);
+      }
 
       const interval = setInterval(async () => {
         try {
@@ -59,6 +67,9 @@ export default function UploadPage() {
           const statusData = await statusRes.json();
           setProgress(statusData.progress);
           setStatusMessage(statusData.statusMessage);
+          if (statusData.validationChecklist) {
+            setValidationChecklist(statusData.validationChecklist);
+          }
           if (statusData.status === "completed" || statusData.progress >= 100) {
             setUploadStatus("completed");
             clearInterval(interval);
@@ -284,11 +295,15 @@ export default function UploadPage() {
 
               <div className="space-y-1">
                 <div className="flex items-start gap-2.5 py-2.5 border-b border-slate-800/60 transition-colors duration-150 hover:bg-cyan-500/[0.02] px-1 rounded-lg">
-                  <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+                  {progress > 0 ? (
+                    <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+                  ) : (
+                    <span className="w-3.5 h-3.5 rounded-full border border-slate-600 mt-0.5 shrink-0" />
+                  )}
                   <div>
                     <p className="text-xs text-slate-200 font-medium">Coordinate Reference System</p>
                     <p className="text-[10px] text-slate-400 uppercase tracking-wide mt-0.5 font-mono">
-                      Detected · Valid UTM (EPSG:32651)
+                      {progress > 0 ? validationChecklist.crs : "Awaiting upload"}
                     </p>
                   </div>
                 </div>
@@ -296,13 +311,15 @@ export default function UploadPage() {
                 <div className="flex items-start gap-2.5 py-2.5 border-b border-slate-800/60 transition-colors duration-150 hover:bg-cyan-500/[0.02] px-1 rounded-lg">
                   {progress >= 60 ? (
                     <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 shrink-0" />
-                  ) : (
+                  ) : progress > 0 ? (
                     <Loader2 size={14} className="text-cyan-400 animate-spin mt-0.5 shrink-0" />
+                  ) : (
+                    <span className="w-3.5 h-3.5 rounded-full border border-slate-600 mt-0.5 shrink-0" />
                   )}
                   <div>
                     <p className="text-xs text-slate-200 font-medium">Spatial Resolution</p>
                     <p className="text-[10px] text-slate-400 uppercase tracking-wide mt-0.5 font-mono">
-                      {progress >= 60 ? "Extracted · 10m GSD" : "Analyzing · Extraction"}
+                      {progress > 0 ? validationChecklist.resolution : "Awaiting upload"}
                     </p>
                   </div>
                 </div>
@@ -310,13 +327,15 @@ export default function UploadPage() {
                 <div className="flex items-start gap-2.5 py-2.5 transition-colors duration-150 hover:bg-cyan-500/[0.02] px-1 rounded-lg">
                   {progress === 100 ? (
                     <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 shrink-0" />
-                  ) : (
+                  ) : progress > 0 ? (
                     <Loader2 size={14} className="text-slate-500 animate-spin mt-0.5 shrink-0" />
+                  ) : (
+                    <span className="w-3.5 h-3.5 rounded-full border border-slate-600 mt-0.5 shrink-0" />
                   )}
                   <div>
                     <p className="text-xs text-slate-200 font-medium">Cloud Cover Assessment</p>
                     <p className="text-[10px] text-slate-400 uppercase tracking-wide mt-0.5 font-mono">
-                      {progress === 100 ? "Verified · 4.2% Cloud" : "Awaiting QA · Band Analysis"}
+                      {progress > 0 ? validationChecklist.cloudCover : "Awaiting upload"}
                     </p>
                   </div>
                 </div>

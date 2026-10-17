@@ -343,25 +343,70 @@ function AnalysisPanel({
         </div>
       </div>
 
-      {/* Summary Box */}
-      <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-lg text-xs text-slate-300 font-sans space-y-1">
-        <div className="text-[10px] font-mono text-cyan-400 uppercase">Analysis Summary</div>
-        <p className="leading-relaxed">
+      {/* Summary Box & Temporal Metadata */}
+      <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-lg text-xs text-slate-300 font-sans space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold">Analysis Summary</span>
+          {data?.alignment_status && (
+            <span className="text-[9px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+              {data.alignment_status}
+            </span>
+          )}
+        </div>
+        <p className="leading-relaxed text-[11px]">
           {data?.summary || "Analyzing pixel intensity delta across paired satellite scenes..."}
         </p>
+
+        {(data?.acquisition_date_a || data?.scene_a_id) && (
+          <div className="pt-1.5 border-t border-slate-800/80 text-[10px] font-mono grid grid-cols-2 gap-1 text-slate-400">
+            <div>
+              <span className="text-slate-500 block text-[9px]">Observation A:</span>
+              <span className="text-slate-300 truncate block">{data.acquisition_date_a || data.scene_a_id}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block text-[9px]">Observation B:</span>
+              <span className="text-slate-300 truncate block">{data.acquisition_date_b || data.scene_b_id}</span>
+            </div>
+          </div>
+        )}
+
+        {data?.cloud_contamination_detected && (
+          <div className="bg-amber-950/30 border border-amber-500/40 text-amber-300 p-1.5 rounded text-[10px] font-mono flex items-center gap-1.5">
+            <span className="font-bold">⚠️ Cloud Contamination:</span>
+            <span>{((data.cloud_pixels_fraction || 0) * 100).toFixed(1)}% of pixels affected</span>
+          </div>
+        )}
       </div>
 
       {/* Key Metric Cards */}
-      <div className="grid grid-cols-2 gap-2 font-mono">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono">
         <div className="bg-slate-900/70 border border-slate-800 p-2.5 rounded-lg">
-          <span className="text-[10px] text-slate-500 block uppercase">Changed Pixel Fraction</span>
+          <span className="text-[9px] text-slate-500 block uppercase">Changed Fraction</span>
           <span className="text-base font-bold text-cyan-300">{deltaPct}%</span>
         </div>
         <div className="bg-slate-900/70 border border-slate-800 p-2.5 rounded-lg">
-          <span className="text-[10px] text-slate-500 block uppercase">Mean Intensity Delta</span>
+          <span className="text-[9px] text-slate-500 block uppercase">Mean Delta</span>
           <span className="text-base font-bold text-slate-200">{data?.mean_intensity_delta?.toFixed(1) || "0.0"}</span>
         </div>
+        <div className="bg-slate-900/70 border border-slate-800 p-2.5 rounded-lg col-span-2 sm:col-span-1">
+          <span className="text-[9px] text-slate-500 block uppercase">Valid Usable Pixels</span>
+          <span className="text-base font-bold text-emerald-400">
+            {data?.valid_pixels_fraction !== undefined ? `${(data.valid_pixels_fraction * 100).toFixed(0)}%` : "100%"}
+          </span>
+        </div>
       </div>
+
+      {/* Methodological Limitations Banner */}
+      {data?.limitations && data.limitations.length > 0 && (
+        <div className="bg-slate-950/80 border border-slate-800/90 rounded p-2.5 text-[10px] font-mono text-slate-400 space-y-1">
+          <span className="font-bold uppercase text-[9px] text-slate-300 block">Change Evidence Disclaimers:</span>
+          <ul className="list-disc list-inside space-y-0.5 text-slate-400">
+            {data.limitations.map((lim, idx) => (
+              <li key={idx} className="leading-tight">{lim}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Anomaly List */}
       <div className="space-y-2">

@@ -332,9 +332,9 @@ class SemanticChangeEngine:
             query=q_clean,
             evidence=evidence_nodes,
             confidence=round(avg_conf, 2),
-            confidence_type="model" if len(interpreted_regions) > 0 else "heuristic",
+            confidence_type="algorithmic",
             confidence_source="bitemporal_semantic_change_engine",
-            model_provenance="Research baseline — temporal feature differencing, Otsu clustering & RS object grounding",
+            model_provenance="ALGORITHMIC (Research baseline) — temporal feature differencing, Otsu clustering & RS object grounding",
             processing_time_ms=round(dur, 2),
         )
 

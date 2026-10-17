@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap');
+      * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .mono { font-family: 'JetBrains Mono', monospace; }
+      
+      .title { font-size: 34px; font-weight: 900; fill: #0F172A; letter-spacing: -0.8px; }
+      .subtitle { font-size: 15px; font-weight: 500; fill: #475569; }
+      .badge-text { font-size: 11px; font-weight: 800; fill: #0284C7; letter-spacing: 1.2px; text-transform: uppercase; }
+      
+      .node-title { font-size: 16px; font-weight: 800; fill: #0F172A; }
+      .node-tag { font-size: 10px; font-weight: 700; fill: #2563EB; letter-spacing: 0.5px; }
+      .node-desc { font-size: 12px; font-weight: 500; fill: #475569; }
+      .node-bullet { font-size: 11.5px; font-weight: 500; fill: #334155; }
+      
+      .card-white { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; filter: drop-shadow(0 4px 12px rgba(15, 23, 42, 0.04)); rx: 12px; }
+      .card-hero { fill: #FFFFFF; stroke: #2563EB; stroke-width: 2; filter: drop-shadow(0 6px 18px rgba(37, 99, 235, 0.08)); rx: 12px; }
+      .card-inner { fill: #F8FAFC; stroke: #E2E8F0; stroke-width: 1.2; rx: 8px; }
+      
+      .flow-arrow-blue { stroke: #2563EB; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .flow-arrow-cyan { stroke: #0284C7; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .flow-arrow-dark { stroke: #0F172A; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#2563EB" />
+    </marker>
+    <marker id="arr-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#0284C7" />
+    </marker>
+    <marker id="arr-dark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#0F172A" />
+    </marker>
+
+    <pattern id="dot-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="1" fill="#E2E8F0" />
+    </pattern>
+  </defs>
+
+  <!-- PURE WHITE BACKGROUND -->
+  <rect width="1920" height="1080" fill="#FFFFFF" />
+  <rect width="1920" height="1080" fill="url(#dot-grid)" opacity="0.65" />
+
+  <!-- Outer Presentation Margin Border -->
+  <rect x="36" y="30" width="1848" height="1020" rx="16" fill="none" stroke="#E2E8F0" stroke-width="1.5" />
+
+  <!-- ================= HEADER AREA ================= -->
+  <g transform="translate(70, 65)">
+    <!-- Top Pill Badge -->
+    <rect x="0" y="0" width="190" height="26" rx="13" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.2" />
+    <circle cx="14" cy="13" r="4" fill="#0284C7" />
+    <text x="26" y="17" class="badge-text">System Architecture</text>
+
+    <!-- Main Title & Subtitle -->
+    <text x="0" y="62" class="title">NexSpace Autonomous Satellite Intelligence Flowchart</text>
+    <text x="0" y="88" class="subtitle">Autonomous query reasoning, multimodal sensor fusion, specialist AI model routing, and verified geospatial reporting</text>
+
+    <!-- Tech specs chips on top right -->
+    <g transform="translate(1380, 15)">
+      <rect x="0" y="0" width="400" height="42" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+      <circle cx="22" cy="21" r="5" fill="#10B981" />
+      <text x="36" y="26" class="mono" font-size="12" font-weight="700" fill="#0F172A">SYSTEM STATUS: PRODUCTION ONLINE</text>
+      <line x1="300" y1="10" x2="300" y2="32" stroke="#CBD5E1" stroke-width="1" />
+      <text x="312" y="26" class="mono" font-size="11" font-weight="600" fill="#2563EB">v2.4 AGY</text>
+    </g>
+  </g>
+
+  <!-- ================= ROW 1: PRIMARY CONTROL FLOW (4 NODES) ================= -->
+  
+  <g id="flow-row-1">
+    <!-- Node 1: User Query -->
+    <g transform="translate(70, 195)">
+      <rect width="380" height="120" class="card-white" />
+      <rect x="0" y="0" width="6" height="120" rx="3" fill="#2563EB" />
+      <rect x="20" y="18" width="40" height="40" rx="8" fill="#EFF6FF" />
+      
+      <!-- Icon: Search / Terminal Query -->
+      <circle cx="40" cy="38" r="8" stroke="#2563EB" stroke-width="2" fill="none" />
+      <line x1="46" y1="44" x2="52" y2="50" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" />
+      <line x1="36" y1="38" x2="44" y2="38" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" />
+
+      <text x="74" y="35" class="node-title">User Query</text>
+      <text x="74" y="50" class="node-tag">NATURAL LANGUAGE INTENT</text>
+      
+      <g transform="translate(20, 72)">
+        <rect width="340" height="34" rx="6" fill="#F1F5F9" />
+        <text x="12" y="21" class="mono" font-size="11" font-weight="600" fill="#1E293B">"Detect combatant ships &amp; pier delta"</text>
+      </g>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 450 255 L 505 255" class="flow-arrow-blue" marker-end="url(#arr-blue)" />
+
+    <!-- Node 2: Query Understanding -->
+    <g transform="translate(515, 195)">
+      <rect width="380" height="120" class="card-white" />
+      <rect x="0" y="0" width="6" height="120" rx="3" fill="#0284C7" />
+      <rect x="20" y="18" width="40" height="40" rx="8" fill="#F0F9FF" />
+      
+      <!-- Icon: Parser / Syntax Entity Tree -->
+      <rect x="30" y="28" width="20" height="20" rx="3" stroke="#0284C7" stroke-width="2" fill="none" />
+      <line x1="35" y1="34" x2="45" y2="34" stroke="#0284C7" stroke-width="1.8" stroke-linecap="round" />
+      <line x1="35" y1="40" x2="41" y2="40" stroke="#0284C7" stroke-width="1.8" stroke-linecap="round" />
+
+      <text x="74" y="35" class="node-title">Query Understanding</text>
+      <text x="74" y="50" font-size="10" font-weight="700" fill="#0284C7" letter-spacing="0.5px">INTENT &amp; ENTITY PARSER</text>
+      
+      <text x="20" y="84" class="node-bullet">• Semantic Intent &amp; Temporal Constraints</text>
+      <text x="20" y="102" class="node-bullet">• Spatial AOI Extraction (Port Berth 3)</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 895 255 L 950 255" class="flow-arrow-blue" marker-end="url(#arr-blue)" />
+
+    <!-- Node 3: Agent Controller -->
+    <g transform="translate(960, 195)">
+      <rect width="380" height="120" class="card-hero" />
+      <rect x="0" y="0" width="6" height="120" rx="3" fill="#2563EB" />
+      <rect x="20" y="18" width="40" height="40" rx="8" fill="#EEF2FF" />
+      
+      <!-- Icon: Orchestration Engine / Brain Hub -->
+      <circle cx="40" cy="38" r="9" stroke="#2563EB" stroke-width="2" fill="none" />
+      <circle cx="40" cy="38" r="3" fill="#2563EB" />
+      <path d="M 40 24 L 40 27 M 40 49 L 40 52 M 26 38 L 29 38 M 51 38 L 54 38" stroke="#2563EB" stroke-width="2" stroke-linecap="round" />
+
+      <text x="74" y="35" class="node-title">Agent Controller</text>
+      <text x="74" y="50" class="node-tag">AUTONOMOUS ORCHESTRATOR</text>
+      
+      <text x="20" y="84" class="node-bullet">• Multi-Step Autonomous Execution Plan</text>
+      <text x="20" y="102" class="node-bullet">• Tool Dispatch &amp; Memory State Sync</text>
+    </g>
+
+    <!-- Arrow 3 -> 4 -->
+    <path d="M 1340 255 L 1395 255" class="flow-arrow-blue" marker-end="url(#arr-blue)" />
+
+    <!-- Node 4: Task / Model Routing -->
+    <g transform="translate(1405, 195)">
+      <rect width="445" height="120" class="card-white" />
+      <rect x="0" y="0" width="6" height="120" rx="3" fill="#0284C7" />
+      <rect x="20" y="18" width="40" height="40" rx="8" fill="#F0F9FF" />
+      
+      <!-- Icon: Dynamic Router -->
+      <circle cx="32" cy="38" r="3.5" fill="#0284C7" />
+      <circle cx="48" cy="29" r="3.5" fill="#0284C7" />
+      <circle cx="48" cy="47" r="3.5" fill="#0284C7" />
+      <path d="M 32 38 L 48 29 M 32 38 L 48 47" stroke="#0284C7" stroke-width="1.8" />
+
+      <text x="74" y="35" class="node-title">Task / Model Routing</text>
+      <text x="74" y="50" font-size="10" font-weight="700" fill="#0284C7" letter-spacing="0.5px">DYNAMIC TASK ALLOCATOR</text>
+      
+      <text x="20" y="84" class="node-bullet">• Sensor Modality Check (Optical vs. SAR)</text>
+      <text x="20" y="102" class="node-bullet">• Sub-Task Parallelization &amp; Model Trigger</text>
+    </g>
+  </g>
+
+  <!-- Downward Flow from Task Routing into Specialist Models -->
+  <path d="M 1625 315 L 1625 385" class="flow-arrow-blue" marker-end="url(#arr-blue)" />
+
+  <!-- ================= ROW 2: IMAGERY FEEDS + MULTIMODAL REASONING + SPECIALIST AI MODELS ================= -->
+  
+  <!-- Left Side: Remote Sensing Feeds Box -->
+  <g transform="translate(70, 395)">
+    <rect width="400" height="260" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+    
+    <rect x="18" y="14" width="180" height="22" rx="4" fill="#E2E8F0" />
+    <text x="26" y="29" class="mono" font-size="10" font-weight="700" fill="#334155">IMAGERY INGESTION FEEDS</text>
+    
+    <!-- Feed 1: Optical -->
+    <g transform="translate(18, 48)">
+      <rect width="364" height="88" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+      <rect x="14" y="14" width="40" height="40" rx="6" fill="#EFF6FF" />
+      <!-- Sun/Sensor Icon -->
+      <circle cx="34" cy="34" r="8" stroke="#2563EB" stroke-width="2" fill="none" />
+      <path d="M 34 20 L 34 23 M 34 45 L 34 48 M 20 34 L 23 34 M 45 34 L 48 34" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" />
+      <text x="64" y="32" font-size="14" font-weight="800" fill="#0F172A">Optical Satellite Imagery</text>
+      <text x="64" y="48" font-size="11" font-weight="600" fill="#2563EB">High-Res RGB / Multispectral</text>
+      <text x="64" y="66" font-size="11" font-weight="500" fill="#64748B">Sentinel-2 (10m) • PlanetScope (0.5m)</text>
+    </g>
+
+    <!-- Feed 2: SAR -->
+    <g transform="translate(18, 148)">
+      <rect width="364" height="88" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+      <rect x="14" y="14" width="40" height="40" rx="6" fill="#F0F9FF" />
+      <!-- SAR Radar Waves Icon -->
+      <path d="M 26 44 A 12 12 0 0 1 42 44 M 22 48 A 18 18 0 0 1 46 48 M 34 40 L 34 22" stroke="#0284C7" stroke-width="2" stroke-linecap="round" fill="none" />
+      <text x="64" y="32" font-size="14" font-weight="800" fill="#0F172A">SAR Imagery (Radar)</text>
+      <text x="64" y="48" font-size="11" font-weight="600" fill="#0284C7">Synthetic Aperture Radar (VV/VH)</text>
+      <text x="64" y="66" font-size="11" font-weight="500" fill="#64748B">Capella Space • Sentinel-1 All-Weather</text>
+    </g>
+  </g>
+
+  <!-- Feed connector lines to Multimodal Reasoning -->
+  <path d="M 470 488 L 525 488" class="flow-arrow-cyan" marker-end="url(#arr-cyan)" />
+  <path d="M 470 588 L 525 540" class="flow-arrow-cyan" marker-end="url(#arr-cyan)" />
+
+  <!-- Middle Center: Multimodal Reasoning Layer -->
+  <g transform="translate(535, 410)">
+    <rect width="250" height="230" rx="12" fill="#F0FDF4" stroke="#4ADE80" stroke-width="1.8" stroke-dasharray="4 3" />
+    
+    <rect x="16" y="14" width="34" height="34" rx="6" fill="#DCFCE7" />
+    <!-- Multimodal Fusion Icon -->
+    <path d="M 27 25 L 39 37 M 39 25 L 27 37" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round" />
+    
+    <text x="58" y="28" class="mono" font-size="10" font-weight="700" fill="#15803D">REASONING LAYER</text>
+    <text x="58" y="42" font-size="13" font-weight="800" fill="#0F172A">Multimodal Fusion</text>
+    
+    <line x1="16" y1="58" x2="234" y2="58" stroke="#BBF7D0" stroke-width="1.2" />
+
+    <text x="16" y="82" font-size="12" font-weight="700" fill="#14532D">Sensor &amp; Temporal Sync</text>
+    <text x="16" y="104" font-size="11.5" font-weight="500" fill="#334155">• Optical + SAR Alignment</text>
+    <text x="16" y="126" font-size="11.5" font-weight="500" fill="#334155">• Multi-temporal Delta Match</text>
+    <text x="16" y="148" font-size="11.5" font-weight="500" fill="#334155">• Sub-pixel Coregistration</text>
+    <text x="16" y="170" font-size="11.5" font-weight="500" fill="#334155">• Cross-spectrum Coherence</text>
+
+    <rect x="16" y="190" width="218" height="26" rx="4" fill="#DCFCE7" />
+    <text x="24" y="207" class="mono" font-size="10" font-weight="700" fill="#15803D">CROSS-SENSOR LINKED</text>
+  </g>
+
+  <!-- Flow from Multimodal Reasoning into Specialist AI Models -->
+  <path d="M 785 525 L 835 525" class="flow-arrow-cyan" marker-end="url(#arr-cyan)" />
+
+  <!-- Right Side: Specialist AI Models Big Container (4 Compact Modules) -->
+  <g transform="translate(845, 385)">
+    <rect width="1005" height="280" rx="14" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.2" filter="drop-shadow(0 6px 20px rgba(37, 99, 235, 0.08))" />
+    
+    <!-- Top Header Ribbon -->
+    <rect x="24" y="-14" width="220" height="28" rx="6" fill="#2563EB" />
+    <text x="36" y="4" font-size="12" font-weight="800" fill="#FFFFFF" letter-spacing="1px">SPECIALIST AI MODELS</text>
+    
+    <text x="740" y="24" class="mono" font-size="11" font-weight="700" fill="#64748B">4 SPECIALIZED VISION-LANGUAGE ENGINES</text>
+
+    <!-- 4 Modules in horizontal row -->
+
+    <!-- Module 1: VQA -->
+    <g transform="translate(20, 42)">
+      <rect width="230" height="215" class="card-inner" />
+      <rect x="14" y="14" width="36" height="36" rx="6" fill="#EFF6FF" />
+      <!-- VQA Icon -->
+      <path d="M 24 26 L 40 26 C 44 26 44 38 40 38 L 32 38 L 26 44 Z" stroke="#2563EB" stroke-width="2" fill="none" />
+      <circle cx="34" cy="32" r="1.5" fill="#2563EB" />
+
+      <text x="58" y="30" font-size="14" font-weight="800" fill="#0F172A">VQA</text>
+      <text x="58" y="44" font-size="10" font-weight="700" fill="#2563EB">VISUAL QUESTION ANSW.</text>
+
+      <line x1="14" y1="60" x2="216" y2="60" stroke="#E2E8F0" stroke-width="1" />
+
+      <text x="14" y="84" font-size="12" font-weight="700" fill="#1E293B">Zero-Shot Q&amp;A</text>
+      <text x="14" y="106" class="node-bullet">• Geospatial query parsing</text>
+      <text x="14" y="126" class="node-bullet">• Vessel &amp; terrain QA</text>
+      <text x="14" y="146" class="node-bullet">• Target attribute check</text>
+      <text x="14" y="166" class="node-bullet">• Natural language logic</text>
+
+      <rect x="14" y="180" width="202" height="22" rx="4" fill="#EFF6FF" />
+      <text x="22" y="195" class="mono" font-size="9" font-weight="700" fill="#2563EB">PRECISION: 96.2%</text>
+    </g>
+
+    <!-- Module 2: Image Captioning -->
+    <g transform="translate(262, 42)">
+      <rect width="230" height="215" class="card-inner" />
+      <rect x="14" y="14" width="36" height="36" rx="6" fill="#F0F9FF" />
+      <!-- Captioning Icon -->
+      <rect x="22" y="22" width="20" height="20" rx="3" stroke="#0284C7" stroke-width="2" fill="none" />
+      <line x1="26" y1="28" x2="38" y2="28" stroke="#0284C7" stroke-width="1.8" stroke-linecap="round" />
+      <line x1="26" y1="34" x2="34" y2="34" stroke="#0284C7" stroke-width="1.8" stroke-linecap="round" />
+
+      <text x="58" y="30" font-size="14" font-weight="800" fill="#0F172A">Image Captioning</text>
+      <text x="58" y="44" font-size="10" font-weight="700" fill="#0284C7">DENSE SCENE DESCRIPTOR</text>
+
+      <line x1="14" y1="60" x2="216" y2="60" stroke="#E2E8F0" stroke-width="1" />
+
+      <text x="14" y="84" font-size="12" font-weight="700" fill="#1E293B">Scene Narration</text>
+      <text x="14" y="106" class="node-bullet">• Multi-scale terrain text</text>
+      <text x="14" y="126" class="node-bullet">• Harbor activity summary</text>
+      <text x="14" y="146" class="node-bullet">• Infrastructure context</text>
+      <text x="14" y="166" class="node-bullet">• Automated briefings</text>
+
+      <rect x="14" y="180" width="202" height="22" rx="4" fill="#F0F9FF" />
+      <text x="22" y="195" class="mono" font-size="9" font-weight="700" fill="#0284C7">BLEU-4: 0.88</text>
+    </g>
+
+    <!-- Module 3: Visual Grounding -->
+    <g transform="translate(504, 42)">
+      <rect width="230" height="215" class="card-inner" />
+      <rect x="14" y="14" width="36" height="36" rx="6" fill="#EFF6FF" />
+      <!-- Grounding Target Icon -->
+      <circle cx="32" cy="32" r="8" stroke="#2563EB" stroke-width="2" fill="none" />
+      <rect x="24" y="24" width="16" height="16" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="2 2" fill="none" />
+
+      <text x="58" y="30" font-size="14" font-weight="800" fill="#0F172A">Visual Grounding</text>
+      <text x="58" y="44" font-size="10" font-weight="700" fill="#2563EB">TARGET LOCALIZATION</text>
+
+      <line x1="14" y1="60" x2="216" y2="60" stroke="#E2E8F0" stroke-width="1" />
+
+      <text x="14" y="84" font-size="12" font-weight="700" fill="#1E293B">Open-Vocabulary BBox</text>
+      <text x="14" y="106" class="node-bullet">• Pixel-exact [x,y,w,h]</text>
+      <text x="14" y="126" class="node-bullet">• Referring expressions</text>
+      <text x="14" y="146" class="node-bullet">• Naval vessel classes</text>
+      <text x="14" y="166" class="node-bullet">• Sub-meter coordinates</text>
+
+      <rect x="14" y="180" width="202" height="22" rx="4" fill="#EFF6FF" />
+      <text x="22" y="195" class="mono" font-size="9" font-weight="700" fill="#2563EB">IOU ACCURACY: 94.8%</text>
+    </g>
+
+    <!-- Module 4: Change Analysis -->
+    <g transform="translate(746, 42)">
+      <rect width="230" height="215" class="card-inner" />
+      <rect x="14" y="14" width="36" height="36" rx="6" fill="#F0F9FF" />
+      <!-- Change Delta Triangle Icon -->
+      <path d="M 24 38 L 32 24 L 40 38 Z" stroke="#0284C7" stroke-width="2" fill="none" />
+      <line x1="26" y1="34" x2="38" y2="34" stroke="#0284C7" stroke-width="1.5" />
+
+      <text x="58" y="30" font-size="14" font-weight="800" fill="#0F172A">Change Analysis</text>
+      <text x="58" y="44" font-size="10" font-weight="700" fill="#0284C7">BI-TEMPORAL DELTA</text>
+
+      <line x1="14" y1="60" x2="216" y2="60" stroke="#E2E8F0" stroke-width="1" />
+
+      <text x="14" y="84" font-size="12" font-weight="700" fill="#1E293B">Temporal Differential</text>
+      <text x="14" y="106" class="node-bullet">• Pier &amp; berth construction</text>
+      <text x="14" y="126" class="node-bullet">• Fleet relocation tracking</text>
+      <text x="14" y="146" class="node-bullet">• SAR coherence changes</text>
+      <text x="14" y="166" class="node-bullet">• Quantified area delta</text>
+
+      <rect x="14" y="180" width="202" height="22" rx="4" fill="#F0F9FF" />
+      <text x="22" y="195" class="mono" font-size="9" font-weight="700" fill="#0284C7">DELTA INDEX: +42%</text>
+    </g>
+  </g>
+
+  <!-- Downward Flow from Specialist AI Models to Row 3 -->
+  <path d="M 1347 665 L 1347 710" class="flow-arrow-blue" marker-end="url(#arr-blue)" />
+
+  <!-- ================= ROW 3: EVIDENCE -> RESULTS -> REPORTS ================= -->
+  
+  <g id="flow-row-3">
+    <!-- Stage 1: Evidence + Confidence -->
+    <g transform="translate(70, 720)">
+      <rect width="560" height="130" class="card-white" />
+      <rect x="0" y="0" width="6" height="130" rx="3" fill="#2563EB" />
+      <rect x="20" y="18" width="40" height="40" rx="8" fill="#EFF6FF" />
+      <!-- Evidence Shield Icon -->
+      <path d="M 40 26 L 30 30 L 30 42 C 30 48 40 52 40 52 C 40 52 50 48 50 42 L 50 30 Z" stroke="#2563EB" stroke-width="2" fill="none" />
+      <path d="M 36 39 L 39 42 L 45 35" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+      <text x="72" y="35" class="node-title">Evidence + Confidence Engine</text>
+      <text x="72" y="50" class="node-tag">CALIBRATED VERIFICATION</text>
+      
+      <text x="20" y="82" class="node-bullet">• Bounding box coordinates with cross-sensor validation</text>
+      <text x="20" y="100" class="node-bullet">• Calibrated confidence scores (94.8%) with zero-hallucination bounds</text>
+      <text x="20" y="118" class="node-bullet">• Transparent reasoning trace timestamps and model weights</text>
+    </g>
+
+    <!-- Arrow Evidence -> Results -->
+    <path d="M 630 785 L 685 785" class="flow-arrow-blue" marker-end="url(#arr-blue)" />
+
+    <!-- Stage 2: Investigation Results -->
+    <g transform="translate(695, 720)">
+      <rect width="560" height="130" class="card-white" />
+      <rect x="0" y="0" width="6" height="130" rx="3" fill="#0284C7" />
+      <rect x="20" y="18" width="40" height="40" rx="8" fill="#F0F9FF" />
+      <!-- Results Metrics Icon -->
+      <rect x="30" y="26" width="20" height="24" rx="3" stroke="#0284C7" stroke-width="2" fill="none" />
+      <path d="M 35 40 L 39 34 L 43 38 L 47 30" stroke="#0284C7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+      <text x="72" y="35" class="node-title">Investigation Results</text>
+      <text x="72" y="50" font-size="10" font-weight="700" fill="#0284C7" letter-spacing="0.5px">GEOSPATIAL SYNTHESIS</text>
+      
+      <text x="20" y="82" class="node-bullet">• Target identification: Naval Destroyer &amp; Logistics Vessel confirmed</text>
+      <text x="20" y="100" class="node-bullet">• Quantified infrastructure change index: +42% pier expansion delta</text>
+      <text x="20" y="118" class="node-bullet">• Multi-temporal anomaly timeline and operational status metrics</text>
+    </g>
+
+    <!-- Arrow Results -> Reports -->
+    <path d="M 1255 785 L 1310 785" class="flow-arrow-blue" marker-end="url(#arr-blue)" />
+
+    <!-- Stage 3: Reports / Visual Output -->
+    <g transform="translate(1320, 720)">
+      <rect width="530" height="130" class="card-hero" />
+      <rect x="0" y="0" width="6" height="130" rx="3" fill="#2563EB" />
+      <rect x="20" y="18" width="40" height="40" rx="8" fill="#EEF2FF" />
+      <!-- Report Icon -->
+      <path d="M 32 26 L 44 26 L 48 30 L 48 48 L 32 48 Z" stroke="#2563EB" stroke-width="2" fill="none" />
+      <path d="M 36 36 L 44 36 M 36 41 L 44 41" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" />
+
+      <text x="72" y="35" class="node-title">Reports / Visual Output</text>
+      <text x="72" y="50" class="node-tag">ACTIONABLE DELIVERABLES</text>
+      
+      <text x="20" y="82" class="node-bullet">• Interactive UI overlay with vector geospatial bounding layers</text>
+      <text x="20" y="100" class="node-bullet">• Executive PDF Intelligence Brief with cryptographically signed audit</text>
+      <text x="20" y="118" class="node-bullet">• Downstream GeoJSON &amp; Tactical C2 API direct export</text>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM VALUE PROGRESSION BAR ================= -->
+  <g transform="translate(70, 885)">
+    <rect width="1780" height="90" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+    
+    <!-- Step 1: Evidence -->
+    <g transform="translate(60, 24)">
+      <circle cx="21" cy="21" r="18" fill="#EFF6FF" stroke="#2563EB" stroke-width="2" />
+      <text x="21" y="26" text-anchor="middle" font-size="14" font-weight="900" fill="#2563EB">1</text>
+      <text x="56" y="18" font-size="16" font-weight="800" fill="#0F172A">Evidence</text>
+      <text x="56" y="36" font-size="12" font-weight="500" fill="#475569">Bounding Boxes • SAR Coherence • Calibrated Confidence</text>
+    </g>
+
+    <!-- Connector 1 -> 2 -->
+    <g transform="translate(560, 42)">
+      <line x1="0" y1="0" x2="80" y2="0" stroke="#2563EB" stroke-width="2.5" marker-end="url(#arr-blue)" />
+    </g>
+
+    <!-- Step 2: Explainable Insights -->
+    <g transform="translate(680, 24)">
+      <circle cx="21" cy="21" r="18" fill="#F0F9FF" stroke="#0284C7" stroke-width="2" />
+      <text x="21" y="26" text-anchor="middle" font-size="14" font-weight="900" fill="#0284C7">2</text>
+      <text x="56" y="18" font-size="16" font-weight="800" fill="#0F172A">Explainable Insights</text>
+      <text x="56" y="36" font-size="12" font-weight="500" fill="#475569">VQA Reasoning Chain • Multimodal Cross-Corroboration</text>
+    </g>
+
+    <!-- Connector 2 -> 3 -->
+    <g transform="translate(1200, 42)">
+      <line x1="0" y1="0" x2="80" y2="0" stroke="#2563EB" stroke-width="2.5" marker-end="url(#arr-blue)" />
+    </g>
+
+    <!-- Step 3: Actionable Intelligence -->
+    <g transform="translate(1320, 24)">
+      <circle cx="21" cy="21" r="18" fill="#DCFCE7" stroke="#16A34A" stroke-width="2" />
+      <text x="21" y="26" text-anchor="middle" font-size="14" font-weight="900" fill="#16A34A">3</text>
+      <text x="56" y="18" font-size="16" font-weight="800" fill="#0F172A">Actionable Intelligence</text>
+      <text x="56" y="36" font-size="12" font-weight="500" fill="#475569">Strategic Mission Support • Tactical Alerts • C2 Dispatch</text>
+    </g>
+  </g>
+
+  <!-- Footer Metadata -->
+  <g transform="translate(70, 1018)">
+    <text x="0" y="0" font-size="12" font-weight="800" fill="#0F172A">NEXSPACE</text>
+    <text x="80" y="0" font-size="12" font-weight="500" fill="#64748B">|  AI-POWERED REMOTE SENSING &amp; SATELLITE INTELLIGENCE PLATFORM</text>
+    <text x="1780" y="0" text-anchor="end" class="mono" font-size="11" font-weight="600" fill="#64748B">FIGURE 1: SYSTEM ARCHITECTURE &amp; FLOWCHART</text>
+  </g>
+</svg>

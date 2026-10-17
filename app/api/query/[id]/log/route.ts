@@ -1,29 +1,43 @@
 import { NextResponse } from "next/server";
 
+const ML_BACKEND_URL = process.env.ML_BACKEND_URL || "http://127.0.0.1:8000";
+
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const logLines = [
-    { time: "00:00.12", tag: "INFO", text: "Investigation request received and validated.", color: "text-slate-400" },
-    { time: "00:00.35", tag: "INFO", text: "Source image raster validated and normalized.", color: "text-slate-400" },
-    { time: "00:00.68", tag: "SUCCESS", text: "Intent classified: Specialist models routed.", color: "text-emerald-400" },
-    { time: "00:01.45", tag: "INFO", text: "Executing Grounding DINO object localization...", color: "text-cyan-300" },
-    { time: "00:03.20", tag: "SUCCESS", text: "Object detections extracted and normalized.", color: "text-emerald-400" },
-    { time: "00:03.85", tag: "INFO", text: "Executing BLIP scene captioning and VQA...", color: "text-cyan-300" },
-    { time: "00:04.90", tag: "SUCCESS", text: "Multimodal findings synthesized into executive report.", color: "text-emerald-400" },
-  ];
 
-  const tensorMetadata = {
-    shape: "(1, 3, 512, 512)",
-    dtype: "uint8 / float32",
-    minMaxVal: "0.00 / 255.00",
-    meanAct: "0.4820",
-    memUsage: "3.2 MB"
-  };
+  try {
+    const res = await fetch(`${ML_BACKEND_URL}/api/investigation/${id}/result`, {
+      signal: AbortSignal.timeout(3000),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const trace = data.execution_trace || [];
+      const logLines = trace.map((st: any, idx: number) => ({
+        time: typeof st.duration_ms === "number" ? `+${st.duration_ms.toFixed(0)}ms` : `00:0${idx + 1}.00`,
+        tag: (st.status || "INFO").toUpperCase(),
+        text: `[${st.stage || st.name}] ${st.details || st.message || ""}`.trim(),
+        color: st.status === "failed" ? "text-rose-400" : "text-emerald-400",
+      }));
+
+      return NextResponse.json({
+        queryId: id,
+        pid: "AGENT-CONTROLLER-ML",
+        status: data.status || "completed",
+        provenance: data.provenance || "UNAVAILABLE",
+        logLines,
+      });
+    }
+  } catch {
+    // Backend offline or not found
+  }
 
   return NextResponse.json({
     queryId: id,
     pid: "AGENT-CONTROLLER-ML",
-    logLines,
-    tensorMetadata
+    status: "UNAVAILABLE",
+    provenance: "UNAVAILABLE",
+    logLines: [],
+    message: "No live execution logs available for this query ID.",
   });
 }

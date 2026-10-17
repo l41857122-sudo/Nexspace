@@ -36,6 +36,9 @@ class InvestigationReport:
     execution_summary: Dict[str, Any]
     trace: List[Dict[str, Any]]
     spatial_summary: Optional[Dict[str, Any]] = None
+    summary: Optional[str] = None
+    interpretations: Optional[List[str]] = None
+    evidence_references: Optional[List[str]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -48,9 +51,13 @@ class InvestigationReport:
             "execution_summary": self.execution_summary,
             "spatial_summary": self.spatial_summary or {
                 "geospatial_available": False,
-                "reason": "No geospatial metadata available",
+                "crs": None,
+                "reason": "Non-georeferenced optical image; spatial analysis indexed in normalized pixel coordinates [0-1000].",
             },
             "trace": self.trace,
+            "summary": self.summary,
+            "interpretations": self.interpretations or [],
+            "evidence_references": self.evidence_references or [],
         }
 
 
@@ -116,7 +123,9 @@ class InvestigationSynthesizer:
         and human-readable response text.
         """
         q_raw = (query or "").strip()
-        q_lower = q_raw.lower()
+        from target_spec import extract_safety_constraints
+        clean_q, constraints = extract_safety_constraints(q_raw)
+        q_lower = clean_q.lower() if clean_q else q_raw.lower()
 
         observations: List[str] = []
         limitations: List[str] = []
@@ -132,7 +141,9 @@ class InvestigationSynthesizer:
         change_data: Optional[Dict[str, Any]] = None
         grounding_detections: List[Dict[str, Any]] = []
         grounding_target: Optional[str] = None
+        target_outcomes: Optional[Dict[str, Any]] = None
         fusion_summary: Optional[str] = None
+        spectral_data: Optional[Dict[str, Any]] = None
 
         for res in tool_results:
             t_name = getattr(res, "tool_name", "")
@@ -176,9 +187,22 @@ class InvestigationSynthesizer:
             elif t_name == "Grounding" and t_status == "success":
                 grounding_detections = data.get("detections", [])
                 grounding_target = data.get("target_phrase", "objects")
-                observations.append(
-                    f"Grounding DINO detected {len(grounding_detections)} candidate region(s) matching '{grounding_target}'."
-                )
+                target_outcomes = data.get("target_outcomes")
+                geom_type = data.get("geometry_type", "box")
+                if target_outcomes:
+                    for tgt, t_info in target_outcomes.items():
+                        c = t_info.get("count", 0)
+                        observations.append(
+                            f"Multi-Target Grounding localized {c} instance(s) matching '{tgt}'."
+                        )
+                elif geom_type == "polygon":
+                    observations.append(
+                        f"Region Grounding Specialist localized {len(grounding_detections)} verified polygon region(s) for '{grounding_target}'."
+                    )
+                else:
+                    observations.append(
+                        f"Grounding DINO detected {len(grounding_detections)} candidate region(s) matching '{grounding_target}'."
+                    )
 
             elif t_name == "VQA":
                 ans = data.get("primary_answer") or data.get("answer") or ""
@@ -208,6 +232,13 @@ class InvestigationSynthesizer:
                     fusion_summary or "Cross-sensor comparison shows moderate structural pattern similarity between optical and SAR imagery."
                 )
                 limitations.append("Optical + SAR analysis is based on a preliminary feature comparison baseline.")
+
+            elif t_name == "Multispectral_Analysis":
+                spectral_data = data
+                if t_status == "success":
+                    observations.append("Authentic multispectral sensor bands processed; verified spectral indices computed.")
+                else:
+                    limitations.append("Multispectral analysis could not be computed: authentic Red (B04) and NIR (B08) sensor bands are required; imagery is RGB-only.")
 
         # Disclaimers
         if requires_count_warning or bool(re.search(r"\b(how many|count)\b", q_lower)):
@@ -244,10 +275,10 @@ class InvestigationSynthesizer:
 
         spatial_summary = {
             "geospatial_available": has_geo,
-            "crs": crs,
+            "crs": crs if has_geo else None,
             "evidence_with_coordinates": len(geo_nodes),
-            "total_ground_area": round(total_ground_area, 2) if total_ground_area > 0 else None,
-            "total_ground_area_unit": "m2" if total_ground_area > 0 else None,
+            "total_ground_area": round(total_ground_area, 2) if (has_geo and total_ground_area > 0) else None,
+            "total_ground_area_unit": "m2" if (has_geo and total_ground_area > 0) else None,
         }
 
         # Build Investigation Report
@@ -276,12 +307,15 @@ class InvestigationSynthesizer:
             vqa_answers=vqa_answers,
             change_data=change_data,
             fusion_summary=fusion_summary,
+            spectral_data=spectral_data,
             has_geo=has_geo,
             crs=crs,
             exec_summary=exec_summary,
             observations=observations,
             plan=plan,
+            target_outcomes=target_outcomes,
         )
+        report.summary = response_text
 
         return report, exec_summary, response_text
 
@@ -301,14 +335,46 @@ class InvestigationSynthesizer:
         exec_summary: Dict[str, Any],
         observations: List[str],
         plan: Optional[Dict[str, Any]] = None,
+        spectral_data: Optional[Dict[str, Any]] = None,
+        target_outcomes: Optional[Dict[str, Any]] = None,
     ) -> str:
-        q_lower = query.lower().strip()
+        from target_spec import extract_safety_constraints
+        clean_q, constraints = extract_safety_constraints(query)
+        q_lower = clean_q.lower().strip()
         sections: List[str] = []
 
-        # Case 1: Geospatial Metadata Queries (CRS, Resolution, Coordinates, GSD)
-        if bool(re.search(r"\b(coordinates|crs|resolution|ground sampling distance|gsd|projection|lat.*lon)\b", q_lower)):
-            if has_geo:
-                sections.append(f"**Geospatial Metadata:** Coordinate Reference System: `{crs or 'EPSG:4326'}`. Spatial resolution and ground footprints are available in the evidence layer.")
+        # Case 0: Multispectral Analysis (NDVI, NDWI, NDBI)
+        if spectral_data or any(k in q_lower for k in ["ndvi", "ndwi", "ndbi", "vegetation index", "water index", "built-up index", "multispectral", "spectral index", "spectral indices"]):
+            if spectral_data and spectral_data.get("multispectral_present") and spectral_data.get("indices"):
+                idx_lines = []
+                for idx_name, idx_info in spectral_data["indices"].items():
+                    if idx_info.get("status") == "success" and idx_info.get("stats"):
+                        st = idx_info["stats"]
+                        idx_lines.append(f"- **{idx_name}:** Mean {st['mean']:.3f} (Range: [{st['min']:.3f} .. {st['max']:.3f}], Valid Pixels: {st['valid_pixel_count']}) [{idx_info['formula']}]")
+                    else:
+                        idx_lines.append(f"- **{idx_name}:** {idx_info.get('error', 'Unavailable')}")
+                bands_str = ", ".join(spectral_data.get("loaded_bands", []))
+                sections.append(
+                    f"**Multispectral Analysis:**\n"
+                    f"Authentic Sentinel-2 Level-2A surface reflectance bands ({bands_str}) processed.\n"
+                    + "\n".join(idx_lines)
+                )
+            else:
+                sections.append(
+                    "**Multispectral Analysis:** NDVI/NDWI could not be computed. Authentic Red (B04) and NIR (B08) spectral bands are required. The available imagery is RGB-only."
+                )
+            return "\n\n".join(sections)
+
+        # Case 1: Pure Geospatial Metadata Queries (CRS, Resolution, Coordinates, GSD)
+        is_pure_geo = (task_type in ("GEOSPATIAL_METADATA", "GEOLOCATION")) or (
+            not grounding_detections
+            and not target_outcomes
+            and bool(re.search(r"\b(coordinates|crs|resolution|ground sampling distance|gsd|projection|lat.*lon)\b", q_lower))
+            and not any(re.search(p, q_lower) for p in [r"\bidentify\b", r"\bdetect\b", r"\blocate\b", r"\bfind\b", r"\bsegment\b", r"\bcount\b", r"\banalyze\b", r"\bspot\b", r"\bpinpoint\b", r"\boutline\b"])
+        )
+        if is_pure_geo:
+            if has_geo and crs:
+                sections.append(f"**Geospatial Metadata:** Coordinate Reference System: `{crs}`. Spatial resolution and ground footprints are available in the evidence layer.")
             else:
                 sections.append("**Geospatial Metadata:** This raster is currently loaded without embedded geospatial tags (GeoTIFF tags / world file). Spatial coordinates are indexed in pixel space `[0-1000]`. Upload a GeoTIFF raster to extract geographic lat/lon coordinates and EPSG projections.")
             return "\n\n".join(sections)
@@ -386,7 +452,10 @@ class InvestigationSynthesizer:
 
         # Case 7: Optical + SAR Cross-Modality
         if fusion_summary or task_type == "OPTICAL_SAR_ANALYSIS":
-            sections.append(f"**Multimodal Fusion Analysis:** {fusion_summary or 'Optical & SAR feature representations aligned and evaluated.'}")
+            if fusion_summary:
+                sections.append(f"**Multimodal Fusion Analysis:** {fusion_summary}")
+            else:
+                sections.append("**Multimodal Fusion Analysis:** Optical-SAR analysis could not be completed. An independent SAR radar image is required.")
             if caption_text:
                 sections.append(f"- **Optical View:** {caption_text}")
             if sar_caption_text:
@@ -396,6 +465,36 @@ class InvestigationSynthesizer:
         # Case 8: SAR Only
         if sar_caption_text and not caption_text:
             sections.append(f"**Radar SAR Analysis:** {sar_caption_text}")
+            return "\n\n".join(sections)
+
+        # Multi-Target Outcomes (Phase 3.E)
+        if target_outcomes and len(target_outcomes) > 1:
+            sections.append("**Multi-Target Visual Analysis:**")
+            for tgt, t_info in target_outcomes.items():
+                c = t_info.get("count", 0)
+                plural = _pluralize_phrase(tgt)
+                if c == 0:
+                    sections.append(f"- **{tgt.title()}:** 0 candidate {plural} localized (None detected in imagery).")
+                else:
+                    sections.append(f"- **{tgt.title()}:** {c} candidate {plural} localized.")
+            if caption_text:
+                sections.append(f"**Scene Overview:** {caption_text}")
+            elif vqa_answers:
+                sections.append(f"**Answer:** {' | '.join(vqa_answers)}")
+            if constraints and not has_geo:
+                sections.append("*(Safety Constraint: Non-georeferenced imagery analyzed in normalized pixel frame [0-1000]. Verified sensor and geospatial metadata reported as unavailable.)*")
+            return "\n\n".join(sections)
+
+        # Direct VQA query response (if question asked)
+        is_direct_q = query.endswith("?") or task_type in ("VQA", "OPEN_ENDED_LAND_USE") or any(k in q_lower for k in ["is there", "are there", "what type of", "what is the dominant", "tell me if"])
+        if is_direct_q and vqa_answers:
+            sections.append(f"**Answer:** {' | '.join(vqa_answers)}")
+            if caption_text:
+                sections.append(f"**Scene Description:** {caption_text}")
+            elif grounding_detections:
+                target_display = grounding_target or "structure"
+                plural_name = _pluralize_phrase(target_display)
+                sections.append(f"**Objects Located:** We found {len(grounding_detections)} possible {plural_name} in this image.")
             return "\n\n".join(sections)
 
         # Case 9: General Visual & Multi-Tool Output
@@ -417,7 +516,7 @@ class InvestigationSynthesizer:
             if not vqa_answers:
                 sections.append("Scene description could not be generated reliably for this image. The visual content could not be interpreted with sufficient confidence from the available model weights.")
 
-        if vqa_answers:
+        if vqa_answers and not any("**Answer:**" in s for s in sections):
             sections.append(f"**Answer:** {' | '.join(vqa_answers)}")
 
         if not sections and observations:

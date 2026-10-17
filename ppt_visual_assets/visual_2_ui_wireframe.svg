@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap');
+      * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .mono { font-family: 'JetBrains Mono', monospace; }
+      
+      .title { font-size: 34px; font-weight: 900; fill: #0F172A; letter-spacing: -0.8px; }
+      .subtitle { font-size: 15px; font-weight: 500; fill: #475569; }
+      .badge-text { font-size: 11px; font-weight: 800; fill: #0284C7; letter-spacing: 1.2px; text-transform: uppercase; }
+      
+      .window-frame { fill: #FFFFFF; stroke: #0F172A; stroke-width: 2; rx: 12px; }
+      .panel-card { fill: #FFFFFF; stroke: #E2E8F0; stroke-width: 1.2; rx: 8px; }
+      .mini-pill { font-size: 10px; font-weight: 700; fill: #2563EB; }
+    </style>
+
+    <marker id="wf-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#2563EB" />
+    </marker>
+    
+    <pattern id="wf-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#F1F5F9" stroke-width="1" />
+    </pattern>
+
+    <pattern id="radar-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#CBD5E1" />
+    </pattern>
+  </defs>
+
+  <!-- PURE WHITE BACKGROUND -->
+  <rect width="1920" height="1080" fill="#FFFFFF" />
+  <rect width="1920" height="1080" fill="url(#wf-grid)" />
+
+  <!-- Outer Presentation Margin Border -->
+  <rect x="36" y="30" width="1848" height="1020" rx="16" fill="none" stroke="#E2E8F0" stroke-width="1.5" />
+
+  <!-- Header Banner -->
+  <g transform="translate(70, 60)">
+    <rect x="0" y="0" width="170" height="26" rx="13" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.2" />
+    <circle cx="14" cy="13" r="4" fill="#0284C7" />
+    <text x="26" y="17" class="badge-text">UI &amp; Wireframe</text>
+
+    <text x="0" y="60" class="title">NexSpace Mission Console &amp; Analyst Workflow</text>
+    <text x="0" y="86" class="subtitle">Interactive geospatial intelligence environment with connected agent execution lifecycle</text>
+  </g>
+
+  <!-- ================= TOP STEP-BY-STEP WORKFLOW MINI-PANELS ================= -->
+  <g transform="translate(70, 160)">
+    <rect width="1780" height="60" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+    
+    <!-- Stage 1: Dashboard -->
+    <g transform="translate(30, 15)">
+      <circle cx="15" cy="15" r="14" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.8" />
+      <text x="15" y="20" text-anchor="middle" font-size="12" font-weight="800" fill="#2563EB">1</text>
+      <text x="40" y="14" font-size="13" font-weight="800" fill="#0F172A">Dashboard</text>
+      <text x="40" y="26" font-size="10" font-weight="500" fill="#64748B">Fleet &amp; AOI Overview</text>
+    </g>
+    <path d="M 220 30 L 260 30" stroke="#CBD5E1" stroke-width="2" marker-end="url(#wf-arrow)" />
+
+    <!-- Stage 2: Query -->
+    <g transform="translate(290, 15)">
+      <circle cx="15" cy="15" r="14" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.8" />
+      <text x="15" y="20" text-anchor="middle" font-size="12" font-weight="800" fill="#2563EB">2</text>
+      <text x="40" y="14" font-size="13" font-weight="800" fill="#0F172A">Query</text>
+      <text x="40" y="26" font-size="10" font-weight="500" fill="#64748B">Natural Language Input</text>
+    </g>
+    <path d="M 500 30 L 540 30" stroke="#CBD5E1" stroke-width="2" marker-end="url(#wf-arrow)" />
+
+    <!-- Stage 3: Results -->
+    <g transform="translate(570, 15)">
+      <circle cx="15" cy="15" r="14" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.8" />
+      <text x="15" y="20" text-anchor="middle" font-size="12" font-weight="800" fill="#2563EB">3</text>
+      <text x="40" y="14" font-size="13" font-weight="800" fill="#0F172A">Results</text>
+      <text x="40" y="26" font-size="10" font-weight="500" fill="#64748B">Specialist AI Sync</text>
+    </g>
+    <path d="M 780 30 L 820 30" stroke="#CBD5E1" stroke-width="2" marker-end="url(#wf-arrow)" />
+
+    <!-- Stage 4: Evidence -->
+    <g transform="translate(850, 15)">
+      <circle cx="15" cy="15" r="14" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.8" />
+      <text x="15" y="20" text-anchor="middle" font-size="12" font-weight="800" fill="#2563EB">4</text>
+      <text x="40" y="14" font-size="13" font-weight="800" fill="#0F172A">Evidence</text>
+      <text x="40" y="26" font-size="10" font-weight="500" fill="#64748B">BBoxes &amp; Overlays</text>
+    </g>
+    <path d="M 1080 30 L 1120 30" stroke="#CBD5E1" stroke-width="2" marker-end="url(#wf-arrow)" />
+
+    <!-- Stage 5: Execution -->
+    <g transform="translate(1150, 15)">
+      <circle cx="15" cy="15" r="14" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.8" />
+      <text x="15" y="20" text-anchor="middle" font-size="12" font-weight="800" fill="#2563EB">5</text>
+      <text x="40" y="14" font-size="13" font-weight="800" fill="#0F172A">Execution</text>
+      <text x="40" y="26" font-size="10" font-weight="500" fill="#64748B">Trace Audit Trail</text>
+    </g>
+    <path d="M 1380 30 L 1420 30" stroke="#CBD5E1" stroke-width="2" marker-end="url(#wf-arrow)" />
+
+    <!-- Stage 6: Reports -->
+    <g transform="translate(1450, 15)">
+      <circle cx="15" cy="15" r="14" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.8" />
+      <text x="15" y="20" text-anchor="middle" font-size="12" font-weight="800" fill="#16A34A">6</text>
+      <text x="40" y="14" font-size="13" font-weight="800" fill="#0F172A">Reports</text>
+      <text x="40" y="26" font-size="10" font-weight="500" fill="#15803D">Verified PDF / GeoJSON</text>
+    </g>
+  </g>
+
+  <!-- ================= MAIN DESKTOP APP WIREFRAME CONTAINER ================= -->
+  <g transform="translate(70, 245)">
+    <!-- Main Window Outer Frame -->
+    <rect width="1780" height="745" rx="12" class="window-frame" filter="drop-shadow(0 12px 32px rgba(15, 23, 42, 0.08))" />
+
+    <!-- Top Window Title Bar -->
+    <path d="M 0 12 Q 0 0 12 0 L 1768 0 Q 1780 0 1780 12 L 1780 54 L 0 54 Z" fill="#0F172A" />
+    
+    <!-- Control Dots -->
+    <circle cx="26" cy="27" r="5" fill="#EF4444" />
+    <circle cx="44" cy="27" r="5" fill="#F59E0B" />
+    <circle cx="62" cy="27" r="5" fill="#10B981" />
+    
+    <!-- Branding -->
+    <text x="96" y="32" font-size="15" font-weight="900" fill="#FFFFFF" letter-spacing="0.5px">NEXSPACE</text>
+    <rect x="195" y="16" width="92" height="22" rx="4" fill="#1E293B" />
+    <text x="204" y="31" class="mono" font-size="10" font-weight="700" fill="#38BDF8">MISSION C2</text>
+
+    <!-- Breadcrumb -->
+    <text x="315" y="31" font-size="12" font-weight="500" fill="#94A3B8">Target AOI: <tspan fill="#FFFFFF" font-weight="700">Port Said Naval Terminal • Multi-Sensor (EO + SAR)</tspan></text>
+
+    <!-- Top Actions -->
+    <g transform="translate(1480, 14)">
+      <rect x="0" y="0" width="140" height="28" rx="6" fill="#2563EB" />
+      <text x="16" y="18" font-size="11" font-weight="700" fill="#FFFFFF">EXPORT BRIEFING</text>
+      <rect x="155" y="0" width="120" height="28" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1" />
+      <text x="170" y="18" font-size="11" font-weight="600" fill="#CBD5E1">ANALYST: AGY</text>
+    </g>
+
+    <!-- ================= LEFT SIDEBAR (NAV) ================= -->
+    <g transform="translate(0, 54)">
+      <rect width="250" height="691" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1" />
+
+      <g transform="translate(18, 24)">
+        <text x="8" y="0" font-size="10" font-weight="800" fill="#94A3B8" letter-spacing="1px">WORKSPACES</text>
+
+        <!-- Active Item -->
+        <rect x="0" y="14" width="214" height="38" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.2" />
+        <circle cx="20" cy="33" r="4" fill="#2563EB" />
+        <text x="36" y="37" font-size="13" font-weight="700" fill="#2563EB">Satellite Viewer</text>
+
+        <!-- Nav 2 -->
+        <g transform="translate(0, 60)">
+          <rect x="0" y="0" width="214" height="36" rx="6" fill="transparent" />
+          <text x="36" y="22" font-size="13" font-weight="600" fill="#475569">Sensor Modalities</text>
+        </g>
+
+        <!-- Nav 3 -->
+        <g transform="translate(0, 104)">
+          <rect x="0" y="0" width="214" height="36" rx="6" fill="transparent" />
+          <text x="36" y="22" font-size="13" font-weight="600" fill="#475569">Specialist AI Models</text>
+        </g>
+
+        <!-- Nav 4 -->
+        <g transform="translate(0, 148)">
+          <rect x="0" y="0" width="214" height="36" rx="6" fill="transparent" />
+          <text x="36" y="22" font-size="13" font-weight="600" fill="#475569">Evidence Vault</text>
+        </g>
+
+        <!-- Nav 5 -->
+        <g transform="translate(0, 192)">
+          <rect x="0" y="0" width="214" height="36" rx="6" fill="transparent" />
+          <text x="36" y="22" font-size="13" font-weight="600" fill="#475569">Execution Trace</text>
+        </g>
+
+        <!-- Sensor Layer Toggles -->
+        <text x="8" y="260" font-size="10" font-weight="800" fill="#94A3B8" letter-spacing="1px">ACTIVE SENSOR LAYERS</text>
+        
+        <g transform="translate(0, 275)">
+          <rect width="214" height="34" rx="5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+          <rect x="10" y="10" width="14" height="14" rx="3" fill="#2563EB" />
+          <text x="32" y="21" font-size="11" font-weight="600" fill="#0F172A">Optical EO (0.5m RGB)</text>
+        </g>
+
+        <g transform="translate(0, 318)">
+          <rect width="214" height="34" rx="5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+          <rect x="10" y="10" width="14" height="14" rx="3" fill="#0284C7" />
+          <text x="32" y="21" font-size="11" font-weight="600" fill="#0F172A">SAR Radar (VV/VH)</text>
+        </g>
+
+        <g transform="translate(0, 361)">
+          <rect width="214" height="34" rx="5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+          <rect x="10" y="10" width="14" height="14" rx="3" fill="#10B981" />
+          <text x="32" y="21" font-size="11" font-weight="600" fill="#0F172A">Bi-Temporal Delta Mask</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- ================= CENTER: SATELLITE VIEWER ================= -->
+    <g transform="translate(250, 54)">
+      <!-- Map Viewport -->
+      <rect width="970" height="691" fill="#F1F5F9" />
+      <rect width="970" height="691" fill="url(#radar-dots)" />
+
+      <!-- Synthetic Coastline & Naval Berths -->
+      <path d="M 0 320 Q 280 290 480 410 T 970 360 L 970 691 L 0 691 Z" fill="#E2E8F0" />
+      <path d="M 360 390 L 450 280 L 510 300 L 440 410 Z" fill="#CBD5E1" stroke="#94A3B8" stroke-width="1.8" />
+      <path d="M 530 430 L 630 320 L 690 340 L 610 450 Z" fill="#CBD5E1" stroke="#94A3B8" stroke-width="1.8" />
+      
+      <!-- Coordinate Crosshair HUD -->
+      <line x1="480" y1="20" x2="480" y2="40" stroke="#64748B" stroke-width="1.5" />
+      <line x1="470" y1="30" x2="490" y2="30" stroke="#64748B" stroke-width="1.5" />
+      <text x="500" y="34" class="mono" font-size="11" font-weight="700" fill="#334155">31°15'42"N  32°18'20"E  •  GSD: 0.5m  •  AZ: 142°</text>
+
+      <!-- Zoom / Controls -->
+      <g transform="translate(24, 24)">
+        <rect width="36" height="100" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+        <text x="13" y="24" font-size="16" font-weight="800" fill="#0F172A">+</text>
+        <line x1="6" y1="34" x2="30" y2="34" stroke="#E2E8F0" stroke-width="1" />
+        <text x="14" y="58" font-size="16" font-weight="800" fill="#0F172A">-</text>
+        <line x1="6" y1="68" x2="30" y2="68" stroke="#E2E8F0" stroke-width="1" />
+        <circle cx="18" cy="84" r="5" stroke="#0284C7" stroke-width="1.5" fill="none" />
+      </g>
+
+      <!-- ================= DETECTION BOUNDING BOXES & EVIDENCE OVERLAYS ================= -->
+      
+      <!-- Target 1: Type 052D Destroyer -->
+      <g transform="translate(410, 240)">
+        <rect width="140" height="75" rx="2" fill="rgba(37, 99, 235, 0.08)" stroke="#2563EB" stroke-width="2" stroke-dasharray="4 2" />
+        <!-- Corner Reticles -->
+        <path d="M 0 10 L 0 0 L 10 0" stroke="#2563EB" stroke-width="3" fill="none" />
+        <path d="M 130 0 L 140 0 L 140 10" stroke="#2563EB" stroke-width="3" fill="none" />
+        <path d="M 0 65 L 0 75 L 10 75" stroke="#2563EB" stroke-width="3" fill="none" />
+        <path d="M 130 75 L 140 75 L 140 65" stroke="#2563EB" stroke-width="3" fill="none" />
+
+        <!-- Floating Tag -->
+        <g transform="translate(0, -30)">
+          <rect width="240" height="26" rx="4" fill="#2563EB" />
+          <text x="8" y="17" font-size="10" font-weight="800" fill="#FFFFFF">#TRG-01 TYPE 052D DESTROYER</text>
+          <rect x="190" y="4" width="44" height="18" rx="3" fill="#1D4ED8" />
+          <text x="194" y="16" class="mono" font-size="9" font-weight="700" fill="#93C5FD">96.4%</text>
+        </g>
+      </g>
+
+      <!-- Target 2: Logistics Vessel -->
+      <g transform="translate(590, 295)">
+        <rect width="120" height="65" rx="2" fill="rgba(2, 132, 199, 0.08)" stroke="#0284C7" stroke-width="2" />
+        <g transform="translate(0, -30)">
+          <rect width="215" height="26" rx="4" fill="#0284C7" />
+          <text x="8" y="17" font-size="10" font-weight="800" fill="#FFFFFF">#TRG-02 LOGISTICS VESSEL</text>
+          <rect x="166" y="4" width="44" height="18" rx="3" fill="#0369A1" />
+          <text x="170" y="16" class="mono" font-size="9" font-weight="700" fill="#E0F2FE">91.8%</text>
+        </g>
+      </g>
+
+      <!-- Target 3: Berth Expansion Polygon -->
+      <g transform="translate(330, 395)">
+        <polygon points="0,20 65,0 130,40 45,85" fill="rgba(239, 68, 68, 0.12)" stroke="#EF4444" stroke-width="2" stroke-dasharray="3 3" />
+        <g transform="translate(20, -24)">
+          <rect width="170" height="22" rx="4" fill="#EF4444" />
+          <text x="8" y="15" font-size="10" font-weight="800" fill="#FFFFFF">#CHG-01 BERTH EXPANSION</text>
+        </g>
+      </g>
+
+      <!-- ================= BOTTOM AI QUERY INPUT BAR ================= -->
+      <g transform="translate(50, 585)">
+        <rect width="870" height="76" rx="10" fill="#FFFFFF" stroke="#2563EB" stroke-width="2" filter="drop-shadow(0 8px 24px rgba(37,99,235,0.12))" />
+        
+        <rect x="18" y="18" width="40" height="40" rx="8" fill="#EFF6FF" />
+        <circle cx="38" cy="38" r="8" stroke="#2563EB" stroke-width="2" fill="none" />
+        <path d="M 44 44 L 49 49" stroke="#2563EB" stroke-width="2" stroke-linecap="round" />
+
+        <text x="72" y="34" font-size="11" font-weight="800" fill="#2563EB" letter-spacing="0.5px">AUTONOMOUS MULTIMODAL QUERY</text>
+        <text x="72" y="52" font-size="13" font-weight="600" fill="#0F172A">"Locate all combatant vessels docked at Berth 3 and highlight infrastructure changes"</text>
+
+        <!-- Action Button -->
+        <g transform="translate(720, 16)">
+          <rect width="130" height="44" rx="8" fill="#2563EB" />
+          <text x="24" y="27" font-size="12" font-weight="800" fill="#FFFFFF">EXECUTE ➔</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- ================= RIGHT PANEL: RESULTS, CONFIDENCE & TRACE ================= -->
+    <g transform="translate(1220, 54)">
+      <rect width="560" height="691" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+
+      <!-- Section 1: Investigation Summary -->
+      <g transform="translate(24, 24)">
+        <text x="0" y="0" font-size="11" font-weight="900" fill="#0F172A" letter-spacing="1px">INVESTIGATION RESULTS</text>
+        
+        <g transform="translate(0, 16)">
+          <rect width="512" height="135" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" />
+          <text x="16" y="26" font-size="13" font-weight="800" fill="#0F172A">Berth 3 Activity Assessment</text>
+          <text x="16" y="46" font-size="12" font-weight="500" fill="#334155">2 combatant vessels confirmed docked. High radar reflectivity</text>
+          <text x="16" y="64" font-size="12" font-weight="500" fill="#334155">corroborates Type 052D superstructure. Structural expansion</text>
+          <text x="16" y="82" font-size="12" font-weight="500" fill="#334155">detected on Pier 4 with +42% surface delta.</text>
+          
+          <g transform="translate(16, 96)">
+            <rect width="120" height="24" rx="4" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1" />
+            <text x="10" y="16" class="mini-pill">TARGETS: 2 FOUND</text>
+
+            <rect x="130" y="0" width="130" height="24" rx="4" fill="#FEF2F2" stroke="#FECACA" stroke-width="1" />
+            <text x="140" y="16" font-size="10" font-weight="800" fill="#DC2626">DELTA: +42% PIER</text>
+
+            <rect x="270" y="0" width="120" height="24" rx="4" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+            <text x="280" y="16" font-size="10" font-weight="800" fill="#059669">AUDIT: VERIFIED</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Section 2: Model & Confidence Metrics -->
+      <g transform="translate(24, 205)">
+        <text x="0" y="0" font-size="11" font-weight="900" fill="#0F172A" letter-spacing="1px">MODEL &amp; CONFIDENCE METRICS</text>
+
+        <g transform="translate(0, 16)">
+          <rect width="512" height="140" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" />
+
+          <text x="16" y="28" font-size="12" font-weight="700" fill="#0F172A">Overall System Confidence</text>
+          <text x="440" y="28" class="mono" font-size="14" font-weight="900" fill="#2563EB">94.8%</text>
+          
+          <rect x="16" y="38" width="480" height="8" rx="4" fill="#E2E8F0" />
+          <rect x="16" y="38" width="455" height="8" rx="4" fill="#2563EB" />
+
+          <g transform="translate(16, 62)">
+            <text x="0" y="14" font-size="11.5" font-weight="500" fill="#334155">• Visual Grounding Engine: <tspan font-weight="700" fill="#0F172A">96.4%</tspan></text>
+            <text x="0" y="34" font-size="11.5" font-weight="500" fill="#334155">• Multimodal SAR Corroboration: <tspan font-weight="700" fill="#0F172A">91.8%</tspan></text>
+            <text x="0" y="54" font-size="11.5" font-weight="500" fill="#334155">• Bi-Temporal Change Mask: <tspan font-weight="700" fill="#0F172A">96.2%</tspan></text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Section 3: Execution Trace -->
+      <g transform="translate(24, 390)">
+        <text x="0" y="0" font-size="11" font-weight="900" fill="#0F172A" letter-spacing="1px">EXECUTION TRACE LOG (TRANSPARENT REASONING)</text>
+
+        <g transform="translate(0, 16)">
+          <rect width="512" height="245" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" />
+
+          <!-- Step 1 -->
+          <g transform="translate(16, 20)">
+            <circle cx="8" cy="8" r="6" fill="#10B981" />
+            <line x1="8" y1="18" x2="8" y2="40" stroke="#CBD5E1" stroke-width="2" />
+            <text x="24" y="12" font-size="12" font-weight="700" fill="#0F172A">1. Query Ingestion &amp; Intent Routing</text>
+            <text x="430" y="12" class="mono" font-size="11" font-weight="600" fill="#64748B">120ms</text>
+            <text x="24" y="28" font-size="10" font-weight="500" fill="#64748B">Decomposed into spatial grounding + change detection tasks</text>
+          </g>
+
+          <!-- Step 2 -->
+          <g transform="translate(16, 75)">
+            <circle cx="8" cy="8" r="6" fill="#10B981" />
+            <line x1="8" y1="18" x2="8" y2="40" stroke="#CBD5E1" stroke-width="2" />
+            <text x="24" y="12" font-size="12" font-weight="700" fill="#0F172A">2. Dual Sensor Alignment (EO + SAR)</text>
+            <text x="430" y="12" class="mono" font-size="11" font-weight="600" fill="#64748B">340ms</text>
+            <text x="24" y="28" font-size="10" font-weight="500" fill="#64748B">Coregistration validated with sub-pixel alignment RMS 0.18</text>
+          </g>
+
+          <!-- Step 3 -->
+          <g transform="translate(16, 130)">
+            <circle cx="8" cy="8" r="6" fill="#10B981" />
+            <line x1="8" y1="18" x2="8" y2="40" stroke="#CBD5E1" stroke-width="2" />
+            <text x="24" y="12" font-size="12" font-weight="700" fill="#0F172A">3. Specialist Model Execution</text>
+            <text x="430" y="12" class="mono" font-size="11" font-weight="600" fill="#64748B">490ms</text>
+            <text x="24" y="28" font-size="10" font-weight="500" fill="#64748B">Visual Grounding localized 2 hulls; Change detector masked pier</text>
+          </g>
+
+          <!-- Step 4 -->
+          <g transform="translate(16, 185)">
+            <circle cx="8" cy="8" r="6" fill="#2563EB" />
+            <text x="24" y="12" font-size="12" font-weight="700" fill="#2563EB">4. Evidence Synthesis &amp; Brief Generation</text>
+            <text x="430" y="12" class="mono" font-size="11" font-weight="600" fill="#64748B">180ms</text>
+            <text x="24" y="28" font-size="10" font-weight="500" fill="#64748B">Calibrated confidence synthesized; PDF audit bundle compiled</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer Metadata -->
+  <g transform="translate(70, 1020)">
+    <text x="0" y="0" font-size="12" font-weight="800" fill="#0F172A">NEXSPACE</text>
+    <text x="80" y="0" font-size="12" font-weight="500" fill="#64748B">|  AI-POWERED SATELLITE INTELLIGENCE UI/UX WIREFRAME</text>
+    <text x="1780" y="0" text-anchor="end" class="mono" font-size="11" font-weight="600" fill="#64748B">FIGURE 2: ANALYST WORKSTATION SPECIFICATION</text>
+  </g>
+</svg>

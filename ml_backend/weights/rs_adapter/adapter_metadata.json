@@ -1,0 +1,30 @@
+{
+  "status": "TRAINED MODEL",
+  "base_model_id": "flax-community/clip-rsicd",
+  "adaptation_technique": "PEFT / Hard-Negative Contrastive RS Projection",
+  "epochs_completed": 10,
+  "final_loss": 0.3606,
+  "initial_loss": 1.9347,
+  "loss_reduction_pct": 81.36,
+  "loss_history": [
+    1.9347,
+    1.0963,
+    0.8509,
+    0.6742,
+    0.4625,
+    0.4527,
+    0.4205,
+    0.4047,
+    0.3699,
+    0.3606
+  ],
+  "training_duration_s": 2.29,
+  "dataset_samples": 38,
+  "train_samples": 30,
+  "hard_negatives": 8,
+  "val_samples": 6,
+  "dataset_source": "C:\\Users\\USER\\Desktop\\app\\Nexspace\\ml_backend\\datasets\\rs_training_set",
+  "device": "cpu",
+  "weights_file": "rs_adapter_weights.pt",
+  "trained_at": "2026-09-13T07:22:00.275582+00:00"
+}

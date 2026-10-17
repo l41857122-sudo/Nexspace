@@ -94,13 +94,20 @@ class RemoteSensingVQAEngine:
         g = img_np[..., 1]
         b = img_np[..., 2]
 
-        # Empirical spectral indices
+        # Empirical spectral indices & multi-cue water proxy
         # Excess Green (ExG)
         exg = (2.0 * g - r - b) / (2.0 * g + r + b + 1e-6)
         veg_coverage = float(np.mean(exg > 0.05))
 
-        # Normalized Difference Water Ratio proxy
-        water_mask = (b > r + 15) & (b > g) & (r < 110)
+        # Multi-cue RGB water proxy (blue water, turbid/silt river, deep water)
+        lum = 0.299 * r + 0.587 * g + 0.114 * b
+        water_ratio = (b - r) / (b + r + 1e-5)
+        cue_blue = (water_ratio > 0.06) & (b > g * 0.80) & (r < 125) & (lum < 145) & (b < 185)
+        cue_turbid = (lum < 118.0) & (exg < 0.02) & (b > r + 8) & (g > r + 4) & (r < 110)
+        cue_dark = (lum < 42.0) & (b >= r) & (r < 45) & (g < 50) & (b < 60)
+        sky_mask = (b > 185) | (lum > 155)
+
+        water_mask = (cue_blue | cue_turbid | cue_dark) & (~sky_mask)
         water_coverage = float(np.mean(water_mask))
 
         # Edge gradient density (structural / urban proxy)
@@ -142,167 +149,323 @@ class RemoteSensingVQAEngine:
                 answer = f"No distinct {target} instances were detected above confidence threshold."
 
             evidence_refs.append(f"grounding_{target}_count_{count_val}")
-            conf_val = round(conf_score, 2) if conf_score else 0.45
+            conf_val = round(conf_score, 2) if conf_score is not None else None
 
+            is_grounding_real = self.grounding.is_available()
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_COUNTING",
-                "model_id": "RS_Grounded_VQA_Pipeline",
-                "checkpoint": self.grounding.model_id if self.grounding.is_available() else "rs_spectral_heuristic",
-                "inference_status": "REAL RS-ADAPTED MODEL" if self.grounding.is_available() else "HEURISTIC FALLBACK",
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": self.grounding.model_id if is_grounding_real else "spectral_gradient_heuristic",
+                "inference_status": "PROPOSAL_GROUNDED" if is_grounding_real else "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "FALLBACK" if is_grounding_real else "HEURISTIC",
+                "provenance_type": "FALLBACK" if is_grounding_real else "HEURISTIC",
                 "confidence": conf_val,
-                "confidence_type": "model" if self.grounding.is_available() else "heuristic",
-                "confidence_source": "grounding_dino_count_proposals" if self.grounding.is_available() else "heuristic_spectral_count",
-                "fallback_status": not self.grounding.is_available(),
+                "confidence_type": "model" if is_grounding_real else "heuristic",
+                "confidence_source": "grounding_dino_proposals" if is_grounding_real else "structural_gradient_heuristic",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "grounding_object_counting" if is_grounding_real else "spectral_gradient_counting",
+                "evidence_references": evidence_refs,
+                "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
+            }
+
+        # Handler: WATER PRESENCE & LOCALIZATION
+        if is_water:
+            from region_segmenter import rs_region_segmenter
+            reg_check = rs_region_segmenter.segment_regions(image, "river" if "river" in q_lower else "water body")
+            reg_dets = reg_check.get("detections", [])
+            effective_coverage = max(water_coverage, sum(d.get("area_fraction", 0.0) for d in reg_dets))
+            has_water = (effective_coverage >= 0.01) or (water_coverage > 0.02) or (top_scene in ("coastal_water", "inland_water", "coastal", "river", "wetland") and effective_coverage > 0.005)
+
+            if has_water:
+                entity_name = "river channel" if ("river" in q_lower or "inland_water" in top_scene) else "water body"
+                if len(reg_dets) > 0:
+                    primary_d = reg_dets[0]
+                    box = primary_d.get("bbox_normalized") or [0, 0, 1000, 1000]
+                    cx = (box[0] + box[2]) / 2.0
+                    cy = (box[1] + box[3]) / 2.0
+                    horiz = "western / left" if cx < 450 else ("eastern / right" if cx > 550 else "central")
+                    vert = "northern / upper" if cy < 450 else ("southern / lower" if cy > 550 else "central")
+                    loc_desc = f"{vert} {horiz} sector" if vert != "central" or horiz != "central" else "central image region"
+                    answer = f"Yes, a {entity_name} is visible in the image, occupying approximately {effective_coverage:.1%} of the scene situated primarily in the {loc_desc}."
+                else:
+                    water_ys, water_xs = np.where(water_mask)
+                    if len(water_xs) > 0:
+                        mean_x = np.mean(water_xs) / max(1, w)
+                        mean_y = np.mean(water_ys) / max(1, h)
+                        horiz = "western / left" if mean_x < 0.45 else ("eastern / right" if mean_x > 0.55 else "central")
+                        vert = "northern / upper" if mean_y < 0.45 else ("southern / lower" if mean_y > 0.55 else "central")
+                        loc_desc = f"{vert} {horiz} sector" if vert != "central" or horiz != "central" else "central image region"
+                        answer = f"Yes, a {entity_name} is visible in the image, occupying approximately {effective_coverage:.1%} of the scene situated primarily in the {loc_desc}."
+                    else:
+                        answer = f"Yes, a {entity_name} is visible occupying approximately {effective_coverage:.1%} of the image frame."
+                conf_val = round(min(0.92, 0.65 + effective_coverage), 2)
+            else:
+                answer = "No significant water bodies are detected in this overhead capture."
+                conf_val = 0.70
+
+            evidence_refs.append(f"spectral_water_mask_{round(water_coverage, 3)}")
+            return {
+                "question": clean_q,
+                "answer": answer,
+                "task": "VQA_HYDROLOGY",
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "spectral_water_ratio_heuristic",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "provenance_type": "HEURISTIC",
+                "confidence": conf_val,
+                "confidence_type": "heuristic",
+                "confidence_source": "spectral_water_ratio",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "spectral_water_mask_analysis",
+                "evidence_references": evidence_refs,
+                "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
+            }
+
+        # Handler: VEGETATION / GREENERY
+        if is_veg:
+            if veg_coverage > 0.10 or top_scene in ("forest_woodland", "agricultural", "grassland_pasture"):
+                answer = f"Yes, substantial vegetation coverage ({veg_coverage:.1%} area) is detected across the landscape."
+                conf_val = round(min(0.85, 0.50 + veg_coverage), 2)
+            else:
+                answer = f"Vegetation is sparse ({veg_coverage:.1%} detected); the area is predominantly built-up or barren."
+                conf_val = 0.65
+
+            evidence_refs.append(f"excess_green_index_{round(veg_coverage, 3)}")
+            return {
+                "question": clean_q,
+                "answer": answer,
+                "task": "VQA_VEGETATION",
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "excess_green_index_heuristic",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "provenance_type": "HEURISTIC",
+                "confidence": conf_val,
+                "confidence_type": "heuristic",
+                "confidence_source": "excess_green_spectral_metric",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "excess_green_index_analysis",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
 
         # Handler: SPATIAL REASONING & LOCALIZATION
         if is_where:
-            if "bridge" in q_lower and ("near" in q_lower or "what is" in q_lower):
-                answer = "Near the bridge, major highway transport corridors connect both banks of the river, linking the western industrial/residential zone with the eastern residential neighborhoods."
-                conf_val = 0.82
-            elif "construction" in q_lower and ("residential" in q_lower or "relative" in q_lower or "where" in q_lower):
-                answer = "The active construction area is located in the south-eastern sector, positioned directly south of the main highway and adjacent to the eastern residential zone."
-                conf_val = 0.85
-            elif "industrial" in q_lower and ("which side" in q_lower or "where" in q_lower or "side" in q_lower):
-                answer = "The industrial area containing large warehouse complexes and factory structures is situated on the west (left) side of the river."
-                conf_val = 0.88
-            elif is_ship and ("river" in q_lower or "water" in q_lower or "where" in q_lower):
-                answer = "The boats and cargo vessels are located directly along the central river channel, navigating and moored along the navigable waterway."
-                conf_val = 0.85
-            else:
-                target = "buildings" if is_building else ("ships" if is_ship else "structures")
-                count_val, conf_score, boxes = self._count_objects_with_grounding(image, target)
-                if boxes:
-                    quadrants = []
-                    for b_item in boxes:
-                        cx = (b_item[0] + b_item[2]) / 2.0 / max(1, w)
-                        cy = (b_item[1] + b_item[3]) / 2.0 / max(1, h)
-                        horiz = "west / left" if cx < 0.5 else "east / right"
-                        vert = "north / upper" if cy < 0.5 else "south / lower"
-                        quadrants.append(f"{vert}-{horiz}")
+            target = "boats or ships" if is_ship else ("buildings" if is_building else ("bridges" if is_bridge else "structures"))
+            count_val, conf_score, boxes = self._count_objects_with_grounding(image, target)
+            if boxes:
+                quadrants = []
+                for b_item in boxes:
+                    cx = (b_item[0] + b_item[2]) / 2.0 / max(1, w)
+                    cy = (b_item[1] + b_item[3]) / 2.0 / max(1, h)
+                    horiz = "west / left" if cx < 0.45 else ("east / right" if cx > 0.55 else "central")
+                    vert = "north / upper" if cy < 0.45 else ("south / lower" if cy > 0.55 else "central")
+                    quadrants.append(f"{vert}-{horiz}")
 
-                    from collections import Counter
-                    q_counts = Counter(quadrants)
-                    top_q = q_counts.most_common(2)
-                    loc_summary = ", ".join(f"{count} in the {quad}" for quad, count in top_q)
-                    answer = f"{target.capitalize()} are concentrated primarily in: {loc_summary}."
-                    conf_val = round(conf_score, 2) if conf_score else 0.50
-                else:
-                    answer = f"{target.capitalize()} are distributed primarily across the eastern residential and western industrial sectors bordering the river."
-                    conf_val = 0.70
+                from collections import Counter
+                q_counts = Counter(quadrants)
+                top_q = q_counts.most_common(2)
+                loc_summary = ", ".join(f"{count} in the {quad}" for quad, count in top_q)
+                answer = f"{target.capitalize()} candidate(s) localized primarily in: {loc_summary}."
+                conf_val = round(conf_score, 2) if conf_score is not None else None
+            else:
+                answer = f"No distinct {target} instances localized above detection threshold for spatial mapping."
+                conf_val = None
 
             evidence_refs.append("spatial_quadrant_analysis")
+            is_grounding_real = self.grounding.is_available() and len(boxes) > 0
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_SPATIAL_REASONING",
-                "model_id": "RS_Spatial_Reasoning_Engine",
-                "checkpoint": self.grounding.model_id if self.grounding.is_available() else "centroid_spatial_heuristic",
-                "inference_status": "REAL RS-ADAPTED MODEL",
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": self.grounding.model_id if is_grounding_real else "centroid_spatial_heuristic",
+                "inference_status": "PROPOSAL_GROUNDED" if is_grounding_real else "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "FALLBACK" if is_grounding_real else "HEURISTIC",
+                "provenance_type": "FALLBACK" if is_grounding_real else "HEURISTIC",
                 "confidence": conf_val,
-                "confidence_type": "heuristic",
-                "confidence_source": "spatial_domain_grounding_integration",
-                "fallback_status": False,
+                "confidence_type": "model" if is_grounding_real else "heuristic",
+                "confidence_source": "grounding_spatial_centroids" if is_grounding_real else "spatial_heuristics",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "grounding_spatial_reasoning",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
 
         # Handler: BRIDGE PRESENCE
         if is_bridge:
-            has_bridge = True  # Verified structural crossing or grounding
-            answer = "Yes, a prominent highway bridge spans across the river, connecting the western and eastern banks."
-            evidence_refs.append("structural_river_crossing_identified")
+            count_val, conf_score, boxes = self._count_objects_with_grounding(image, "bridge")
+            if count_val > 0:
+                answer = f"Yes, bridge or structural crossing candidate detected in the scene ({count_val} candidate(s))."
+                conf_val = round(conf_score, 2) if conf_score is not None else 0.60
+            else:
+                answer = "No prominent bridge or viaduct structures were localized above confidence threshold."
+                conf_val = 0.50
+
+            evidence_refs.append(f"structural_crossing_candidates_{count_val}")
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_INFRASTRUCTURE",
-                "model_id": "RS_Infrastructure_VQA_Pipeline",
-                "checkpoint": "rs_structural_bridge_detector",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": 0.88,
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "grounding_bridge_detector" if self.grounding.is_available() else "structural_heuristic",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "confidence": conf_val,
                 "confidence_type": "heuristic",
-                "confidence_source": "structural_river_crossing_detector",
-                "fallback_status": False,
+                "confidence_source": "grounding_bridge_detector",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "infrastructure_crossing_detection",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
 
         # Handler: INDUSTRIAL AREA PRESENCE
         if is_industrial:
-            answer = "Yes, an industrial zone with large rectangular warehouse rooftops and manufacturing facilities is present in the western / north-western quadrant."
-            evidence_refs.append("industrial_facility_clusters")
+            count_val, conf_score, _ = self._count_objects_with_grounding(image, "warehouse or industrial building")
+            if count_val > 0 or top_scene == "industrial_commercial":
+                answer = f"Yes, industrial / commercial facilities detected ({count_val} structure(s), scene category: '{top_scene}')."
+                conf_val = round(conf_score, 2) if conf_score is not None else 0.65
+            else:
+                answer = f"No distinct industrial facilities detected (dominant scene classification: '{top_scene}')."
+                conf_val = 0.55
+
+            evidence_refs.append(f"industrial_detection_{top_scene}")
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_INDUSTRIAL",
-                "model_id": "RS_Industrial_VQA_Pipeline",
-                "checkpoint": "rs_industrial_cluster_analyzer",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": 0.86,
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "rs_scene_classifier_and_grounding",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "confidence": conf_val,
                 "confidence_type": "heuristic",
-                "confidence_source": "industrial_texture_and_geometry",
-                "fallback_status": False,
+                "confidence_source": "rs_scene_classifier",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "industrial_scene_grounding",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
 
         # Handler: RESIDENTIAL AREA PRESENCE
         if is_residential:
-            answer = "Yes, an extensive residential area characterized by dense individual housing roofs and local road networks is prominently developed across the eastern sector."
-            evidence_refs.append("residential_neighborhood_grid")
+            count_val, conf_score, _ = self._count_objects_with_grounding(image, "houses or residential buildings")
+            if count_val > 0 or top_scene in ("dense_residential", "sparse_residential"):
+                answer = f"Yes, residential structures detected ({count_val} candidate(s), scene category: '{top_scene}')."
+                conf_val = round(conf_score, 2) if conf_score is not None else 0.65
+            else:
+                answer = f"Residential housing is not prominently detected (dominant scene category: '{top_scene}')."
+                conf_val = 0.55
+
+            evidence_refs.append(f"residential_detection_{top_scene}")
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_RESIDENTIAL",
-                "model_id": "RS_Residential_VQA_Pipeline",
-                "checkpoint": "rs_residential_density_analyzer",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": 0.90,
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "rs_scene_classifier_and_grounding",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "confidence": conf_val,
                 "confidence_type": "heuristic",
-                "confidence_source": "residential_density_metric",
-                "fallback_status": False,
+                "confidence_source": "rs_scene_classifier",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "residential_density_analysis",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
 
         # Handler: CONSTRUCTION SITE PRESENCE
         if is_construction:
-            answer = "Yes, an active construction site with bare earthworks, foundation footings, and excavated land parcels is visible in the south-eastern quadrant."
-            evidence_refs.append("construction_excavation_cluster")
+            count_val, conf_score, _ = self._count_objects_with_grounding(image, "construction site or bare ground")
+            if count_val > 0 or top_scene in ("bare_soil_desert", "construction site"):
+                answer = f"Yes, construction groundworks or bare soil parcels are visible in the scene."
+                conf_val = round(conf_score, 2) if conf_score is not None else 0.55
+            else:
+                answer = "No active large-scale construction groundworks are clearly identified in this scene."
+                conf_val = 0.50
+
+            evidence_refs.append(f"construction_detection_{top_scene}")
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_CONSTRUCTION",
-                "model_id": "RS_Construction_VQA_Pipeline",
-                "checkpoint": "rs_earthwork_spectral_analyzer",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": 0.88,
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "rs_scene_classifier_and_grounding",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "confidence": conf_val,
                 "confidence_type": "heuristic",
-                "confidence_source": "earthwork_spectral_texture",
-                "fallback_status": False,
+                "confidence_source": "earthwork_texture_classifier",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "construction_spectral_analysis",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
 
         # Handler: FARMLAND / AGRICULTURAL PRESENCE
         if is_farmland:
-            answer = "Yes, agricultural farmland with partitioned crop fields and cultivated plots is present in the south-western sector of the image."
-            evidence_refs.append("agricultural_field_patterns")
+            if veg_coverage > 0.12 or top_scene in ("agricultural", "grassland_pasture"):
+                answer = f"Yes, agricultural cropland or cultivated plots are present ({veg_coverage:.1%} vegetation index, category: '{top_scene}')."
+                conf_val = round(min(0.85, 0.50 + veg_coverage), 2)
+            else:
+                answer = f"No prominent agricultural cropland detected (dominant scene category: '{top_scene}')."
+                conf_val = 0.60
+
+            evidence_refs.append(f"agricultural_detection_{top_scene}")
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_AGRICULTURE",
-                "model_id": "RS_Agriculture_VQA_Pipeline",
-                "checkpoint": "rs_crop_field_analyzer",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": 0.85,
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "rs_scene_classifier_and_spectral_index",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "confidence": conf_val,
                 "confidence_type": "heuristic",
-                "confidence_source": "agricultural_spectral_indices",
-                "fallback_status": False,
+                "confidence_source": "agricultural_spectral_index",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "agricultural_field_analysis",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
@@ -311,24 +474,30 @@ class RemoteSensingVQAEngine:
         if is_road:
             has_linear_roads = edge_density > 0.08 or top_scene in ("highway_transport", "airport_runway", "dense_residential", "industrial_commercial")
             if has_linear_roads:
-                answer = f"Yes, transport corridors and highway road networks are clearly visible crossing the landscape and connecting across the bridge (structural edge density: {edge_density:.1%})."
-                conf_val = min(0.90, 0.55 + edge_density)
+                answer = f"Yes, transport corridors or linear roadway networks are visible across the scene (structural edge density: {edge_density:.1%})."
+                conf_val = round(min(0.85, 0.50 + edge_density), 2)
             else:
                 answer = "No prominent road or transportation networks are detected in this scene."
-                conf_val = 0.65
+                conf_val = 0.55
 
             evidence_refs.append(f"edge_gradient_density_{round(edge_density, 3)}")
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_PRESENCE",
-                "model_id": "RS_Structural_VQA_Pipeline",
-                "checkpoint": "rs_edge_texture_analyzer",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": round(conf_val, 2),
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "structural_edge_analyzer",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "confidence": conf_val,
                 "confidence_type": "heuristic",
-                "confidence_source": "edge_density_and_scene_prior",
-                "fallback_status": False,
+                "confidence_source": "edge_density_heuristic",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "linear_edge_density_analysis",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
@@ -338,9 +507,9 @@ class RemoteSensingVQAEngine:
             built_up_ratio = edge_density
             veg_ratio = veg_coverage
             if built_up_ratio > veg_ratio:
-                comp = f"The built-up structures form the primary fabric of the scene, with surrounding green space occupying only {veg_ratio:.1%} of the area."
+                comp = f"The built-up structures form the primary fabric of the scene, with surrounding green space occupying approximately {veg_ratio:.1%} of the area."
             else:
-                comp = f"Structures and residential blocks are clustered alongside the expansive river corridor and vegetated parcels ({veg_ratio:.1%} vegetation vs {built_up_ratio:.1%} dense structural footprint)."
+                comp = f"Structures are clustered alongside vegetated parcels ({veg_ratio:.1%} vegetation vs {built_up_ratio:.1%} structural edge footprint)."
 
             answer = f"Spatial Comparison: {comp}"
             evidence_refs.append(f"structure_to_vegetation_ratio_{round(built_up_ratio / max(0.01, veg_ratio), 2)}")
@@ -348,114 +517,84 @@ class RemoteSensingVQAEngine:
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_COMPARISON",
-                "model_id": "RS_Comparative_Reasoning_Engine",
-                "checkpoint": "rs_multi_modal_feature_integrator",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": 0.75,
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "spectral_structural_ratio",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "confidence": 0.60,
                 "confidence_type": "heuristic",
                 "confidence_source": "structural_vs_vegetation_ratio",
-                "fallback_status": False,
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "structural_vegetation_comparison",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
 
         # Handler: LAND-USE & AREA TYPE
         if is_landuse:
-            raw_conf = scene_res.get("confidence", 0.75)
-            answer = f"The dominant land-use pattern is a mixed river corridor with surrounding residential, industrial, and active construction zones (scene category: '{top_scene}')."
+            raw_conf = scene_res.get("confidence", 0.70)
+            is_model = scene_res.get("confidence_type") == "model"
+            answer = f"The dominant land-use pattern is {top_desc} (scene classification: '{top_scene}')."
             evidence_refs.append(f"rs_scene_classifier_{top_scene}")
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_LAND_USE",
-                "model_id": scene_res.get("model_id", "clip_rsicd_zero_shot"),
-                "checkpoint": scene_res.get("model_id", "clip_rsicd_zero_shot"),
-                "inference_status": scene_res.get("provenance", "REAL RS-ADAPTED MODEL"),
+                "model": scene_res.get("model_id", "flax-community/clip-rsicd"),
+                "model_id": scene_res.get("model_id", "flax-community/clip-rsicd"),
+                "model_loaded": self.rs_vision.is_available(),
+                "checkpoint": scene_res.get("model_id", "flax-community/clip-rsicd"),
+                "inference_status": "REAL RS-ADAPTED MODEL" if is_model else "HEURISTIC FALLBACK",
+                "provenance": "MODEL_DERIVED" if is_model else "HEURISTIC",
                 "confidence": raw_conf,
-                "confidence_type": scene_res.get("confidence_type", "model"),
+                "confidence_type": "model" if is_model else "heuristic",
                 "confidence_source": scene_res.get("confidence_source", "zero_shot_rs_classification"),
-                "fallback_status": scene_res.get("status") == "fallback",
+                "fallback_used": not is_model,
+                "fallback_status": not is_model,
+                "status": "COMPLETED" if is_model else "DEGRADED",
+                "method": "zero_shot_rs_classification" if is_model else "heuristic_spectral_classification",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
 
-
         # Handler: SHIPS / MARITIME
         if is_ship:
-            if water_coverage > 0.15 or top_scene in ("port_harbor", "coastal_water", "inland_water"):
+            if water_coverage > 0.05 or top_scene in ("port_harbor", "coastal_water", "inland_water"):
                 count_val, conf_score, _ = self._count_objects_with_grounding(image, "ships")
                 if count_val > 0:
                     answer = f"Yes, maritime activity detected with approximately {count_val} vessel candidate(s) in the water area."
-                    conf_val = round(conf_score, 2)
+                    conf_val = round(conf_score, 2) if conf_score is not None else 0.60
                 else:
-                    answer = f"A water body is present ({water_coverage:.1%} coverage), but no clear ships or vessels were resolved."
-                    conf_val = 0.60
+                    answer = f"A water body is present ({water_coverage:.1%} coverage), but no clear ships or vessels were resolved above threshold."
+                    conf_val = 0.55
             else:
                 answer = "No ships are present; the scene depicts terrestrial land cover with no significant open water."
-                conf_val = 0.80
+                conf_val = 0.70
 
             evidence_refs.append(f"water_ratio_{round(water_coverage, 3)}")
+            is_grounding_real = self.grounding.is_available()
             return {
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_MARITIME",
-                "model_id": "RS_Maritime_VQA_Pipeline",
-                "checkpoint": self.grounding.model_id if self.grounding.is_available() else "spectral_water_mask",
-                "inference_status": "REAL RS-ADAPTED MODEL" if self.grounding.is_available() else "HEURISTIC FALLBACK",
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": self.grounding.model_id if is_grounding_real else "spectral_water_mask",
+                "inference_status": "PROPOSAL_GROUNDED" if is_grounding_real else "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "FALLBACK" if is_grounding_real else "HEURISTIC",
+                "provenance_type": "FALLBACK" if is_grounding_real else "HEURISTIC",
                 "confidence": conf_val,
-                "confidence_type": "model" if self.grounding.is_available() else "heuristic",
-                "confidence_source": "grounding_maritime_detector",
-                "fallback_status": not self.grounding.is_available(),
-                "evidence_references": evidence_refs,
-                "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
-            }
-
-        # Handler: VEGETATION / GREENERY
-        if is_veg:
-            if veg_coverage > 0.15 or top_scene in ("forest_woodland", "agricultural", "grassland_pasture"):
-                answer = f"Yes, substantial vegetation coverage ({veg_coverage:.1%} area) is detected across the landscape."
-                conf_val = min(0.90, 0.50 + veg_coverage)
-            else:
-                answer = f"Vegetation is sparse ({veg_coverage:.1%} detected); the area is predominantly built-up or barren."
-                conf_val = 0.75
-
-            evidence_refs.append(f"excess_green_index_{round(veg_coverage, 3)}")
-            return {
-                "question": clean_q,
-                "answer": answer,
-                "task": "VQA_VEGETATION",
-                "model_id": "RS_Spectral_VQA_Pipeline",
-                "checkpoint": "spectral_exg_index_engine",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": round(conf_val, 2),
-                "confidence_type": "heuristic",
-                "confidence_source": "excess_green_spectral_metric",
-                "fallback_status": False,
-                "evidence_references": evidence_refs,
-                "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
-            }
-
-        # Handler: WATER PRESENCE
-        if is_water:
-            if water_coverage > 0.08 or top_scene in ("coastal_water", "inland_water", "port_harbor"):
-                answer = f"Yes, a water body is visible occupying approximately {water_coverage:.1%} of the image frame."
-                conf_val = min(0.92, 0.55 + water_coverage)
-            else:
-                answer = "No significant water bodies are detected in this overhead capture."
-                conf_val = 0.82
-
-            evidence_refs.append(f"water_spectral_mask_{round(water_coverage, 3)}")
-            return {
-                "question": clean_q,
-                "answer": answer,
-                "task": "VQA_HYDROLOGY",
-                "model_id": "RS_Hydrology_VQA_Pipeline",
-                "checkpoint": "spectral_water_ratio_engine",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": round(conf_val, 2),
-                "confidence_type": "heuristic",
-                "confidence_source": "spectral_water_ratio",
-                "fallback_status": False,
+                "confidence_type": "model" if is_grounding_real else "heuristic",
+                "confidence_source": "grounding_maritime_detector" if is_grounding_real else "water_mask_heuristic",
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "maritime_vessel_detection",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
@@ -482,13 +621,19 @@ class RemoteSensingVQAEngine:
                 "question": clean_q,
                 "answer": answer,
                 "task": "VQA_INVENTORY",
-                "model_id": "RS_Object_Inventory_Engine",
-                "checkpoint": "rs_spectral_object_synthesizer",
-                "inference_status": "REAL RS-ADAPTED MODEL",
-                "confidence": 0.68,
+                "model": self.paligemma.model_id,
+                "model_id": self.paligemma.model_id,
+                "model_loaded": False,
+                "checkpoint": "rs_multi_feature_inventory",
+                "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+                "provenance": "HEURISTIC",
+                "confidence": 0.55,
                 "confidence_type": "heuristic",
                 "confidence_source": "multi_feature_inventory",
-                "fallback_status": False,
+                "fallback_used": True,
+                "fallback_status": True,
+                "status": "DEGRADED",
+                "method": "multi_feature_scene_inventory",
                 "evidence_references": evidence_refs,
                 "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
             }
@@ -500,13 +645,19 @@ class RemoteSensingVQAEngine:
             "question": clean_q,
             "answer": answer,
             "task": "VQA_GENERAL",
-            "model_id": "RS_General_VQA_Engine",
-            "checkpoint": "rs_general_reasoning_pipeline",
-            "inference_status": "REAL RS-ADAPTED MODEL",
-            "confidence": 0.55,
+            "model": self.paligemma.model_id,
+            "model_id": self.paligemma.model_id,
+            "model_loaded": False,
+            "checkpoint": "rs_general_reasoning_fallback",
+            "inference_status": "HEURISTIC FALLBACK (VLM unavailable)",
+            "provenance": "HEURISTIC",
+            "confidence": 0.50,
             "confidence_type": "heuristic",
             "confidence_source": "general_rs_scene_heuristics",
-            "fallback_status": False,
+            "fallback_used": True,
+            "fallback_status": True,
+            "status": "DEGRADED",
+            "method": "general_scene_heuristics",
             "evidence_references": evidence_refs,
             "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
         }

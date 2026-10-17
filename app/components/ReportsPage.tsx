@@ -257,31 +257,55 @@ export default function ReportsPage() {
                       className="max-h-[340px] w-auto object-contain select-none pointer-events-none"
                     />
 
-                    {/* Dynamic Grounding Overlays */}
-                    {normalizedDetections.map((d) => {
-                      const [xmin, ymin, xmax, ymax] = d.box;
-                      const top = (ymin / 1000) * 100;
-                      const left = (xmin / 1000) * 100;
-                      const width = Math.max(2, ((xmax - xmin) / 1000) * 100);
-                      const height = Math.max(2, ((ymax - ymin) / 1000) * 100);
+                    {/* Dynamic Grounding Overlays with Exact SVG Coordinate Lock */}
+                    <svg
+                      viewBox="0 0 1000 1000"
+                      preserveAspectRatio="xMidYMid meet"
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                    >
+                      {normalizedDetections.map((d) => {
+                        const [xmin, ymin, xmax, ymax] = d.box;
+                        const width = Math.max(2, xmax - xmin);
+                        const height = Math.max(2, ymax - ymin);
+                        const labelText = `${d.label}${d.score !== null ? ` (${Math.round(d.score * 100)}%)` : ""}`;
+                        const labelWidth = Math.max(75, labelText.length * 7.5 + 12);
 
-                      return (
-                        <div
-                          key={d.id}
-                          className="absolute border-2 border-cyan-400 bg-cyan-500/20 rounded flex flex-col justify-between p-1 z-10 pointer-events-none shadow-[0_0_12px_rgba(6,182,212,0.5)]"
-                          style={{
-                            top: `${top}%`,
-                            left: `${left}%`,
-                            width: `${width}%`,
-                            height: `${height}%`,
-                          }}
-                        >
-                          <span className="text-[8px] font-mono font-bold bg-slate-900/90 text-cyan-300 px-1 py-0.5 rounded self-start">
-                            {d.label} {d.score !== null ? `(${Math.round(d.score * 100)}%)` : ""}
-                          </span>
-                        </div>
-                      );
-                    })}
+                        return (
+                          <g key={d.id}>
+                            <rect
+                              x={xmin}
+                              y={ymin}
+                              width={width}
+                              height={height}
+                              fill="rgba(6, 182, 212, 0.16)"
+                              stroke="#22d3ee"
+                              strokeWidth="2.5"
+                              vectorEffect="non-scaling-stroke"
+                            />
+                            <rect
+                              x={xmin}
+                              y={Math.max(0, ymin - 18)}
+                              width={labelWidth}
+                              height={16}
+                              fill="rgba(15, 23, 42, 0.92)"
+                              stroke="rgba(6, 182, 212, 0.4)"
+                              strokeWidth="1"
+                              rx="3"
+                            />
+                            <text
+                              x={xmin + 4}
+                              y={Math.max(12, ymin - 5)}
+                              fill="#67e8f9"
+                              fontSize="10"
+                              fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+                              fontWeight="bold"
+                            >
+                              {labelText}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
                   </div>
 
                   <div className="relative z-10 flex items-center justify-between text-[10px] font-mono text-slate-400 bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 mt-2">
@@ -289,6 +313,51 @@ export default function ReportsPage() {
                     <span>Format: {sourceImage.mediaType} · 512x512 Frame</span>
                   </div>
                 </div>
+
+                {/* Detections table */}
+                {normalizedDetections.length > 0 && (
+                  <div className="mt-4 border border-slate-800 rounded-xl overflow-hidden bg-[#09121d]/80">
+                    <div className="px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-200">Bounding Box Target Inventory</span>
+                      <span className="text-[10px] font-mono text-cyan-400">Canonical [0, 1000] Space</span>
+                    </div>
+                    <div className="p-3 overflow-x-auto">
+                      <table className="w-full text-left text-xs font-mono">
+                        <thead>
+                          <tr className="border-b border-slate-800 text-slate-400 text-[10px]">
+                            <th className="pb-2.5 pr-4 font-normal">Target ID</th>
+                            <th className="pb-2.5 pr-4 font-normal">Detected Class</th>
+                            <th className="pb-2.5 pr-4 font-normal">Confidence Score</th>
+                            <th className="pb-2.5 pr-4 font-normal">Normalized Box [xmin, ymin, xmax, ymax]</th>
+                            <th className="pb-2.5 font-normal">Center (X%, Y%)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60 text-[11px]">
+                          {normalizedDetections.map((d) => {
+                            const [xmin, ymin, xmax, ymax] = d.box;
+                            const cx = ((xmin + xmax) / 2 / 1000) * 100;
+                            const cy = ((ymin + ymax) / 2 / 1000) * 100;
+                            return (
+                              <tr key={d.id} className="hover:bg-cyan-500/[0.04]">
+                                <td className="py-2.5 pr-4 text-cyan-400 font-semibold">{d.id}</td>
+                                <td className="py-2.5 pr-4 text-slate-200">{d.label}</td>
+                                <td className="py-2.5 pr-4 text-emerald-400 font-semibold">
+                                  {d.score !== null ? `${Math.round(d.score * 100)}%` : "N/A"}
+                                </td>
+                                <td className="py-2.5 pr-4 text-slate-300">
+                                  [{xmin}, {ymin}, {xmax}, {ymax}]
+                                </td>
+                                <td className="py-2.5 text-slate-400">
+                                  {cx.toFixed(1)}%, {cy.toFixed(1)}%
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </Section>
 
               {/* 3.0 Technical Appendix */}
@@ -326,8 +395,8 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-800/60 text-[11px] font-mono text-slate-400 space-y-1">
-                  <div>• <strong>Captioning Model:</strong> Salesforce/blip-image-captioning-base</div>
-                  <div>• <strong>RSVQA Engine:</strong> {vqa.length > 0 ? "PaliGemma RSVQA / Multimodal Fallback" : "Standby"}</div>
+                  <div>• <strong>Captioning Model:</strong> {investigationState.response?.optical_caption ? ((investigationState.response as any)?.provenance_contract?.optical_captioning?.model || ((investigationState.response as any)?.model_loaded ? "Salesforce/blip-image-captioning-base" : "Spectral Scene Heuristic")) : "Standby / Not Invoked"}</div>
+                  <div>• <strong>RSVQA Engine:</strong> {vqa.length > 0 ? ((investigationState.response as any)?.provenance_contract?.rsvqa?.model ? `${(investigationState.response as any).provenance_contract.rsvqa.model} (${(investigationState.response as any).provenance_contract.rsvqa.provenance})` : "Heuristic / Classical Fallback") : "Standby"}</div>
                   <div>• <strong>Geospatial CRS:</strong> {investigationState.response?.geospatial_metadata?.crs || "Pixel frame reference"}</div>
                 </div>
               </Section>

@@ -9,17 +9,22 @@
     "demo": "node scripts/launch_demo.js",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:assistant": "npx tsx test_assistant.ts",
+    "test:assistant:kb": "npx tsx -e \"import('./lib/nexspace-ai/knowledge').then(m => { console.log('Knowledge base OK — capabilities:', m.CAPABILITIES.length, '| FAQ entries:', m.FAQ_ENTRIES.length, '| chips:', m.QUICK_ACTION_CHIPS.length); process.exit(0); }).catch(e => { console.error(e); process.exit(1); })\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
     "@prisma/client": "^7.10.0",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^13.1.1",
+    "gsap": "^3.15.0",
     "jsonwebtoken": "^9.0.3",
+    "lenis": "^1.3.26",
     "lucide-react": "^1.34.0",
     "next": "16.3.3",
     "ogl": "^1.0.11",
+    "openai": "^7.27.0",
     "pdfkit": "^0.20.2",
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",

@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap');
+      * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .mono { font-family: 'JetBrains Mono', monospace; }
+      
+      .title { font-size: 34px; font-weight: 900; fill: #0F172A; letter-spacing: -0.8px; }
+      .subtitle { font-size: 15px; font-weight: 500; fill: #475569; }
+      .badge-text { font-size: 11px; font-weight: 800; fill: #0284C7; letter-spacing: 1.2px; text-transform: uppercase; }
+      
+      .pipe-node-title { font-size: 14px; font-weight: 900; fill: #0F172A; }
+      .pipe-node-tag { font-size: 10px; font-weight: 700; fill: #2563EB; letter-spacing: 0.5px; }
+      .mini-pill { font-size: 10px; font-weight: 700; fill: #2563EB; }
+    </style>
+
+    <marker id="pipe-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#2563EB" />
+    </marker>
+    
+    <pattern id="dot-pat" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="14" cy="14" r="1" fill="#E2E8F0" />
+    </pattern>
+  </defs>
+
+  <!-- PURE WHITE BACKGROUND -->
+  <rect width="1920" height="1080" fill="#FFFFFF" />
+  <rect width="1920" height="1080" fill="url(#dot-pat)" opacity="0.7" />
+
+  <!-- Outer Presentation Margin Border -->
+  <rect x="36" y="30" width="1848" height="1020" rx="16" fill="none" stroke="#E2E8F0" stroke-width="1.5" />
+
+  <!-- Header Section -->
+  <g transform="translate(70, 75)">
+    <rect x="0" y="0" width="180" height="26" rx="13" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.2" />
+    <circle cx="14" cy="13" r="4" fill="#0284C7" />
+    <text x="26" y="17" class="badge-text">Compact AI Pipeline</text>
+
+    <text x="0" y="62" class="title">NexSpace Streamlined Multimodal Pipeline</text>
+    <text x="0" y="88" class="subtitle">High-density slide-ready architecture: from raw satellite acquisition to explainable geospatial insights</text>
+  </g>
+
+  <!-- ================= HORIZONTAL COMPACT PIPELINE ================= -->
+  <g transform="translate(70, 215)">
+    <!-- Container Card -->
+    <rect width="1780" height="690" rx="16" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" filter="drop-shadow(0 10px 30px rgba(15,23,42,0.05))" />
+
+    <!-- Top Flow Track Bar -->
+    <rect x="30" y="35" width="1720" height="6" rx="3" fill="#F1F5F9" />
+
+    <!-- ================= 7 MAIN PIPELINE STAGES ================= -->
+
+    <!-- STAGE 1: SATELLITE IMAGERY -->
+    <g transform="translate(30, 65)">
+      <rect width="215" height="560" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+      <rect x="16" y="16" width="36" height="36" rx="8" fill="#EFF6FF" />
+      <circle cx="34" cy="34" r="7" stroke="#2563EB" stroke-width="2" fill="none" />
+      <path d="M 34 22 L 34 25 M 34 43 L 34 46 M 22 34 L 25 34 M 43 34 L 46 34" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" />
+
+      <text x="16" y="74" class="pipe-node-title">SATELLITE IMAGERY</text>
+      <text x="16" y="90" class="pipe-node-tag">RAW INGESTION</text>
+      <line x1="16" y1="104" x2="199" y2="104" stroke="#E2E8F0" stroke-width="1.2" />
+
+      <!-- Items -->
+      <g transform="translate(16, 125)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Optical EO</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">RGB / SWIR (0.5m)</text>
+      </g>
+      <g transform="translate(16, 185)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">SAR Radar</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Sentinel-1 (VV/VH)</text>
+      </g>
+      <g transform="translate(16, 245)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Commercial SAR</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Capella Space / ICEYE</text>
+      </g>
+      <g transform="translate(16, 305)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Multi-Temporal</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Historical Archives</text>
+      </g>
+
+      <rect x="16" y="505" width="183" height="30" rx="4" fill="#EFF6FF" />
+      <text x="24" y="524" class="mono" font-size="10" font-weight="700" fill="#2563EB">TELEMETRY INGEST</text>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 250 345 L 275 345" stroke="#2563EB" stroke-width="2.5" marker-end="url(#pipe-arrow)" />
+
+    <!-- STAGE 2: INPUT VALIDATION -->
+    <g transform="translate(280, 65)">
+      <rect width="215" height="560" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+      <rect x="16" y="16" width="36" height="36" rx="8" fill="#F0F9FF" />
+      <rect x="25" y="25" width="18" height="18" rx="3" stroke="#0284C7" stroke-width="2" fill="none" />
+      <path d="M 29 34 L 33 38 L 39 30" stroke="#0284C7" stroke-width="2" stroke-linecap="round" />
+
+      <text x="16" y="74" class="pipe-node-title">INPUT VALIDATION</text>
+      <text x="16" y="90" font-size="10" font-weight="700" fill="#0284C7" letter-spacing="0.5px">TELEMETRY &amp; GSD</text>
+      <line x1="16" y1="104" x2="199" y2="104" stroke="#E2E8F0" stroke-width="1.2" />
+
+      <g transform="translate(16, 125)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">GSD Resolution</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Ground Sampling Rate</text>
+      </g>
+      <g transform="translate(16, 185)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Cloud Masking</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Shadow / Obscuration</text>
+      </g>
+      <g transform="translate(16, 245)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Footprint AOI</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Bounding Polygon</text>
+      </g>
+      <g transform="translate(16, 305)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Sensor Calibration</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Radiometric Check</text>
+      </g>
+
+      <rect x="16" y="505" width="183" height="30" rx="4" fill="#F0F9FF" />
+      <text x="24" y="524" class="mono" font-size="10" font-weight="700" fill="#0284C7">QUALITY GATE PASS</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 500 345 L 525 345" stroke="#2563EB" stroke-width="2.5" marker-end="url(#pipe-arrow)" />
+
+    <!-- STAGE 3: PREPROCESSING -->
+    <g transform="translate(530, 65)">
+      <rect width="215" height="560" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+      <rect x="16" y="16" width="36" height="36" rx="8" fill="#EFF6FF" />
+      <!-- Layers Icon -->
+      <path d="M 24 30 L 34 24 L 44 30 L 34 36 Z" stroke="#2563EB" stroke-width="1.8" fill="none" />
+      <path d="M 24 36 L 34 42 L 44 36" stroke="#2563EB" stroke-width="1.8" fill="none" />
+
+      <text x="16" y="74" class="pipe-node-title">PREPROCESSING</text>
+      <text x="16" y="90" class="pipe-node-tag">GEOMETRIC NORMALIZATION</text>
+      <line x1="16" y1="104" x2="199" y2="104" stroke="#E2E8F0" stroke-width="1.2" />
+
+      <g transform="translate(16, 125)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Orthorectification</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">DEM Terrain Corrected</text>
+      </g>
+      <g transform="translate(16, 185)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Atmospheric Norm</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Bottom-of-Atmosphere</text>
+      </g>
+      <g transform="translate(16, 245)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">SAR Despeckling</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">Lee Filter / Coherence</text>
+      </g>
+      <g transform="translate(16, 305)">
+        <rect width="183" height="48" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="22" font-size="12" font-weight="700" fill="#0F172A">Tiling &amp; Pyramids</text>
+        <text x="12" y="38" font-size="10" font-weight="500" fill="#64748B">GeoTIFF COG Tiles</text>
+      </g>
+
+      <rect x="16" y="505" width="183" height="30" rx="4" fill="#EFF6FF" />
+      <text x="24" y="524" class="mono" font-size="10" font-weight="700" fill="#2563EB">ARD DATA READY</text>
+    </g>
+
+    <!-- Arrow 3 -> 4 -->
+    <path d="M 750 345 L 775 345" stroke="#2563EB" stroke-width="2.5" marker-end="url(#pipe-arrow)" />
+
+    <!-- STAGE 4 (HERO): AI PERCEPTION -->
+    <g transform="translate(780, 65)">
+      <rect width="250" height="560" rx="10" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.2" filter="drop-shadow(0 6px 18px rgba(37,99,235,0.1))" />
+      <rect x="16" y="16" width="36" height="36" rx="8" fill="#EFF6FF" />
+      <!-- AI Chip Icon -->
+      <rect x="25" y="25" width="18" height="18" rx="3" stroke="#2563EB" stroke-width="2" fill="none" />
+      <circle cx="34" cy="34" r="3" fill="#2563EB" />
+
+      <text x="16" y="74" class="pipe-node-title" font-size="15" fill="#2563EB">AI PERCEPTION</text>
+      <text x="16" y="90" class="pipe-node-tag">SPECIALIST ENGINES</text>
+      <line x1="16" y1="104" x2="234" y2="104" stroke="#BFDBFE" stroke-width="1.5" />
+
+      <!-- 4 Compact Pills -->
+      <g transform="translate(16, 125)">
+        <rect width="218" height="52" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+        <text x="12" y="24" font-size="13" font-weight="800" fill="#0F172A">VQA</text>
+        <text x="12" y="42" font-size="10.5" font-weight="500" fill="#475569">Zero-Shot Questions &amp; Audit</text>
+      </g>
+      <g transform="translate(16, 190)">
+        <rect width="218" height="52" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+        <text x="12" y="24" font-size="13" font-weight="800" fill="#0F172A">Captioning</text>
+        <text x="12" y="42" font-size="10.5" font-weight="500" fill="#475569">Dense Scene Descriptions</text>
+      </g>
+      <g transform="translate(16, 255)">
+        <rect width="218" height="52" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+        <text x="12" y="24" font-size="13" font-weight="800" fill="#0F172A">Grounding</text>
+        <text x="12" y="42" font-size="10.5" font-weight="500" fill="#475569">Pixel Bounding Box [x,y,w,h]</text>
+      </g>
+      <g transform="translate(16, 320)">
+        <rect width="218" height="52" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+        <text x="12" y="24" font-size="13" font-weight="800" fill="#0F172A">Change Detect</text>
+        <text x="12" y="42" font-size="10.5" font-weight="500" fill="#475569">Bi-Temporal Delta &amp; Masks</text>
+      </g>
+
+      <rect x="16" y="505" width="218" height="30" rx="4" fill="#EFF6FF" />
+      <text x="24" y="524" class="mono" font-size="10" font-weight="800" fill="#2563EB">PARALLEL INFERENCE</text>
+    </g>
+
+    <!-- Arrow 4 -> 5 -->
+    <path d="M 1035 345 L 1060 345" stroke="#2563EB" stroke-width="2.5" marker-end="url(#pipe-arrow)" />
+
+    <!-- STAGE 5 (HERO): MULTIMODAL REASONING -->
+    <g transform="translate(1065, 65)">
+      <rect width="245" height="560" rx="10" fill="#FFFFFF" stroke="#0284C7" stroke-width="2.2" filter="drop-shadow(0 6px 18px rgba(2,132,199,0.1))" />
+      <rect x="16" y="16" width="36" height="36" rx="8" fill="#F0F9FF" />
+      <path d="M 27 27 L 41 41 M 41 27 L 27 41" stroke="#0284C7" stroke-width="2.2" stroke-linecap="round" />
+
+      <text x="16" y="74" class="pipe-node-title" font-size="14.5" fill="#0284C7">MULTIMODAL REASONING</text>
+      <text x="16" y="90" font-size="10" font-weight="700" fill="#0284C7" letter-spacing="0.5px">CROSS-SENSOR FUSION</text>
+      <line x1="16" y1="104" x2="229" y2="104" stroke="#BAE6FD" stroke-width="1.5" />
+
+      <g transform="translate(16, 125)">
+        <rect width="213" height="58" rx="6" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.2" />
+        <text x="12" y="24" font-size="12" font-weight="800" fill="#0F172A">Optical + SAR</text>
+        <text x="12" y="44" font-size="10.5" font-weight="500" fill="#0284C7">Cross-Spectrum Validation</text>
+      </g>
+
+      <g transform="translate(16, 195)">
+        <rect width="213" height="58" rx="6" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.2" />
+        <text x="12" y="24" font-size="12" font-weight="800" fill="#0F172A">Multi-Temporal</text>
+        <text x="12" y="44" font-size="10.5" font-weight="500" fill="#0284C7">Time-Series Coherence</text>
+      </g>
+
+      <g transform="translate(16, 265)">
+        <rect width="213" height="58" rx="6" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.2" />
+        <text x="12" y="24" font-size="12" font-weight="800" fill="#0F172A">Agent Controller</text>
+        <text x="12" y="44" font-size="10.5" font-weight="500" fill="#0284C7">Iterative Synthesis Loop</text>
+      </g>
+
+      <rect x="16" y="505" width="213" height="30" rx="4" fill="#F0F9FF" />
+      <text x="24" y="524" class="mono" font-size="10" font-weight="800" fill="#0284C7">DYNAMIC REASONING</text>
+    </g>
+
+    <!-- Arrow 5 -> 6 -->
+    <path d="M 1315 345 L 1340 345" stroke="#2563EB" stroke-width="2.5" marker-end="url(#pipe-arrow)" />
+
+    <!-- STAGE 6: EVIDENCE -->
+    <g transform="translate(1345, 65)">
+      <rect width="205" height="560" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+      <rect x="16" y="16" width="36" height="36" rx="8" fill="#EFF6FF" />
+      <path d="M 34 22 L 26 26 L 26 36 C 26 41 34 44 34 44 C 34 44 42 41 42 36 L 42 26 Z" stroke="#2563EB" stroke-width="2" fill="none" />
+
+      <text x="16" y="74" class="pipe-node-title">EVIDENCE</text>
+      <text x="16" y="90" class="pipe-node-tag">CALIBRATED AUDIT</text>
+      <line x1="16" y1="104" x2="189" y2="104" stroke="#E2E8F0" stroke-width="1.2" />
+
+      <g transform="translate(14, 125)">
+        <rect width="177" height="54" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="24" font-size="12" font-weight="800" fill="#0F172A">Bounding Boxes</text>
+        <text x="12" y="42" font-size="10" font-weight="500" fill="#64748B">Geo-Spatial Precision</text>
+      </g>
+      <g transform="translate(14, 195)">
+        <rect width="177" height="54" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="24" font-size="12" font-weight="800" fill="#0F172A">Confidence Score</text>
+        <text x="12" y="42" font-size="10" font-weight="500" fill="#64748B">Calibrated (94.8%)</text>
+      </g>
+      <g transform="translate(14, 265)">
+        <rect width="177" height="54" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+        <text x="12" y="24" font-size="12" font-weight="800" fill="#0F172A">Execution Trace</text>
+        <text x="12" y="42" font-size="10" font-weight="500" fill="#64748B">Audit Timestamps</text>
+      </g>
+
+      <rect x="14" y="505" width="177" height="30" rx="4" fill="#EFF6FF" />
+      <text x="20" y="524" class="mono" font-size="10" font-weight="700" fill="#2563EB">ZERO-HALLUCINATION</text>
+    </g>
+
+    <!-- Arrow 6 -> 7 -->
+    <path d="M 1555 345 L 1580 345" stroke="#2563EB" stroke-width="2.5" marker-end="url(#pipe-arrow)" />
+
+    <!-- STAGE 7: ACTIONABLE INSIGHT / FINAL OUTPUT -->
+    <g transform="translate(1585, 65)">
+      <rect width="165" height="560" rx="10" fill="#F0FDF4" stroke="#4ADE80" stroke-width="2" />
+      <rect x="16" y="16" width="36" height="36" rx="8" fill="#DCFCE7" />
+      <path d="M 34 24 L 36 30 L 42 30 L 37 34 L 39 40 L 34 36 L 29 40 L 31 34 L 26 30 L 32 30 Z" fill="#16A34A" />
+
+      <text x="16" y="74" class="pipe-node-title" font-size="13" fill="#15803D">ACTIONABLE</text>
+      <text x="16" y="90" class="pipe-node-title" font-size="13" fill="#15803D">INSIGHT</text>
+      <line x1="16" y1="104" x2="149" y2="104" stroke="#BBF7D0" stroke-width="1.2" />
+
+      <g transform="translate(12, 125)">
+        <rect width="141" height="48" rx="6" fill="#FFFFFF" stroke="#86EFAC" stroke-width="1" />
+        <text x="10" y="24" font-size="11" font-weight="800" fill="#15803D">Mission Decisions</text>
+        <text x="10" y="38" font-size="9" font-weight="500" fill="#64748B">Strategic C2</text>
+      </g>
+
+      <g transform="translate(12, 185)">
+        <rect width="141" height="48" rx="6" fill="#FFFFFF" stroke="#86EFAC" stroke-width="1" />
+        <text x="10" y="24" font-size="11" font-weight="800" fill="#15803D">PDF Briefings</text>
+        <text x="10" y="38" font-size="9" font-weight="500" fill="#64748B">Signed Audit</text>
+      </g>
+
+      <g transform="translate(12, 245)">
+        <rect width="141" height="48" rx="6" fill="#FFFFFF" stroke="#86EFAC" stroke-width="1" />
+        <text x="10" y="24" font-size="11" font-weight="800" fill="#15803D">Tactical Alerts</text>
+        <text x="10" y="38" font-size="9" font-weight="500" fill="#64748B">Instant Trigger</text>
+      </g>
+
+      <!-- Final Tagline Badge -->
+      <g transform="translate(10, 420)">
+        <rect width="145" height="115" rx="8" fill="#16A34A" />
+        <text x="14" y="32" font-size="11" font-weight="900" fill="#FFFFFF">EXPLAINABLE</text>
+        <text x="14" y="52" font-size="11" font-weight="900" fill="#FFFFFF">GEOSPATIAL</text>
+        <text x="14" y="72" font-size="11" font-weight="900" fill="#FFFFFF">INTELLIGENCE</text>
+        <line x1="14" y1="84" x2="131" y2="84" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
+        <text x="14" y="100" class="mono" font-size="9" font-weight="700" fill="#DCFCE7">VERIFIED OUTPUT</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer Metadata -->
+  <g transform="translate(70, 1020)">
+    <text x="0" y="0" font-size="12" font-weight="800" fill="#0F172A">NEXSPACE</text>
+    <text x="80" y="0" font-size="12" font-weight="500" fill="#64748B">|  COMPACT SLIDE-READY PIPELINE</text>
+    <text x="1780" y="0" text-anchor="end" class="mono" font-size="11" font-weight="600" fill="#64748B">FIGURE 3: EXPLAINABLE MULTIMODAL REMOTE SENSING AI</text>
+  </g>
+</svg>

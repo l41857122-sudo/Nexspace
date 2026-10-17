@@ -182,6 +182,12 @@ class PaliGemmaVQARuntime(BaseModelRuntime):
         super().__init__(model_id=mid, task_name="VQA")
 
     def _do_load(self) -> bool:
+        # Completely disable heavy PaliGemma VQA model loading on CPU so VQA never causes offline timeouts
+        if self.device == "cpu":
+            self.load_error = "PaliGemma 3B VQA model loading is completely disabled on CPU to eliminate latency spikes and timeouts. Intelligent RS-VQA reasoning engine active."
+            self.is_loaded = False
+            return False
+
         with _SHARED_CACHE_LOCK:
             if self.model_id in _SHARED_MODEL_CACHE:
                 cached = _SHARED_MODEL_CACHE[self.model_id]
@@ -322,12 +328,13 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
         w, h = rgb_image.size
         inf_image = rgb_image
 
-        # 2. Aspect-ratio preserving rescale (never center-crop main architectural/scene content)
-        if max(w, h) > 768:
-            scale = 768.0 / max(w, h)
+        # 2. Aspect-ratio preserving rescale (BLIP native resolution is 384px)
+        target_max = 384 if self.device == "cpu" else 512
+        if max(w, h) > target_max:
+            scale = float(target_max) / max(w, h)
             new_w = max(1, int(round(w * scale)))
             new_h = max(1, int(round(h * scale)))
-            inf_image = rgb_image.resize((new_w, new_h), Image.Resampling.BICUBIC)
+            inf_image = rgb_image.resize((new_w, new_h), Image.Resampling.BILINEAR)
 
         # 3. Fast generation with inference_mode & quality safety check
         inputs = self._processor(inf_image, return_tensors="pt")
@@ -339,7 +346,7 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
             out = self._model.generate(
                 **inputs,
                 num_beams=1,
-                max_new_tokens=35,
+                max_new_tokens=30,
                 min_new_tokens=4,
                 repetition_penalty=1.20,
                 no_repeat_ngram_size=3,
@@ -351,14 +358,19 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
             # Validate quality
             val_result = validate_caption_quality(raw_caption, token_ids=token_ids_list)
 
-            # Pass 2: Fallback to beam search only if greedy output failed validation
+            # Pass 2: Remote-sensing prompt conditioning if unprompted output failed or was generic artifact
             if not val_result.is_valid:
+                prompt_prefix = "a satellite photograph of" if modality != "sar" else "a synthetic aperture radar capture of"
+                inputs_prompted = self._processor(inf_image, text=prompt_prefix, return_tensors="pt")
+                if self.device == "cuda":
+                    inputs_prompted = {k: v.to("cuda") for k, v in inputs_prompted.items()}
+
                 out = self._model.generate(
-                    **inputs,
-                    num_beams=2,
-                    max_new_tokens=35,
+                    **inputs_prompted,
+                    num_beams=1,
+                    max_new_tokens=30,
                     min_new_tokens=4,
-                    repetition_penalty=1.25,
+                    repetition_penalty=1.18,
                     no_repeat_ngram_size=3,
                     early_stopping=True,
                     do_sample=False,
@@ -367,6 +379,28 @@ class BLIPCaptioningRuntime(BaseModelRuntime):
                 raw_caption = self._processor.decode(out[0], skip_special_tokens=True).strip()
                 val_result = validate_caption_quality(raw_caption, token_ids=token_ids_list)
 
+            # Pass 3: Aerial view conditioning fallback if needed
+            if not val_result.is_valid and modality != "sar":
+                inputs_aerial = self._processor(inf_image, text="an aerial view of", return_tensors="pt")
+                if self.device == "cuda":
+                    inputs_aerial = {k: v.to("cuda") for k, v in inputs_aerial.items()}
+
+                out = self._model.generate(
+                    **inputs_aerial,
+                    num_beams=1,
+                    max_new_tokens=30,
+                    min_new_tokens=4,
+                    repetition_penalty=1.18,
+                    no_repeat_ngram_size=3,
+                    early_stopping=True,
+                    do_sample=False,
+                )
+                token_ids_list = out[0].tolist() if hasattr(out[0], "tolist") else list(out[0])
+                raw_caption = self._processor.decode(out[0], skip_special_tokens=True).strip()
+                val_result = validate_caption_quality(raw_caption, token_ids=token_ids_list)
+
+        import gc
+        gc.collect()
         dur = (time.perf_counter() - t0) * 1000.0
 
         if val_result.is_valid:
@@ -465,8 +499,8 @@ class GroundingDINORuntime(BaseModelRuntime):
         self,
         image: Image.Image,
         target_phrase: str,
-        box_threshold: float = 0.25,
-        text_threshold: float = 0.25,
+        box_threshold: float = 0.22,
+        text_threshold: float = 0.20,
     ) -> Dict[str, Any]:
         if not self.is_available():
             raise RuntimeError(f"Grounding DINO runtime is unavailable: {self.load_error}")
@@ -485,7 +519,8 @@ class GroundingDINORuntime(BaseModelRuntime):
             inf_image = image.resize((new_w, new_h), Image.Resampling.BILINEAR)
 
         # Format prompt according to Grounding DINO convention (ending with period)
-        clean_phrase = target_phrase.strip().lower()
+        from router import build_generalized_aerial_prompt
+        clean_phrase = build_generalized_aerial_prompt(target_phrase)
         if not clean_phrase.endswith("."):
             clean_phrase += "."
 
@@ -528,6 +563,25 @@ class GroundingDINORuntime(BaseModelRuntime):
             target_sizes=[(h, w)],
         )
 
+        # Zero-recomputation in-memory fallback: if primary threshold yielded 0 boxes,
+        # reuse already-computed `outputs` logits in RAM at threshold=0.17 (takes < 2ms, NO extra forward pass, NEVER < 0.17)
+        has_boxes = bool(processed and len(processed) > 0 and len(processed[0].get("boxes", [])) > 0)
+        if not has_boxes and box_threshold > 0.17:
+            processed = self._processor.post_process_grounded_object_detection(
+                outputs,
+                inputs["input_ids"] if "input_ids" in inputs else None,
+                threshold=0.17,
+                text_threshold=0.17,
+                target_sizes=[(h, w)],
+            )
+
+        # Free PyTorch tensors and run garbage collection
+        del outputs, inputs
+        import gc
+        gc.collect()
+        if self.device == "cuda":
+            torch.cuda.empty_cache()
+
         dur = (time.perf_counter() - t0) * 1000.0
 
         detections: List[Dict[str, Any]] = []
@@ -535,7 +589,7 @@ class GroundingDINORuntime(BaseModelRuntime):
             res = processed[0]
             scores = res.get("scores", [])
             boxes = res.get("boxes", [])
-            labels = res.get("labels", [])
+            labels = res.get("text_labels", []) or res.get("labels", [])
 
             for score_t, box_t, label_raw in zip(scores, boxes, labels):
                 score = round(float(score_t.item()), 4)
@@ -553,8 +607,6 @@ class GroundingDINORuntime(BaseModelRuntime):
                     continue  # Reject degenerate box
 
                 label_str = str(label_raw).strip()
-                if not label_str:
-                    label_str = target_phrase.strip().rstrip(".")
 
                 xmin_1000 = int(round(max(0.0, min(1.0, x1 / max(1, w))) * 1000))
                 ymin_1000 = int(round(max(0.0, min(1.0, y1 / max(1, h))) * 1000))
@@ -652,6 +704,9 @@ class OpticalSARFusionRuntime(BaseModelRuntime):
         # 1. Validation & Alignment Check
         if not isinstance(optical_image, Image.Image) or not isinstance(sar_image, Image.Image):
             raise ValueError("Both optical_image and sar_image must be valid PIL Image instances.")
+
+        if optical_image is sar_image or optical_image.tobytes() == sar_image.tobytes():
+            raise ValueError("Optical and SAR inputs must be independent.")
 
         opt_w, opt_h = optical_image.size
         sar_w, sar_h = sar_image.size

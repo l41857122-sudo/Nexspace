@@ -113,15 +113,15 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-          className="mt-9 flex flex-wrap items-center justify-center gap-4"
+          className="mt-8 flex flex-wrap items-center justify-center gap-4"
         >
           {/* Primary Button */}
           <Link
-            href="/dashboard"
-            className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 via-sky-400 to-cyan-400 hover:from-cyan-400 hover:to-sky-300 text-[#071320] text-sm font-bold px-6 py-3 rounded-xl transition-all duration-180 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.65)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer overflow-hidden"
+            href="/query"
+            className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 via-sky-400 to-cyan-400 hover:from-cyan-400 hover:to-sky-300 text-[#071320] text-sm font-bold px-7 py-3.5 rounded-xl transition-all duration-180 shadow-[0_0_25px_rgba(6,182,212,0.45)] hover:shadow-[0_0_35px_rgba(6,182,212,0.7)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer overflow-hidden"
           >
-            <Sparkles size={15} className="text-[#071320]" />
-            <span>Start Analysis</span>
+            <Sparkles size={16} className="text-[#071320]" />
+            <span>Launch Investigation</span>
             <ArrowRight
               size={15}
               className="group-hover:translate-x-1 transition-transform duration-180"
@@ -130,26 +130,85 @@ export default function HeroSection() {
 
           {/* Secondary Button */}
           <Link
-            href="/execution"
-            className="group inline-flex items-center gap-2.5 bg-[#0b1726]/80 hover:bg-slate-800/80 backdrop-blur-md border border-slate-800 hover:border-cyan-500/40 text-slate-200 hover:text-cyan-300 text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-180 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] cursor-pointer"
+            href="/dashboard"
+            className="group inline-flex items-center gap-2.5 bg-[#0b1726]/80 hover:bg-slate-800/80 backdrop-blur-md border border-slate-800 hover:border-cyan-500/40 text-slate-200 hover:text-cyan-300 text-sm font-semibold px-6 py-3.5 rounded-xl transition-all duration-180 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] cursor-pointer"
           >
             <div className="w-5 h-5 rounded-full bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform duration-180">
               <Play size={10} className="fill-cyan-400/60 translate-x-[1px]" />
             </div>
-            <span>View Demo Execution</span>
+            <span>Mission Control</span>
           </Link>
+        </motion.div>
+
+        {/* ----------------------------------------------------
+            Cinematic Intelligence Output Journey Flow
+            SATELLITE IMAGERY → AI ANALYSIS → TARGETS FOUND → EVIDENCE → LOCATION → INTELLIGENCE
+            ---------------------------------------------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+          className="mt-12 w-full max-w-3xl"
+        >
+          {/* Journey Steps Bar */}
+          <div className="flex items-center justify-between gap-1 p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 backdrop-blur-md font-mono text-[10px] text-slate-400 overflow-x-auto">
+            <span className="text-cyan-300 font-semibold px-2 py-1 rounded bg-cyan-500/10">SATELLITE IMAGE</span>
+            <span className="text-slate-600">→</span>
+            <span className="text-sky-300 font-semibold px-2 py-1 rounded bg-sky-500/10">AI ANALYSIS</span>
+            <span className="text-slate-600">→</span>
+            <span className="text-emerald-300 font-bold px-2 py-1 rounded bg-emerald-500/15 border border-emerald-500/30">TARGETS FOUND</span>
+            <span className="text-slate-600">→</span>
+            <span className="text-cyan-300 font-semibold px-2 py-1 rounded bg-cyan-500/10">EVIDENCE</span>
+            <span className="text-slate-600">→</span>
+            <span className="text-purple-300 font-semibold px-2 py-1 rounded bg-purple-500/10">LOCATION</span>
+            <span className="text-slate-600">→</span>
+            <span className="text-amber-300 font-bold px-2 py-1 rounded bg-amber-500/10">INTELLIGENCE</span>
+          </div>
+
+          {/* Live Interactive Intelligence Showcase Pill */}
+          <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-slate-950/90 via-[#071322]/90 to-slate-950/90 border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.15)] text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[11px] font-mono font-bold text-emerald-300 uppercase tracking-wider">
+                  Live Investigation Output
+                </span>
+                <span className="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                  Mumbai Harbour · Sentinel-2
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-white">
+                "6 vessels identified near the port docks."
+              </p>
+              <div className="text-xs text-slate-400 font-mono flex items-center gap-3 pt-0.5">
+                <span>Targets: <strong className="text-cyan-300">6 Verified</strong></span>
+                <span>•</span>
+                <span>Focal: <strong className="text-slate-200">18.9402° N, 72.8354° E</strong></span>
+                <span>•</span>
+                <span>Confidence: <strong className="text-emerald-400">High (91%)</strong></span>
+              </div>
+            </div>
+
+            <Link
+              href="/query"
+              className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/25 hover:text-white text-xs font-mono font-bold transition-all cursor-pointer"
+            >
+              <span>Explore Evidence</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
         </motion.div>
       </div>
 
       {/* ----------------------------------------------------
-          Bottom Right Telemetry Readout
+          Bottom Telemetry Readout
           ---------------------------------------------------- */}
       <div className="relative sm:absolute sm:bottom-6 sm:right-8 z-20 text-center sm:text-right p-4 text-[10px] font-mono text-slate-400">
         <div className="uppercase tracking-widest text-slate-500 font-mono">
-          Target Focal Coordinate
+          Planetary Coordinate Resolution
         </div>
         <div className="text-cyan-300/90 font-mono mt-0.5">
-          37.7749° N, 122.4194° W · ZOOM 14×
+          EPSG:4326 · 0.5M GSD · MULTISPECTRAL OPTICAL
         </div>
       </div>
     </section>

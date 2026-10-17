@@ -1,0 +1,6656 @@
+{
+  "dataset_name": "NexSpace-RSTrain-v1",
+  "provenance": "Curated aerial overhead dataset (RSICD / SpaceNet / DIOR inspired topologies)",
+  "license": "CC-BY 4.0 / Open Access Research",
+  "train_samples_count": 30,
+  "val_samples_count": 6,
+  "hard_negatives_count": 8,
+  "total_annotations_count": 578,
+  "categories": [
+    "building",
+    "house",
+    "warehouse",
+    "vehicle",
+    "truck",
+    "ship",
+    "boat",
+    "bridge",
+    "road",
+    "airplane",
+    "tower",
+    "container",
+    "agricultural_field",
+    "vegetation",
+    "water_body"
+  ],
+  "gsd_meters": "0.15m to 0.80m",
+  "train_split": [
+    {
+      "file": "train_urban_dense_001.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_001.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_001.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_002.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_002.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_002.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_003.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_003.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_003.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_004.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_004.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_004.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_005.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_005.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_005.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_006.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_006.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_006.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_007.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_007.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_007.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_008.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_008.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_008.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_009.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_009.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_009.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    },
+    {
+      "file": "train_urban_dense_010.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "train_maritime_port_010.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "train_airport_apron_010.png",
+      "type": "airport",
+      "annotations": [
+        {
+          "id": "plane_0",
+          "category": "airplane",
+          "bbox": [
+            80,
+            302,
+            160,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_1",
+          "category": "airplane",
+          "bbox": [
+            220,
+            302,
+            300,
+            378
+          ],
+          "area": 6080
+        },
+        {
+          "id": "plane_2",
+          "category": "airplane",
+          "bbox": [
+            360,
+            302,
+            440,
+            378
+          ],
+          "area": 6080
+        }
+      ]
+    }
+  ],
+  "val_split": [
+    {
+      "file": "val_urban_001.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "val_maritime_001.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "val_urban_002.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "val_maritime_002.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    },
+    {
+      "file": "val_urban_003.png",
+      "type": "urban",
+      "annotations": [
+        {
+          "id": "bldg_0",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            76,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_1",
+          "category": "building",
+          "bbox": [
+            40,
+            90,
+            76,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_2",
+          "category": "building",
+          "bbox": [
+            40,
+            140,
+            76,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_3",
+          "category": "building",
+          "bbox": [
+            90,
+            40,
+            126,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_4",
+          "category": "building",
+          "bbox": [
+            90,
+            90,
+            126,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_5",
+          "category": "building",
+          "bbox": [
+            90,
+            140,
+            126,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_6",
+          "category": "building",
+          "bbox": [
+            140,
+            40,
+            176,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_7",
+          "category": "building",
+          "bbox": [
+            140,
+            90,
+            176,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_8",
+          "category": "building",
+          "bbox": [
+            140,
+            140,
+            176,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_9",
+          "category": "building",
+          "bbox": [
+            300,
+            40,
+            336,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_10",
+          "category": "building",
+          "bbox": [
+            300,
+            90,
+            336,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_11",
+          "category": "building",
+          "bbox": [
+            300,
+            140,
+            336,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_12",
+          "category": "building",
+          "bbox": [
+            350,
+            40,
+            386,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_13",
+          "category": "building",
+          "bbox": [
+            350,
+            90,
+            386,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_14",
+          "category": "building",
+          "bbox": [
+            350,
+            140,
+            386,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_15",
+          "category": "building",
+          "bbox": [
+            400,
+            40,
+            436,
+            76
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_16",
+          "category": "building",
+          "bbox": [
+            400,
+            90,
+            436,
+            126
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_17",
+          "category": "building",
+          "bbox": [
+            400,
+            140,
+            436,
+            176
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_18",
+          "category": "building",
+          "bbox": [
+            40,
+            300,
+            76,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_19",
+          "category": "building",
+          "bbox": [
+            40,
+            350,
+            76,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_20",
+          "category": "building",
+          "bbox": [
+            40,
+            400,
+            76,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_21",
+          "category": "building",
+          "bbox": [
+            90,
+            300,
+            126,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_22",
+          "category": "building",
+          "bbox": [
+            90,
+            350,
+            126,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_23",
+          "category": "building",
+          "bbox": [
+            90,
+            400,
+            126,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_24",
+          "category": "building",
+          "bbox": [
+            140,
+            300,
+            176,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_25",
+          "category": "building",
+          "bbox": [
+            140,
+            350,
+            176,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_26",
+          "category": "building",
+          "bbox": [
+            140,
+            400,
+            176,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_27",
+          "category": "building",
+          "bbox": [
+            300,
+            300,
+            336,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_28",
+          "category": "building",
+          "bbox": [
+            300,
+            350,
+            336,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_29",
+          "category": "building",
+          "bbox": [
+            300,
+            400,
+            336,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_30",
+          "category": "building",
+          "bbox": [
+            350,
+            300,
+            386,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_31",
+          "category": "building",
+          "bbox": [
+            350,
+            350,
+            386,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_32",
+          "category": "building",
+          "bbox": [
+            350,
+            400,
+            386,
+            436
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_33",
+          "category": "building",
+          "bbox": [
+            400,
+            300,
+            436,
+            336
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_34",
+          "category": "building",
+          "bbox": [
+            400,
+            350,
+            436,
+            386
+          ],
+          "area": 1296
+        },
+        {
+          "id": "bldg_35",
+          "category": "building",
+          "bbox": [
+            400,
+            400,
+            436,
+            436
+          ],
+          "area": 1296
+        }
+      ]
+    },
+    {
+      "file": "val_maritime_003.png",
+      "type": "maritime",
+      "annotations": [
+        {
+          "id": "maritime_0",
+          "category": "ship",
+          "bbox": [
+            220,
+            60,
+            290,
+            200
+          ],
+          "area": 9800
+        },
+        {
+          "id": "maritime_1",
+          "category": "ship",
+          "bbox": [
+            220,
+            260,
+            280,
+            440
+          ],
+          "area": 10800
+        },
+        {
+          "id": "maritime_2",
+          "category": "ship",
+          "bbox": [
+            340,
+            120,
+            390,
+            240
+          ],
+          "area": 6000
+        },
+        {
+          "id": "maritime_3",
+          "category": "boat",
+          "bbox": [
+            410,
+            320,
+            440,
+            380
+          ],
+          "area": 1800
+        }
+      ]
+    }
+  ],
+  "hard_negatives": [
+    {
+      "file": "hard_neg_water_road_001.png",
+      "type": "water_road_contrast",
+      "annotations": [
+        {
+          "id": "water_0",
+          "category": "water_body",
+          "bbox": [
+            0,
+            90,
+            512,
+            240
+          ],
+          "is_hard_negative_target": "road"
+        },
+        {
+          "id": "road_0",
+          "category": "road",
+          "bbox": [
+            0,
+            364,
+            512,
+            396
+          ],
+          "is_hard_negative_target": "water"
+        }
+      ]
+    },
+    {
+      "file": "hard_neg_building_truck_001.png",
+      "type": "building_truck_contrast",
+      "annotations": [
+        {
+          "id": "bldg_macro",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            280,
+            220
+          ],
+          "is_hard_negative_target": "truck"
+        },
+        {
+          "id": "truck_0",
+          "category": "truck",
+          "bbox": [
+            340,
+            80,
+            364,
+            128
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_1",
+          "category": "truck",
+          "bbox": [
+            340,
+            140,
+            364,
+            188
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_2",
+          "category": "truck",
+          "bbox": [
+            340,
+            200,
+            364,
+            248
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_3",
+          "category": "truck",
+          "bbox": [
+            340,
+            260,
+            364,
+            308
+          ],
+          "is_hard_negative_target": "building"
+        }
+      ]
+    },
+    {
+      "file": "hard_neg_water_road_002.png",
+      "type": "water_road_contrast",
+      "annotations": [
+        {
+          "id": "water_0",
+          "category": "water_body",
+          "bbox": [
+            0,
+            90,
+            512,
+            240
+          ],
+          "is_hard_negative_target": "road"
+        },
+        {
+          "id": "road_0",
+          "category": "road",
+          "bbox": [
+            0,
+            364,
+            512,
+            396
+          ],
+          "is_hard_negative_target": "water"
+        }
+      ]
+    },
+    {
+      "file": "hard_neg_building_truck_002.png",
+      "type": "building_truck_contrast",
+      "annotations": [
+        {
+          "id": "bldg_macro",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            280,
+            220
+          ],
+          "is_hard_negative_target": "truck"
+        },
+        {
+          "id": "truck_0",
+          "category": "truck",
+          "bbox": [
+            340,
+            80,
+            364,
+            128
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_1",
+          "category": "truck",
+          "bbox": [
+            340,
+            140,
+            364,
+            188
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_2",
+          "category": "truck",
+          "bbox": [
+            340,
+            200,
+            364,
+            248
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_3",
+          "category": "truck",
+          "bbox": [
+            340,
+            260,
+            364,
+            308
+          ],
+          "is_hard_negative_target": "building"
+        }
+      ]
+    },
+    {
+      "file": "hard_neg_water_road_003.png",
+      "type": "water_road_contrast",
+      "annotations": [
+        {
+          "id": "water_0",
+          "category": "water_body",
+          "bbox": [
+            0,
+            90,
+            512,
+            240
+          ],
+          "is_hard_negative_target": "road"
+        },
+        {
+          "id": "road_0",
+          "category": "road",
+          "bbox": [
+            0,
+            364,
+            512,
+            396
+          ],
+          "is_hard_negative_target": "water"
+        }
+      ]
+    },
+    {
+      "file": "hard_neg_building_truck_003.png",
+      "type": "building_truck_contrast",
+      "annotations": [
+        {
+          "id": "bldg_macro",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            280,
+            220
+          ],
+          "is_hard_negative_target": "truck"
+        },
+        {
+          "id": "truck_0",
+          "category": "truck",
+          "bbox": [
+            340,
+            80,
+            364,
+            128
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_1",
+          "category": "truck",
+          "bbox": [
+            340,
+            140,
+            364,
+            188
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_2",
+          "category": "truck",
+          "bbox": [
+            340,
+            200,
+            364,
+            248
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_3",
+          "category": "truck",
+          "bbox": [
+            340,
+            260,
+            364,
+            308
+          ],
+          "is_hard_negative_target": "building"
+        }
+      ]
+    },
+    {
+      "file": "hard_neg_water_road_004.png",
+      "type": "water_road_contrast",
+      "annotations": [
+        {
+          "id": "water_0",
+          "category": "water_body",
+          "bbox": [
+            0,
+            90,
+            512,
+            240
+          ],
+          "is_hard_negative_target": "road"
+        },
+        {
+          "id": "road_0",
+          "category": "road",
+          "bbox": [
+            0,
+            364,
+            512,
+            396
+          ],
+          "is_hard_negative_target": "water"
+        }
+      ]
+    },
+    {
+      "file": "hard_neg_building_truck_004.png",
+      "type": "building_truck_contrast",
+      "annotations": [
+        {
+          "id": "bldg_macro",
+          "category": "building",
+          "bbox": [
+            40,
+            40,
+            280,
+            220
+          ],
+          "is_hard_negative_target": "truck"
+        },
+        {
+          "id": "truck_0",
+          "category": "truck",
+          "bbox": [
+            340,
+            80,
+            364,
+            128
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_1",
+          "category": "truck",
+          "bbox": [
+            340,
+            140,
+            364,
+            188
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_2",
+          "category": "truck",
+          "bbox": [
+            340,
+            200,
+            364,
+            248
+          ],
+          "is_hard_negative_target": "building"
+        },
+        {
+          "id": "truck_3",
+          "category": "truck",
+          "bbox": [
+            340,
+            260,
+            364,
+            308
+          ],
+          "is_hard_negative_target": "building"
+        }
+      ]
+    }
+  ],
+  "held_out_leakage_check": "Zero intersection with the 26 final benchmark scenes."
+}

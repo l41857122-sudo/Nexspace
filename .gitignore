@@ -52,3 +52,11 @@ scratch/
 .DS_Store
 Thumbs.db
 *.pem
+# Generated runtime imagery and caches
+/ml_backend/cache/visual_validation_cache/
+/ml_backend/downloaded_scenes/
+/cache/overpass/
+# Generated runtime caches and downloaded imagery
+/ml_backend/cache/
+/ml_backend/downloaded_scenes/
+/cache/

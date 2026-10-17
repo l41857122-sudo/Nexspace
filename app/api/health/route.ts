@@ -1,23 +1,45 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import type { NexSpaceHealthResponse } from "../../types/nexspace";
 
-const ML_BACKEND_URL = process.env.ML_BACKEND_URL || "http://localhost:8000";
+export const dynamic = "force-dynamic";
 
-export async function GET() {
-  try {
-    const res = await fetch(`${ML_BACKEND_URL}/api/health`, {
-      method: "GET",
-      signal: AbortSignal.timeout(2000)
+const PRIMARY_BACKEND = process.env.ML_BACKEND_URL || "http://127.0.0.1:8000";
+const BACKEND_URLS = [
+  PRIMARY_BACKEND,
+  ...(PRIMARY_BACKEND.includes("localhost") ? [PRIMARY_BACKEND.replace("localhost", "127.0.0.1")] : []),
+  ...(PRIMARY_BACKEND.includes("127.0.0.1") ? [PRIMARY_BACKEND.replace("127.0.0.1", "localhost")] : [])
+];
+
+export async function GET(req: NextRequest) {
+  // 1. Immediate shallow check for frontend liveness without waiting on ML backend
+  const url = req.nextUrl;
+  if (url.searchParams.get("shallow") === "true") {
+    return NextResponse.json({
+      status: "healthy",
+      service: "NexSpace Next.js Frontend",
+      version: "2.5.0",
+      uptime: process.uptime()
     });
+  }
 
-    if (res.ok) {
-      const data: NexSpaceHealthResponse = await res.json();
-      data.ml_backend_url = ML_BACKEND_URL;
-      data.status = "ok";
-      return NextResponse.json(data);
+  // 2. Proxy to FastAPI backend with fast timeout
+  for (const backendUrl of BACKEND_URLS) {
+    try {
+      const res = await fetch(`${backendUrl}/api/health`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(1500)
+      });
+
+      if (res.ok) {
+        const data: NexSpaceHealthResponse = await res.json();
+        data.ml_backend_url = backendUrl;
+        return NextResponse.json(data);
+      }
+    } catch (_) {
+      // Continue to next backend candidate
     }
-  } catch (err: any) {
-    // Standalone / Native Next.js Neural Engine mode
   }
 
   const liveResponse: NexSpaceHealthResponse = {
@@ -40,7 +62,7 @@ export async function GET() {
       grounding_dino: "GroundingDINO-SwinT",
       paligemma_vqa: "PaliGemma-3B-RSVQA"
     },
-    ml_backend_url: ML_BACKEND_URL
+    ml_backend_url: PRIMARY_BACKEND
   };
 
   return NextResponse.json(liveResponse);

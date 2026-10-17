@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@600;700;800&amp;display=swap');
+      * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .mono { font-family: 'JetBrains Mono', monospace; }
+      
+      .doc-title { font-size: 30px; font-weight: 900; fill: #0F172A; letter-spacing: -0.5px; }
+      .doc-subtitle { font-size: 15px; font-weight: 600; fill: #475569; }
+      
+      /* Standard Academic Flowchart Styles */
+      .box-proc { fill: #F0F7FF; stroke: #0F172A; stroke-width: 2; rx: 6px; }
+      .box-proc-alt { fill: #F8FAFC; stroke: #0F172A; stroke-width: 2; rx: 6px; }
+      .box-term { fill: #0F172A; stroke: #0F172A; stroke-width: 2; rx: 22px; }
+      .box-term-text { font-size: 14px; font-weight: 800; fill: #FFFFFF; letter-spacing: 1px; text-anchor: middle; }
+      
+      .box-diamond { fill: #FEF3C7; stroke: #0F172A; stroke-width: 2; }
+      
+      .text-head { font-size: 15px; font-weight: 800; fill: #0F172A; text-anchor: middle; }
+      .text-sub { font-size: 12px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      
+      .text-diamond { font-size: 13.5px; font-weight: 800; fill: #0F172A; text-anchor: middle; }
+      
+      .flow-line { stroke: #0F172A; stroke-width: 2.2; fill: none; stroke-linecap: square; stroke-linejoin: miter; }
+      .flow-line-loop { stroke: #2563EB; stroke-width: 2.4; stroke-dasharray: 6 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      
+      .lbl-yes { font-size: 12px; font-weight: 900; fill: #15803D; font-family: 'JetBrains Mono', monospace; }
+      .lbl-no { font-size: 12px; font-weight: 900; fill: #DC2626; font-family: 'JetBrains Mono', monospace; }
+      
+      .col-header { font-size: 12px; font-weight: 800; fill: #64748B; letter-spacing: 1.2px; text-transform: uppercase; }
+    </style>
+
+    <marker id="arr-black" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0F172A" />
+    </marker>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563EB" />
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#15803D" />
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#DC2626" />
+    </marker>
+  </defs>
+
+  <!-- PURE WHITE BACKGROUND -->
+  <rect width="1920" height="1080" fill="#FFFFFF" />
+
+  <!-- Outer Engineering Border Frame -->
+  <rect x="40" y="36" width="1840" height="1008" fill="none" stroke="#0F172A" stroke-width="2" />
+  <rect x="46" y="42" width="1828" height="996" fill="none" stroke="#E2E8F0" stroke-width="1" />
+
+  <!-- ================= HEADER AREA ================= -->
+  <g transform="translate(80, 75)">
+    <!-- Document Standard Header Tag -->
+    <rect x="0" y="0" width="170" height="24" rx="4" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1" />
+    <text x="85" y="16" text-anchor="middle" class="mono" font-size="11" font-weight="700" fill="#334155">SYSTEM FLOWCHART</text>
+
+    <text x="0" y="54" class="doc-title">NexSpace – AI Investigation Workflow</text>
+    <text x="0" y="78" class="doc-subtitle">From User Query to Explainable Geospatial Intelligence</text>
+
+    <!-- Top Right Meta Box -->
+    <g transform="translate(1380, 0)">
+      <rect x="0" y="0" width="380" height="78" rx="6" fill="#F8FAFC" stroke="#0F172A" stroke-width="1.5" />
+      <text x="16" y="24" class="mono" font-size="11" font-weight="700" fill="#0F172A">SYSTEM: NEXSPACE ENGINE v2.4</text>
+      <text x="16" y="44" class="mono" font-size="11" font-weight="600" fill="#475569">MODULE: AGENTIC WORKFLOW &amp; ROUTING</text>
+      <text x="16" y="64" class="mono" font-size="11" font-weight="600" fill="#475569">STANDARD: IEEE 2D TECHNICAL SPEC</text>
+    </g>
+  </g>
+
+  <line x1="80" y1="175" x2="1840" y2="175" stroke="#CBD5E1" stroke-width="1.2" />
+
+  <!-- ================= STAGE COLUMNS HEADERS ================= -->
+  <text x="280" y="205" class="col-header" text-anchor="middle">STAGE 1: QUERY &amp; ORCHESTRATION</text>
+  <text x="910" y="205" class="col-header" text-anchor="middle">STAGE 2: MULTIMODAL PERCEPTION &amp; SENSING</text>
+  <text x="1540" y="205" class="col-header" text-anchor="middle">STAGE 3: VERIFICATION, AUDIT &amp; DELIVERY</text>
+
+  <!-- ================= COLUMN 1: INGESTION & PLANNING ================= -->
+  <!-- 1. START (Terminal) -->
+  <g transform="translate(200, 225)">
+    <rect width="160" height="44" class="box-term" />
+    <text x="80" y="27" class="box-term-text">START</text>
+  </g>
+
+  <!-- Arrow Start -> User Input -->
+  <path d="M 280 269 L 280 300" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- 2. USER INPUT -->
+  <g transform="translate(130, 300)">
+    <rect width="300" height="70" class="box-proc" />
+    <text x="150" y="30" class="text-head">USER INPUT</text>
+    <text x="150" y="50" class="text-sub">(Text Query / Image / Region)</text>
+  </g>
+
+  <!-- Arrow User Input -> Query Understanding -->
+  <path d="M 280 370 L 280 400" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- 3. QUERY UNDERSTANDING -->
+  <g transform="translate(130, 400)">
+    <rect width="300" height="70" class="box-proc" />
+    <text x="150" y="30" class="text-head">QUERY UNDERSTANDING</text>
+    <text x="150" y="50" class="text-sub">(Parse intent and identify task)</text>
+  </g>
+
+  <!-- Arrow Query Understanding -> Agent Controller -->
+  <path d="M 280 470 L 280 500" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- 4. AGENT CONTROLLER -->
+  <g transform="translate(130, 500)">
+    <rect width="300" height="70" class="box-proc" />
+    <text x="150" y="30" class="text-head">AGENT CONTROLLER</text>
+    <text x="150" y="50" class="text-sub">(Plan and decompose the request)</text>
+  </g>
+
+  <!-- Arrow Agent Controller -> Task / Model Routing -->
+  <path d="M 280 570 L 280 600" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- 5. TASK / MODEL ROUTING -->
+  <g transform="translate(130, 600)">
+    <rect width="300" height="76" class="box-proc" stroke-width="2.5" />
+    <text x="150" y="32" class="text-head">TASK / MODEL ROUTING</text>
+    <text x="150" y="52" class="text-sub">(Select appropriate specialist model)</text>
+  </g>
+
+  <!-- Flow Connector: Column 1 (Task Routing) -> Column 2 (AI Analysis) -->
+  <path d="M 430 638 L 520 638 L 520 247 L 570 247" class="flow-line" marker-end="url(#arr-black)" />
+
+
+  <!-- ================= COLUMN 2: MULTIMODAL PERCEPTION & SENSING ================= -->
+  
+  <!-- 6. AI ANALYSIS -->
+  <g transform="translate(570, 215)">
+    <rect width="380" height="74" class="box-proc" />
+    <text x="190" y="31" class="text-head">AI ANALYSIS</text>
+    <text x="190" y="51" class="text-sub">(VQA / Captioning / Grounding / Change Analysis)</text>
+  </g>
+
+  <!-- Arrow AI Analysis -> Decision 1 -->
+  <path d="M 760 289 L 760 330" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- 7. DECISION DIAMOND 1: Is additional analysis required? -->
+  <g transform="translate(760, 400)">
+    <polygon points="0,-70 150,0 0,70 -150,0" class="box-diamond" />
+    <text x="0" y="-8" class="text-diamond">Is additional</text>
+    <text x="0" y="12" class="text-diamond">analysis required?</text>
+  </g>
+
+  <!-- Branch NO (Bottom) -> Passes straight down to merge point at (760, 720) -->
+  <path d="M 760 470 L 760 720" class="flow-line" />
+  <rect x="768" y="480" width="34" height="20" rx="3" fill="#FEE2E2" stroke="#DC2626" stroke-width="1" />
+  <text x="785" y="494" class="lbl-no" text-anchor="middle">NO</text>
+
+  <!-- Branch YES (Right) -> Goes to CONSULT ADDITIONAL DATA -->
+  <path d="M 910 400 L 1090 400 L 1090 440" class="flow-line" marker-end="url(#arr-green)" />
+  <rect x="925" y="378" width="40" height="20" rx="3" fill="#DCFCE7" stroke="#16A34A" stroke-width="1" />
+  <text x="945" y="392" class="lbl-yes" text-anchor="middle">YES</text>
+
+  <!-- Process: CONSULT ADDITIONAL DATA -->
+  <g transform="translate(940, 440)">
+    <rect width="300" height="70" class="box-proc-alt" />
+    <text x="150" y="30" class="text-head">CONSULT ADDITIONAL DATA</text>
+    <text x="150" y="50" class="text-sub">(Optical / SAR / Multi-temporal)</text>
+  </g>
+
+  <!-- Arrow Additional Data -> Run Additional Analysis -->
+  <path d="M 1090 510 L 1090 545" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- Process: RUN ADDITIONAL ANALYSIS -->
+  <g transform="translate(940, 545)">
+    <rect width="300" height="70" class="box-proc-alt" />
+    <text x="150" y="30" class="text-head">RUN ADDITIONAL ANALYSIS</text>
+    <text x="150" y="50" class="text-sub">(Cross-Sensor Fusion &amp; Reasoning)</text>
+  </g>
+
+  <!-- Arrow from Run Additional Analysis down to merge line -->
+  <path d="M 1090 615 L 1090 720 L 760 720" class="flow-line" />
+
+  <!-- Flow Connector: Column 2 (Merge at X=1090, Y=720) -> Column 3 (Evidence Extraction) -->
+  <path d="M 1090 720 L 1280 720 L 1280 247 L 1340 247" class="flow-line" marker-end="url(#arr-black)" />
+
+
+  <!-- ================= COLUMN 3: VERIFICATION, AUDIT & DELIVERY ================= -->
+
+  <!-- 8. EVIDENCE EXTRACTION -->
+  <g transform="translate(1340, 215)">
+    <rect width="380" height="74" class="box-proc" />
+    <text x="190" y="31" class="text-head">EVIDENCE EXTRACTION</text>
+    <text x="190" y="51" class="text-sub">(Detections / Changes / Bounding Boxes)</text>
+  </g>
+
+  <!-- Arrow Evidence -> Confidence & Validation -->
+  <path d="M 1530 289 L 1530 330" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- 9. CONFIDENCE & VALIDATION -->
+  <g transform="translate(1340, 330)">
+    <rect width="380" height="70" class="box-proc" />
+    <text x="190" y="30" class="text-head">CONFIDENCE &amp; VALIDATION</text>
+    <text x="190" y="50" class="text-sub">(Confidence Calibration &amp; Error Check)</text>
+  </g>
+
+  <!-- Arrow Validation -> Decision 2 -->
+  <path d="M 1530 400 L 1530 440" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- 10. DECISION DIAMOND 2: Are the results satisfactory? -->
+  <g transform="translate(1530, 510)">
+    <polygon points="0,-70 150,0 0,70 -150,0" class="box-diamond" />
+    <text x="0" y="-8" class="text-diamond">Are the results</text>
+    <text x="0" y="12" class="text-diamond">satisfactory?</text>
+  </g>
+
+  <!-- YES Branch (Bottom) -> Generate Report -->
+  <path d="M 1530 580 L 1530 625" class="flow-line" marker-end="url(#arr-green)" />
+  <rect x="1538" y="590" width="40" height="20" rx="3" fill="#DCFCE7" stroke="#16A34A" stroke-width="1" />
+  <text x="1558" y="604" class="lbl-yes" text-anchor="middle">YES</text>
+
+  <!-- Process: GENERATE REPORT -->
+  <g transform="translate(1350, 625)">
+    <rect width="360" height="72" class="box-proc" stroke-width="2.5" />
+    <text x="180" y="30" class="text-head">GENERATE REPORT</text>
+    <text x="180" y="50" class="text-sub">(PDF / GeoJSON / Dashboard)</text>
+  </g>
+
+  <!-- Arrow Generate Report -> END -->
+  <path d="M 1530 697 L 1530 730" class="flow-line" marker-end="url(#arr-black)" />
+
+  <!-- 11. END (Terminal Oval) -->
+  <g transform="translate(1450, 730)">
+    <rect width="160" height="44" class="box-term" />
+    <text x="80" y="27" class="box-term-text">END</text>
+  </g>
+
+  <!-- NO Branch (Right of Decision 2) -> Out to Refine Query -->
+  <path d="M 1680 510 L 1760 510 L 1760 850 L 1150 850" class="flow-line" marker-end="url(#arr-red)" />
+  <rect x="1690" y="488" width="34" height="20" rx="3" fill="#FEE2E2" stroke="#DC2626" stroke-width="1" />
+  <text x="1707" y="502" class="lbl-no" text-anchor="middle">NO</text>
+
+
+  <!-- ================= BOTTOM: REFINE QUERY & FEEDBACK LOOP ================= -->
+  <!-- Process: REFINE QUERY / PARAMETERS -->
+  <g transform="translate(770, 815)">
+    <rect width="380" height="70" class="box-proc-alt" stroke="#2563EB" stroke-width="2.2" />
+    <text x="190" y="30" class="text-head" fill="#2563EB">REFINE QUERY / PARAMETERS</text>
+    <text x="190" y="50" class="text-sub">(Adjust thresholds, prompt, or bounding box)</text>
+  </g>
+
+  <!-- Loop line: From Refine Query (Left at X=770, Y=850) -> Left to X=80 -> Up to Y=638 -> Enters Task / Model Routing at X=130 -->
+  <path d="M 770 850 L 80 850 L 80 638 L 130 638" class="flow-line-loop" marker-end="url(#arr-blue)" />
+
+  <!-- Annotation Badge on Loop -->
+  <g transform="translate(110, 824)">
+    <rect width="220" height="22" rx="4" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.2" />
+    <text x="110" y="15" text-anchor="middle" class="mono" font-size="10" font-weight="700" fill="#2563EB">↺ RE-EXECUTION / REFINEMENT LOOP</text>
+  </g>
+
+
+  <!-- ================= FOOTER / LEGEND ================= -->
+  <g transform="translate(80, 995)">
+    <text x="0" y="16" class="mono" font-size="11" font-weight="700" fill="#475569">FLOWCHART LEGEND:</text>
+    
+    <rect x="140" y="4" width="22" height="14" rx="2" fill="#F0F7FF" stroke="#0F172A" stroke-width="1.2" />
+    <text x="170" y="16" font-size="11" font-weight="600" fill="#334155">Standard Process</text>
+
+    <polygon points="295,4 305,11 295,18 285,11" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.2" />
+    <text x="315" y="16" font-size="11" font-weight="600" fill="#334155">Decision Diamond</text>
+
+    <rect x="440" y="4" width="24" height="14" rx="7" fill="#0F172A" />
+    <text x="472" y="16" font-size="11" font-weight="600" fill="#334155">Terminal (Start / End)</text>
+
+    <line x1="620" y1="11" x2="650" y2="11" stroke="#2563EB" stroke-width="2" stroke-dasharray="4 2" />
+    <text x="660" y="16" font-size="11" font-weight="600" fill="#2563EB">Refinement Feedback Loop</text>
+
+    <text x="1760" y="16" text-anchor="end" class="mono" font-size="11" font-weight="600" fill="#64748B">NEXSPACE TECHNICAL ARCHITECTURE SPECIFICATION</text>
+  </g>
+</svg>

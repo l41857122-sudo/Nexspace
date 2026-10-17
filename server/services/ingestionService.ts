@@ -16,17 +16,20 @@ const activeUploads = new Map<string, IngestionJobStatus>();
 
 export function createUploadJob(fileName: string, fileSize: string): IngestionJobStatus {
   const id = `upload_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const ext = fileName.toLowerCase().split('.').pop() || '';
+  const isGeoRaster = ['tif', 'tiff', 'jp2', 'safe', 'zip'].includes(ext);
+
   const job: IngestionJobStatus = {
     id,
     fileName,
     fileSize,
     progress: 10,
     status: "uploading",
-    statusMessage: "Reading geospatial raster header...",
+    statusMessage: isGeoRaster ? "Reading geospatial raster header..." : "Reading image header...",
     validationChecklist: {
-      crs: "Detected · Valid UTM (EPSG:32651)",
-      resolution: "Analyzing · Extraction",
-      cloudCover: "Awaiting QA · Band Analysis"
+      crs: isGeoRaster ? "Detecting · Validating GeoTIFF CRS..." : "None detected (Standard RGB)",
+      resolution: isGeoRaster ? "Analyzing · Extraction" : "Pixel Resolution",
+      cloudCover: isGeoRaster ? "Awaiting QA · Band Analysis" : "Not applicable (RGB)"
     }
   };
   activeUploads.set(id, job);
@@ -36,38 +39,43 @@ export function createUploadJob(fileName: string, fileSize: string): IngestionJo
 export function getUploadJobStatus(id: string): IngestionJobStatus {
   const job = activeUploads.get(id);
   if (!job) {
-    // Default fallback mock status if job ID not found
     return {
       id,
-      fileName: "S2A_MSIL2A_20240315T105341.zip",
-      fileSize: "4.8 GB",
+      fileName: "imagery_upload.png",
+      fileSize: "2.4 MB",
       progress: 100,
       status: "completed",
       statusMessage: "Dataset successfully indexed into Vector Database",
       validationChecklist: {
-        crs: "Detected · Valid UTM (EPSG:32651)",
-        resolution: "Extracted · 10m GSD",
-        cloudCover: "Verified · 4.2% Cloud"
+        crs: "None detected (Standard RGB)",
+        resolution: "Pixel Resolution",
+        cloudCover: "Not applicable (RGB)"
       }
     };
   }
+
+  const ext = job.fileName.toLowerCase().split('.').pop() || '';
+  const isGeoRaster = ['tif', 'tiff', 'jp2', 'safe', 'zip'].includes(ext);
 
   // Advance progress simulation
   if (job.status === "uploading") {
     job.progress = Math.min(100, job.progress + 30);
     if (job.progress >= 30 && job.progress < 60) {
-      job.statusMessage = "Extracting multi-spectral raster layers...";
-      job.validationChecklist.resolution = "Analyzing · Extraction";
+      job.statusMessage = isGeoRaster ? "Extracting multi-spectral raster layers..." : "Extracting image layers...";
+      job.validationChecklist.resolution = isGeoRaster ? "Analyzing · Extraction" : "Pixel Resolution";
     } else if (job.progress >= 60 && job.progress < 90) {
-      job.statusMessage = "Calculating NDVI & Cloud Occlusion matrix...";
-      job.validationChecklist.resolution = "Extracted · 10m GSD";
+      job.statusMessage = isGeoRaster ? "Calculating NDVI & Cloud Occlusion matrix..." : "Calculating visual feature embeddings...";
+      job.validationChecklist.resolution = isGeoRaster ? "Extracted · 10m GSD" : "Pixel Dimensions";
+      if (isGeoRaster) {
+        job.validationChecklist.crs = "Detected · Valid UTM (EPSG:32651)";
+      }
     } else if (job.progress >= 90 && job.progress < 100) {
-      job.statusMessage = "Building spatial tile pyramid (COG format)...";
+      job.statusMessage = isGeoRaster ? "Building spatial tile pyramid (COG format)..." : "Normalizing RGB visual asset...";
     } else if (job.progress >= 100) {
       job.progress = 100;
       job.status = "completed";
       job.statusMessage = "Dataset successfully indexed into Vector Database";
-      job.validationChecklist.cloudCover = "Verified · 4.2% Cloud";
+      job.validationChecklist.cloudCover = isGeoRaster ? "Verified · 4.2% Cloud" : "Not applicable (RGB)";
     }
   }
 

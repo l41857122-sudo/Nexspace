@@ -229,7 +229,9 @@ def run_checks():
     # 5. Optical + SAR Separation & Fusion Status Check
     # ------------------------------------------------------------------
     print("\n[5] OPTICAL + SAR SEPARATION & FUSION STATUS CHECK")
-    opt_sar_res = optical_sar_analysis_tool.execute({"optical_image": sample_img, "sar_image": sample_img})
+    sar_sample_path = os.path.join(test_dir, "sample_sar.png")
+    sar_test_img = Image.open(sar_sample_path) if os.path.exists(sar_sample_path) else Image.new("RGB", sample_img.size, color=(60, 60, 60))
+    opt_sar_res = optical_sar_analysis_tool.execute({"optical_image": sample_img, "sar_image": sar_test_img})
     print(f"  * Tool Status          : {opt_sar_res.status}")
     print(f"  * Optical stream status: {opt_sar_res.data.get('optical', {}).get('status')}")
     print(f"  * SAR stream status    : {opt_sar_res.data.get('sar', {}).get('status')}")

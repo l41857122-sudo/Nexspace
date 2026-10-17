@@ -1,3 +1,5 @@
+"use client";
+
 import ExecutionTracePage from "../components/ExecutionTracePage";
 
 export default function Execution() {
